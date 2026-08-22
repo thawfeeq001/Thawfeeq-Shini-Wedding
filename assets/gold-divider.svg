@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 40" width="420" height="40" role="img" aria-label="Decorative gold divider" fill="none">
+  <defs>
+    <linearGradient id="gd" x1="0" y1="0" x2="420" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B08D57" stop-opacity="0"/>
+      <stop offset=".22" stop-color="#B08D57" stop-opacity=".85"/>
+      <stop offset=".5" stop-color="#D8BC8A" stop-opacity="1"/>
+      <stop offset=".78" stop-color="#B08D57" stop-opacity=".85"/>
+      <stop offset="1" stop-color="#B08D57" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g stroke="url(#gd)" stroke-width="1.2" stroke-linecap="round">
+    <path d="M8 20H168"/>
+    <path d="M252 20H412"/>
+    <path d="M168 20c8-9 18-9 21 0s-13 9-21 0z"/>
+    <path d="M252 20c-8-9-18-9-21 0s13 9 21 0z"/>
+    <path d="M196 20c4.6-7.4 9.4-11.2 14-11.2S220.4 12.6 224 20c-3.6 7.4-9.4 11.2-14 11.2S200.6 27.4 196 20z"/>
+  </g>
+  <circle cx="210" cy="20" r="3.1" fill="#B08D57"/>
+  <circle cx="182" cy="20" r="1.6" fill="#B08D57"/>
+  <circle cx="238" cy="20" r="1.6" fill="#B08D57"/>
+  <circle cx="120" cy="20" r="1.2" fill="#B08D57" opacity=".7"/>
+  <circle cx="300" cy="20" r="1.2" fill="#B08D57" opacity=".7"/>
+</svg>
