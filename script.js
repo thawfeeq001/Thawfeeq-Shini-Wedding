@@ -476,6 +476,72 @@
   }
 
   /* ===========================================================
+     6 · INTERACTIVE TIMELINE
+     =========================================================== */
+  function initTimeline() {
+    const heads = $$('.tl__head');
+    if (!heads.length) return;
+
+    heads.forEach(head => {
+      const panel = document.getElementById(head.getAttribute('aria-controls'));
+      if (!panel) return;
+      panel.hidden = false;
+      panel.style.maxHeight = '0px';
+
+      on(head, 'click', () => {
+        const isOpen = head.getAttribute('aria-expanded') === 'true';
+
+        heads.forEach(other => {
+          if (other === head) return;
+          const p = document.getElementById(other.getAttribute('aria-controls'));
+          other.setAttribute('aria-expanded', 'false');
+          if (p) { p.classList.remove('is-open'); p.style.maxHeight = '0px'; }
+        });
+
+        head.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+        panel.classList.toggle('is-open', !isOpen);
+        panel.style.maxHeight = isOpen ? '0px' : (panel.scrollHeight + 32) + 'px';
+      });
+    });
+
+    on(window, 'resize', () => {
+      heads.forEach(head => {
+        if (head.getAttribute('aria-expanded') !== 'true') return;
+        const panel = document.getElementById(head.getAttribute('aria-controls'));
+        if (panel) panel.style.maxHeight = (panel.scrollHeight + 32) + 'px';
+      });
+    }, { passive: true });
+  }
+
+  /* ===========================================================
+     7 · EVENT CARDS · MAP BUTTONS
+     =========================================================== */
+  function mapLinks(key) {
+    const custom = key === 'nikkah' ? NIKKAH_MAP : RECEPTION_MAP;
+    const venue = VENUES[key];
+    const query = encodeURIComponent(venue.name + ', ' + venue.address);
+    return {
+      /* "Google Maps" — open the place */
+      view: custom || ('https://www.google.com/maps/search/?api=1&query=' + query),
+      /* "Navigate" — turn-by-turn directions */
+      navigate: custom || ('https://www.google.com/maps/dir/?api=1&destination=' + query)
+    };
+  }
+
+  function initEvents() {
+    $$('[data-maps]').forEach(btn => {
+      on(btn, 'click', () => {
+        window.open(mapLinks(btn.dataset.maps).view, '_blank', 'noopener,noreferrer');
+      });
+    });
+    $$('[data-navigate]').forEach(btn => {
+      on(btn, 'click', () => {
+        window.open(mapLinks(btn.dataset.navigate).navigate, '_blank', 'noopener,noreferrer');
+      });
+    });
+  }
+
+  /* ===========================================================
      10 · SHARING
      =========================================================== */
   function initShare() {
@@ -526,6 +592,8 @@
     initSplash();
     initMusic();
     initCountdown();
+    initTimeline();
+    initEvents();
     initShare();
   }
 
