@@ -1,0 +1,38 @@
+{
+  "name": "Thawfeeq & Shini Yassmin — Wedding Invitation",
+  "short_name": "T & S Wedding",
+  "description": "Wedding invitation of Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin. Nikkah 25 October 2026, Courtallam. Reception 1 November 2026, Thanjavur.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait-primary",
+  "background_color": "#F7F3EC",
+  "theme_color": "#F7F3EC",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["lifestyle", "events", "social"],
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Event details", "short_name": "Events", "url": "./#events" },
+    { "name": "RSVP", "short_name": "RSVP", "url": "./#rsvp" },
+    { "name": "Gallery", "short_name": "Gallery", "url": "./#gallery" }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/og-image.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Thawfeeq and Shini Yassmin wedding invitation"
+    }
+  ]
+}

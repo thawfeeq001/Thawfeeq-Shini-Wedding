@@ -757,6 +757,35 @@
   }
 
   /* ===========================================================
+     11 · PWA · SERVICE WORKER · INSTALL PROMPT
+     =========================================================== */
+  function initPwa() {
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => { /* offline support unavailable */ });
+      });
+    }
+
+    let deferredPrompt = null;
+    on(window, 'beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = $('#installApp');
+      if (btn) btn.hidden = false;
+    });
+    on($('#installApp'), 'click', () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(() => {
+        deferredPrompt = null;
+        const btn = $('#installApp');
+        if (btn) btn.hidden = true;
+      });
+    });
+    on(window, 'appinstalled', () => toast('Invitation added to your home screen.'));
+  }
+
+  /* ===========================================================
      12 · BOOT
      =========================================================== */
   function boot() {
@@ -777,6 +806,7 @@
     initRsvp();
     initGallery();
     initShare();
+    initPwa();
   }
 
   if (document.readyState === 'loading') {
