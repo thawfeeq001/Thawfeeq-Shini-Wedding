@@ -97,6 +97,21 @@
     items.forEach(el => io.observe(el));
   }
 
+  /* ---------- decorative watercolour layers ----------
+     Loaded only once the page itself is ready: they are purely
+     ornamental and must never compete with the real photographs. */
+  function initWatercolour() {
+    const load = () => {
+      $$('.wc img[data-src]').forEach(img => {
+        img.setAttribute('fetchpriority', 'low');
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+      });
+    };
+    if (document.readyState === 'complete') load();
+    else on(window, 'load', load);
+  }
+
   /* ---------- parallax watercolour + hero ---------- */
   function initParallax() {
     if (REDUCED) return;
@@ -796,6 +811,7 @@
     on(window, 'orientationchange', setVh);
 
     initReveal();
+    initWatercolour();
     initParallax();
     initNav();
     initSplash();

@@ -19,7 +19,7 @@
   --ink:var(--charcoal);
   --ink-70:rgba(35,35,35,.72);
   --ink-55:rgba(35,35,35,.56);
-  --ink-35:rgba(35,35,35,.36);
+  --ink-35:rgba(35,35,35,.54);
   --line:rgba(176,141,87,.28);
   --paper:#FBF9F5;
 
@@ -66,7 +66,6 @@ body{
     radial-gradient(120% 70% at 12% -8%, rgba(188,199,206,.30) 0%, rgba(188,199,206,0) 60%),
     radial-gradient(100% 60% at 92% 8%, rgba(216,188,138,.22) 0%, rgba(216,188,138,0) 55%),
     radial-gradient(120% 80% at 50% 108%, rgba(233,223,201,.55) 0%, rgba(233,223,201,0) 60%);
-  background-attachment:fixed;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
@@ -158,8 +157,8 @@ address{font-style:normal}
   border:1px solid var(--line);color:var(--ink);background:rgba(255,255,255,.4);
 }
 .btn--ghost:hover{background:rgba(255,255,255,.75);border-color:var(--gold);transform:translateY(-2px)}
-.btn--wa{background:#1FA855;color:#fff;box-shadow:0 12px 26px -16px rgba(31,168,85,.95)}
-.btn--wa:hover{transform:translateY(-2px);background:#189347}
+.btn--wa{background:#15773F;color:#fff;box-shadow:0 12px 26px -16px rgba(21,119,63,.95)}
+.btn--wa:hover{transform:translateY(-2px);background:#10602F}
 .btn:active{transform:translateY(0) scale(.985)}
 .btn[disabled]{opacity:.6;pointer-events:none}
 .ico{width:1.05em;height:1.05em;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -176,7 +175,12 @@ address{font-style:normal}
 .wc{
   position:fixed;top:8vh;width:min(46vw,520px);z-index:0;pointer-events:none;
   opacity:.72;will-change:transform;
+  /* the washes belong to the invitation, not the splash: keeping them out of
+     the first render also keeps them out of the Largest Contentful Paint */
+  display:none;
 }
+body.invite-open .wc{display:block;animation:wcFade 1.2s var(--ease) both}
+@keyframes wcFade{from{opacity:0}to{opacity:.72}}
 .wc--left{left:-8vw}
 .wc--right{right:-8vw;top:38vh}
 .wc img{width:100%;height:auto}
@@ -213,24 +217,26 @@ address{font-style:normal}
 .splash.is-open{opacity:0;transform:scale(1.06);visibility:hidden;pointer-events:none}
 .splash__wash{position:absolute;inset:-10%;pointer-events:none}
 .wash{
-  position:absolute;border-radius:50%;filter:blur(46px);
-  animation:washFloat 16s ease-in-out infinite alternate;
-  transform-origin:center;
+  position:absolute;border-radius:50%;filter:blur(28px);
+  animation:washFloat 26s ease-in-out infinite alternate;
+  transform-origin:center;will-change:transform;
 }
-.wash--1{width:58vmax;height:58vmax;left:-18vmax;top:-16vmax;background:radial-gradient(circle at 40% 40%,rgba(188,199,206,.72),rgba(188,199,206,0) 66%);animation-delay:-2s}
-.wash--2{width:52vmax;height:52vmax;right:-16vmax;top:6vmax;background:radial-gradient(circle at 55% 45%,rgba(216,188,138,.55),rgba(216,188,138,0) 66%);animation-delay:-7s}
-.wash--3{width:64vmax;height:64vmax;left:12vmax;bottom:-30vmax;background:radial-gradient(circle at 50% 50%,rgba(233,223,201,.85),rgba(233,223,201,0) 66%);animation-delay:-11s}
+.wash--1{width:54vmax;height:54vmax;left:-18vmax;top:-16vmax;background:radial-gradient(circle at 40% 40%,rgba(188,199,206,.72),rgba(188,199,206,0) 66%);animation-delay:-3s}
+.wash--2{width:48vmax;height:48vmax;right:-16vmax;top:6vmax;background:radial-gradient(circle at 55% 45%,rgba(216,188,138,.55),rgba(216,188,138,0) 66%);animation-delay:-11s}
+.wash--3{width:58vmax;height:58vmax;left:12vmax;bottom:-28vmax;background:radial-gradient(circle at 50% 50%,rgba(233,223,201,.85),rgba(233,223,201,0) 66%);animation-delay:-18s}
+/* deliberately gentle: a large, fast wash costs paint time on every frame */
 @keyframes washFloat{
   0%{transform:translate3d(0,0,0) scale(1)}
-  50%{transform:translate3d(2.5vw,-2vh,0) scale(1.09)}
-  100%{transform:translate3d(-2vw,2.5vh,0) scale(1.03)}
+  50%{transform:translate3d(.8vw,-.7vh,0) scale(1.025)}
+  100%{transform:translate3d(-.7vw,.8vh,0) scale(1.01)}
 }
 
 .splash__inner{
   position:relative;text-align:center;max-width:640px;
-  animation:splashIn 1.5s var(--ease) both;
+  /* kept short: a long fade here delays Largest Contentful Paint */
+  animation:splashIn .7s var(--ease) both;
 }
-@keyframes splashIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes splashIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 .splash__bismillah{
   font-size:clamp(1.05rem,3.4vw,1.5rem);color:var(--gold-deep);
@@ -265,7 +271,7 @@ address{font-style:normal}
   font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-55);
   margin-bottom:2rem;
 }
-.splash #openInvite{animation:pulseGold 3.4s ease-in-out 1.6s infinite}
+.splash #openInvite{animation:pulseGold 3.4s ease-in-out 1.2s infinite}
 @keyframes pulseGold{
   0%,100%{box-shadow:0 12px 26px -14px rgba(142,110,63,.9)}
   50%{box-shadow:0 12px 30px -12px rgba(142,110,63,.95),0 0 0 10px rgba(176,141,87,.08)}

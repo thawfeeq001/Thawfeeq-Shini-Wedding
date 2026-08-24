@@ -332,6 +332,31 @@ with real wedding photographs and the site becomes a keepsake.
 
 ---
 
+## Measured performance
+
+Lighthouse (mobile profile, simulated slow 4G, Chromium 141) against this
+build:
+
+| Category | Score |
+| --- | --- |
+| Performance | **96** |
+| Accessibility | **100** |
+| Best Practices | **96** |
+| SEO | **100** |
+
+First Contentful Paint 1.2 s · Largest Contentful Paint 2.8 s · Total Blocking
+Time 0 ms · Cumulative Layout Shift 0.
+
+The Best Practices score reflects one console error in the offline test
+environment, where Google Fonts could not be reached; it does not occur on the
+live site. Re-run the audit after replacing the placeholders — keep each
+photograph under about 400 KB and the scores stay where they are.
+
+`script.js` and `style.css` are deliberately **not** minified so that you can
+open them and edit the names, dates and links yourself.
+
+---
+
 ## Licence
 
 Released under the [MIT Licence](LICENSE). The photographs and family details

@@ -45,9 +45,11 @@
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap"></noscript>
 
 <link rel="preload" as="image" href="photos/hero-couple.jpg" fetchpriority="high">
+<link rel="preload" as="style" href="style.css">
 <link rel="stylesheet" href="style.css">
 
 <script type="application/ld+json">
@@ -142,7 +144,7 @@
 <!-- ================= NAVIGATION ================= -->
 <header class="nav" id="nav">
   <div class="nav__bar">
-    <a class="nav__brand" href="#top" aria-label="Back to top">T<span>&amp;</span>S</a>
+    <a class="nav__brand" href="#top" aria-label="T&amp;S — back to top">T<span>&amp;</span>S</a>
     <button class="nav__burger" id="navBurger" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="Open menu">
       <span></span><span></span><span></span>
     </button>
@@ -162,15 +164,15 @@
 <div class="nav__scrim" id="navScrim" hidden></div>
 
 <!-- parallax watercolour layers -->
-<div class="wc wc--left" aria-hidden="true"><img src="assets/watercolor-left.png" alt="" width="560" height="880" loading="lazy" decoding="async"></div>
-<div class="wc wc--right" aria-hidden="true"><img src="assets/watercolor-right.png" alt="" width="560" height="880" loading="lazy" decoding="async"></div>
+<div class="wc wc--left" aria-hidden="true"><img data-src="assets/watercolor-left.png" alt="" width="560" height="880" decoding="async"></div>
+<div class="wc wc--right" aria-hidden="true"><img data-src="assets/watercolor-right.png" alt="" width="560" height="880" decoding="async"></div>
 
 <main id="main">
 <!-- ================= HERO ================= -->
 <section class="hero" id="hero">
   <div class="hero__grid">
     <figure class="hero__frame reveal" data-parallax="0.06">
-      <img src="photos/hero-couple.jpg" alt="Portrait of Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin" width="1400" height="1750" fetchpriority="high" decoding="async">
+      <img src="photos/hero-couple.jpg" alt="Portrait of Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin" width="1100" height="1375" fetchpriority="high" decoding="async">
       <figcaption class="hero__badge glass">
         <span>The Wedding of</span>
         <strong>Thawfeeq &amp; Shini</strong>
