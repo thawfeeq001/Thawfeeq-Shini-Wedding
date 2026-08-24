@@ -638,6 +638,90 @@
   }
 
   /* ===========================================================
+     9 · GALLERY · FULLSCREEN VIEWER
+     =========================================================== */
+  function initGallery() {
+    const thumbs = $$('#masonry .ph');
+    const lb    = $('#lightbox');
+    const lbImg = $('#lbImg');
+    const lbCap = $('#lbCap');
+    if (!thumbs.length || !lb || !lbImg) return;
+
+    const items = thumbs.map(btn => {
+      const img = $('img', btn);
+      return { src: img.getAttribute('src'), alt: img.getAttribute('alt') || 'Wedding photograph' };
+    });
+    let index = 0, lastFocus = null;
+
+    function preload(i) {
+      const item = items[(i + items.length) % items.length];
+      if (!item) return;
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = item.src;
+    }
+
+    function show(i) {
+      index = (i + items.length) % items.length;
+      const item = items[index];
+      lbImg.src = item.src;
+      lbImg.alt = item.alt;
+      if (lbCap) lbCap.textContent = (index + 1) + ' of ' + items.length;
+      preload(index + 1);
+      preload(index - 1);
+    }
+
+    function open(i) {
+      lastFocus = document.activeElement;
+      show(i);
+      lb.hidden = false;
+      document.body.classList.add('is-locked');
+      requestAnimationFrame(() => lb.classList.add('is-on'));
+      const close = $('#lbClose');
+      if (close) close.focus({ preventScroll: true });
+    }
+
+    function close() {
+      lb.classList.remove('is-on');
+      document.body.classList.remove('is-locked');
+      setTimeout(() => { lb.hidden = true; lbImg.src = ''; }, 380);
+      if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+    }
+
+    thumbs.forEach((btn, i) => on(btn, 'click', () => open(i)));
+    on($('#lbClose'), 'click', close);
+    on($('#lbPrev'), 'click', () => show(index - 1));
+    on($('#lbNext'), 'click', () => show(index + 1));
+    on(lb, 'click', e => { if (e.target === lb) close(); });
+
+    on(document, 'keydown', e => {
+      if (lb.hidden) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') show(index - 1);
+      else if (e.key === 'ArrowRight') show(index + 1);
+    });
+
+    /* swipe on touch devices */
+    let startX = 0, startY = 0, swiping = false;
+    on(lb, 'touchstart', e => {
+      const t = e.changedTouches[0];
+      startX = t.clientX; startY = t.clientY; swiping = true;
+    }, { passive: true });
+    on(lb, 'touchend', e => {
+      if (!swiping) return;
+      swiping = false;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX, dy = t.clientY - startY;
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1));
+      else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) close();
+    }, { passive: true });
+
+    /* warm the cache for the first few photographs when the browser is idle */
+    const idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 2400); };
+    idle(() => { [0, 1, 2].forEach(preload); });
+  }
+
+  /* ===========================================================
      10 · SHARING
      =========================================================== */
   function initShare() {
@@ -691,6 +775,7 @@
     initTimeline();
     initEvents();
     initRsvp();
+    initGallery();
     initShare();
   }
 
