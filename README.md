@@ -34,37 +34,37 @@ out of their way.
 
 ## Which photo goes where
 
-Every file in `photos/` is a labelled placeholder that names its own role — open
-one and it tells you what belongs there. **Keep the file name, replace the
-image**, and the site picks it up. File names are historical; the label inside
-each placeholder is what counts.
+Every photograph is now a real one, named for the place it appears. Replacing a
+photo is a matter of dropping in a new file with the same name.
 
 | File | Where it appears |
 | --- | --- |
 | `photos/hero-couple.jpg` | Hero — the black &amp; white couple portrait |
-| `photos/gallery-01.jpg` | Meet the Groom — grey suit portrait |
-| `photos/gallery-02.jpg` | Meet the Groom — café portrait |
-| `photos/gallery-03.jpg` | Meet the Bride — saree portrait |
-| `photos/gallery-04.jpg` | Meet the Bride — second saree portrait |
-| `photos/father.jpg` | **Groom Family** — the large group photograph |
-| `photos/mother.jpg`, `photos/sister.jpg` | Groom Family — the two small insets |
-| `photos/bride-father.jpg` | **Bride Family** — the large group photograph |
-| `photos/bride-mother.jpg` | Bride Family — the small inset |
-| `photos/ring-ceremony.jpg`, `photos/engagement-1.jpg`, `photos/engagement-2.jpg`, `photos/gallery-05.jpg` | Blessings Begin — fixing ceremony collage |
-| `photos/gallery-06.jpg` | Gallery — restaurant selfie |
-| `photos/gallery-07.jpg` | Gallery — car selfie |
-| `photos/gallery-08.jpg` | Gallery — mirror portrait |
-| `photos/gallery-09.jpg` | Gallery — parrot photo |
-| `photos/candid.jpg` | Gallery — casual selfie |
-| `photos/couple-2.jpg` | Gallery — black &amp; white portrait |
-| `photos/gallery-10.jpg` … `gallery-12.jpg` | Gallery — three more couple moments |
-| `photos/couple-1.jpg` | Closing — the colourful full-screen portrait |
-| `venues/engagement.jpg`, `venues/nikkah.jpg`, `venues/reception.jpg` | The three venue cards |
+| `photos/groom-portrait.jpg` | Meet the Groom |
+| `photos/bride-portrait.jpg` | Meet the Bride |
+| `photos/groom-family.jpg` | Groom Family |
+| `photos/bride-family.jpg` | Bride Family — the large photograph |
+| `photos/bride-parents.jpg` | Bride Family — the small overlapping inset |
+| `photos/fixing-ceremony.jpg` | Blessings Begin |
+| `photos/gallery-restaurant.jpg` | Gallery |
+| `photos/gallery-car.jpg` | Gallery |
+| `photos/gallery-mirror.jpg` | Gallery |
+| `photos/gallery-parrot.jpg` | Gallery |
+| `photos/gallery-casual.jpg` | Gallery |
+| `photos/closing-couple.jpg` | Closing — the full-screen portrait |
+| `venues/engagement.jpg`, `venues/nikkah.jpg`, `venues/reception.jpg` | The three venue cards (still placeholders) |
 
-The hero renders in black &amp; white through CSS (`filter: grayscale(1)`), so a
-colour photograph works there too. Keep each file under about 200 KB.
+Each photograph is cropped to the aspect ratio its slot needs and compressed to
+between 100 and 230 KB. If you replace one, keep it roughly the same shape —
+portraits at 4:5, the family and ceremony photographs at about 10:7 — and update
+the `width` and `height` attributes on that `<img>` in `index.html` so the page
+does not shift while it loads.
 
----
+The hero renders through `filter: grayscale(1)`, so a colour photograph placed
+there still appears black &amp; white.
+
+**Adding more gallery photographs:** copy one `<button class="ph" …>` block
+inside `<div class="masonry">` in `index.html` and point it at your new file.
 
 ## Editing the words
 
@@ -140,9 +140,9 @@ Lighthouse (mobile, simulated slow 4G, Chromium 141):
 
 | Performance | Accessibility | Best Practices | SEO |
 | --- | --- | --- | --- |
-| **91** | **100** | **96** | **100** |
+| **97** | **100** | **96** | **100** |
 
-FCP 0.9 s · LCP 3.5 s · TBT 0 ms · CLS 0 · Speed Index 1.1 s. The Best Practices
+FCP 0.9 s · LCP 2.6 s · TBT 0 ms · CLS 0 · Speed Index 1.0 s. The Best Practices
 score reflects one console error in the offline test environment where Google
 Fonts was unreachable; it does not occur on the live site.
 
