@@ -1,12 +1,12 @@
-# Thawfeeq &amp; Shini Yassmin — Wedding Website
+# Shini Yassmin &amp; Thawfeeq Ahamed — Wedding Website
 
 A premium, offline-capable wedding invitation website.
 
-**Dr. M. Thawfeeq Ahamed**, MS General Surgery &nbsp;·&nbsp; **Dr. S. Shini Yassmin**, MD General Medicine
+**Dr. S. Shini Yassmin**, MD (General Medicine) &nbsp;·&nbsp; **Dr. M. Thawfeeq Ahamed**, MS (General Surgery)
 
 | Event | When | Where |
 | --- | --- | --- |
-| **Nikkah** | Sunday, 25 October 2026 · 11:00 AM | Drizzle Elite Mahal, Madurai–Courtallam Main Road, Courtallam |
+| **Nikkah** | Sunday, 25 October 2026 · 11.00 AM<br>14<sup>th</sup> Jamadhul Awwal, Hijiri 1448 | Drizzle Elite Mahal, Madurai – Courtallam Main Road, Ilanji, Tenkasi Dt. |
 | **Reception** | Sunday, 1 November 2026 · 12:00 PM | Arulanandham Mahal, Eswari Nagar, Reddipalayam Main Road, Thanjavur |
 
 **Live site:** https://thawfeeq001.github.io/Thawfeeq-Shini-Wedding/
@@ -117,13 +117,14 @@ places:
 
 | Section | Search for |
 | --- | --- |
-| Splash screen | `splash__names` |
+| Splash screen | `splash__names`, `splash__tagline` |
+| Formal Nikkah invitation &amp; both lineages | `<section id="invitation">` |
+| Blessing du‘ā (Arabic + English) | `class="dua"` |
+| Hosts / “Awaiting Your Gracious Presence” | `hosts__list` |
 | Hero heading and degrees | `hero__names`, `hero__creds` |
-| Hosts | `hosted__names` and `hero__hosted` |
-| Groom’s family | `The Groom’s Family` |
 | Bride’s family | `The Bride’s Family` |
-| Grandparents | `grand__list` |
-| Qur’an verse | `hero__quote` |
+| Groom’s family | `The Groom’s Family` |
+| Grandparents | `grand__sides` |
 | Our Story paragraph | `section-lead` inside `<section id="story">` |
 | “No gifts, please.” | `footer__gift` |
 
@@ -169,20 +170,25 @@ To move the thank-you message earlier or later, change `THANKS_FROM` only.
 
 ## 7 · How to add the Google Maps links
 
-Both venue buttons work out of the box — they search Google Maps for the venue
-name and address. To point them at the exact pin instead:
-
-1. Open Google Maps and find the venue.
-2. Tap **Share → Copy link**.
-3. Paste it into `script.js`:
+These are already filled in, read from the QR codes on the printed
+invitation:
 
 ```js
-const NIKKAH_MAP = "https://maps.app.goo.gl/xxxxxxxx";
-const RECEPTION_MAP = "https://maps.app.goo.gl/yyyyyyyy";
+const NIKKAH_MAP    = "https://maps.app.goo.gl/wXZqhk89NidwfUpZ6";
+const RECEPTION_MAP = "https://maps.app.goo.gl/1XXwGVE348TApdXx5";
 ```
 
-Leave a value empty (`""`) to keep the automatic search behaviour for that
-venue.
+Each event card carries three ways to reach the venue:
+
+- **Google Maps** button → opens the exact pin above.
+- **Navigate** button → asks Google Maps for turn-by-turn directions to the
+  venue address (a short link cannot carry a directions request, so this one is
+  built from the address).
+- **QR code** → the same pin as the printed card, in `assets/qr-nikkah.png` and
+  `assets/qr-reception.png`, so a guest can scan it straight off the screen.
+
+To change a pin, open Google Maps, tap **Share → Copy link** and paste it over
+the value. Setting a value to `""` falls back to a Maps search by venue name.
 
 ---
 

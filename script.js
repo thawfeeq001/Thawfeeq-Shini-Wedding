@@ -13,11 +13,12 @@
      =========================================================== */
 
   /* --- Google Maps links -----------------------------------
-     Paste the full Google Maps link for each venue between the
-     quotes. Leave empty ("") and the buttons fall back to a
-     Google Maps search for the venue name + address.           */
-  const NIKKAH_MAP = "";
-  const RECEPTION_MAP = "";
+     These are the exact pins taken from the printed invitation
+     QR codes. The "Google Maps" button opens the pin; "Navigate"
+     always asks Maps for directions to the venue address.
+     Leave empty ("") to fall back to a Maps search.            */
+  const NIKKAH_MAP = "https://maps.app.goo.gl/wXZqhk89NidwfUpZ6";
+  const RECEPTION_MAP = "https://maps.app.goo.gl/1XXwGVE348TApdXx5";
 
   /* --- Google Sheets RSVP endpoint --------------------------
      Paste the /exec URL of your Google Apps Script Web App.    */
@@ -39,8 +40,8 @@
   const VENUES = {
     nikkah: {
       name: 'Drizzle Elite Mahal',
-      address: 'Madurai-Courtallam Main Road, Courtallam, Tamil Nadu',
-      label: 'Sunday, 25 October 2026 · 11:00 AM · Drizzle Elite Mahal, Courtallam'
+      address: 'Madurai - Courtallam Main Road, Ilanji, Tenkasi District, Tamil Nadu',
+      label: 'Sunday, 25 October 2026 · 11:00 AM · Drizzle Elite Mahal, Ilanji'
     },
     reception: {
       name: 'Arulanandham Mahal',
@@ -50,7 +51,7 @@
   };
 
   /* --- Share text ------------------------------------------- */
-  const SHARE_TEXT = 'You are warmly invited to the wedding of Dr. M. Thawfeeq Ahamed & Dr. S. Shini Yassmin. Nikkah: 25 Oct 2026, Courtallam. Reception: 1 Nov 2026, Thanjavur.';
+  const SHARE_TEXT = 'You are warmly invited to the wedding of Dr. S. Shini Yassmin & Dr. M. Thawfeeq Ahamed. Nikkah: Sunday 25 Oct 2026, 11.00 AM, Drizzle Elite Mahal, Ilanji. Reception: Sunday 1 Nov 2026, 12.00 PM, Arulanandham Mahal, Thanjavur.';
 
   /* ===========================================================
      ===============  2 · NOTHING TO EDIT BELOW  ===============
@@ -536,10 +537,10 @@
     const venue = VENUES[key];
     const query = encodeURIComponent(venue.name + ', ' + venue.address);
     return {
-      /* "Google Maps" — open the place */
+      /* "Google Maps" — the exact pin from the invitation QR code */
       view: custom || ('https://www.google.com/maps/search/?api=1&query=' + query),
-      /* "Navigate" — turn-by-turn directions */
-      navigate: custom || ('https://www.google.com/maps/dir/?api=1&destination=' + query)
+      /* "Navigate" — always turn-by-turn, which a short link cannot carry */
+      navigate: 'https://www.google.com/maps/dir/?api=1&destination=' + query
     };
   }
 
