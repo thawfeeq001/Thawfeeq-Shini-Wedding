@@ -1,68 +1,42 @@
 /* =============================================================
-   Thawfeeq & Shini Yassmin — Wedding Website
-   script.js
-   -------------------------------------------------------------
-   EVERYTHING YOU NORMALLY NEED TO EDIT LIVES IN THE CONFIG BLOCK
-   DIRECTLY BELOW. See README.md for step-by-step instructions.
+   Thawfeeq Ahamed & Shini Yassmin — V2
+   Everything you normally edit lives in the CONFIG block below.
    ============================================================= */
 (function () {
   'use strict';
 
-  /* ===========================================================
-     ==============  1 · CONFIGURATION (EDIT ME)  ==============
-     =========================================================== */
+  /* ================= CONFIG ================= */
 
-  /* --- Google Maps links -----------------------------------
-     These are the exact pins taken from the printed invitation
-     QR codes. The "Google Maps" button opens the pin; "Navigate"
-     always asks Maps for directions to the venue address.
-     Leave empty ("") to fall back to a Maps search.            */
-  const NIKKAH_MAP = "https://maps.app.goo.gl/wXZqhk89NidwfUpZ6";
+  /* Exact venue pins, read from the printed invitation QR codes. */
+  const NIKKAH_MAP    = "https://maps.app.goo.gl/wXZqhk89NidwfUpZ6";
   const RECEPTION_MAP = "https://maps.app.goo.gl/1XXwGVE348TApdXx5";
 
-  /* --- Google Sheets RSVP endpoint --------------------------
-     Paste the /exec URL of your Google Apps Script Web App.    */
+  /* Optional: a Google Apps Script /exec URL. RSVPs are always kept
+     in this browser; if this is set they are posted to your sheet too. */
   const SCRIPT_URL = "";
 
-  /* --- Background music -------------------------------------
-     Optional. Path or URL to an audio file (e.g. "assets/music.mp3").
-     Leave empty ("") to use the built-in soft ambient melody.  */
+  /* Optional audio file. Empty = the built-in soft ambient melody. */
   const MUSIC_URL = "";
 
-  /* --- Dates and times (IST, +05:30) ------------------------
-     Change these and the countdown updates itself. No other
-     edit is required anywhere in this file.                    */
+  /* Dates in IST. Change these and the countdown follows. */
   const NIKKAH_AT    = "2026-10-25T11:00:00+05:30";
   const RECEPTION_AT = "2026-11-01T12:00:00+05:30";
-  const THANKS_FROM  = "2026-11-02T00:00:00+05:30"; /* after 1 Nov 2026 */
+  const THANKS_FROM  = "2026-11-02T00:00:00+05:30";
 
-  /* --- Venue details used by the map buttons ---------------- */
   const VENUES = {
-    nikkah: {
-      name: 'Drizzle Elite Mahal',
-      address: 'Madurai - Courtallam Main Road, Ilanji, Tenkasi District, Tamil Nadu',
-      label: 'Sunday, 25 October 2026 · 11:00 AM · Drizzle Elite Mahal, Ilanji'
-    },
-    reception: {
-      name: 'Arulanandham Mahal',
-      address: 'Eswari Nagar, Reddipalayam Main Road, Thanjavur, Tamil Nadu',
-      label: 'Sunday, 1 November 2026 · 12:00 PM · Arulanandham Mahal, Thanjavur'
-    }
+    nikkah:    { name: 'Drizzle Elite Mahal', address: 'Madurai - Courtallam Main Road, Ilanji, Courtallam, Tamil Nadu' },
+    reception: { name: 'Arulanandham Mahal',  address: 'Eswari Nagar, Reddipalayam Main Road, Thanjavur, Tamil Nadu' }
   };
 
-  /* --- Share text ------------------------------------------- */
-  const SHARE_TEXT = 'You are warmly invited to the wedding of Dr. S. Shini Yassmin & Dr. M. Thawfeeq Ahamed. Nikkah: Sunday 25 Oct 2026, 11.00 AM, Drizzle Elite Mahal, Ilanji. Reception: Sunday 1 Nov 2026, 12.00 PM, Arulanandham Mahal, Thanjavur.';
+  const SHARE_TEXT = 'Dr. M. Thawfeeq Ahamed & Dr. S. Shini Yassmin — 25 October 2026, Courtallam.';
 
-  /* ===========================================================
-     ===============  2 · NOTHING TO EDIT BELOW  ===============
-     =========================================================== */
+  /* ================= helpers ================= */
 
-  const $  = (sel, root) => (root || document).querySelector(sel);
-  const $$ = (sel, root) => Array.prototype.slice.call((root || document).querySelectorAll(sel));
-  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $  = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
   const on = (el, ev, fn, opt) => el && el.addEventListener(ev, fn, opt);
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- toast ---------- */
   let toastTimer;
   function toast(message) {
     const el = $('#toast');
@@ -73,24 +47,20 @@
     toastTimer = setTimeout(() => el.classList.remove('is-on'), 3200);
   }
 
-  /* ===========================================================
-     3 · SCROLL REVEAL · PARALLAX · NAVIGATION
-     =========================================================== */
+  /* ================= reveal on scroll ================= */
 
-  /* ---------- reveal on scroll (Intersection Observer) ---------- */
   function initReveal() {
-    const items = $$('.reveal');
+    const items = $$('.reveal, .tl__i');
     if (!('IntersectionObserver' in window) || REDUCED) {
       items.forEach(el => el.classList.add('is-in'));
       return;
     }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
         if (!entry.isIntersecting) return;
         const el = entry.target;
-        const siblings = el.parentElement ? $$('.reveal', el.parentElement) : [];
-        const idx = Math.max(0, siblings.indexOf(el));
-        el.style.setProperty('--d', Math.min(idx, 6) * 70 + 'ms');
+        const peers = el.parentElement ? $$('.reveal, .tl__i', el.parentElement) : [];
+        el.style.setProperty('--d', Math.min(Math.max(0, peers.indexOf(el)), 5) * 80 + 'ms');
         el.classList.add('is-in');
         io.unobserve(el);
       });
@@ -98,58 +68,14 @@
     items.forEach(el => io.observe(el));
   }
 
-  /* ---------- decorative watercolour layers ----------
-     Loaded only once the page itself is ready: they are purely
-     ornamental and must never compete with the real photographs. */
-  function initWatercolour() {
-    const load = () => {
-      $$('.wc img[data-src]').forEach(img => {
-        img.setAttribute('fetchpriority', 'low');
-        img.src = img.dataset.src;
-        img.removeAttribute('data-src');
-      });
-    };
-    if (document.readyState === 'complete') load();
-    else on(window, 'load', load);
-  }
+  /* ================= navigation & scroll progress ================= */
 
-  /* ---------- parallax watercolour + hero ---------- */
-  function initParallax() {
-    if (REDUCED) return;
-    const layers = [
-      { el: $('.wc--left'),  speed: -0.09 },
-      { el: $('.wc--right'), speed:  0.07 }
-    ].filter(l => l.el);
-    const frames = $$('[data-parallax]');
-    if (!layers.length && !frames.length) return;
-
-    let ticking = false;
-    function apply() {
-      const y = window.scrollY || window.pageYOffset;
-      layers.forEach(l => { l.el.style.transform = 'translate3d(0,' + (y * l.speed).toFixed(1) + 'px,0)'; });
-      frames.forEach(f => {
-        const rect = f.getBoundingClientRect();
-        const offset = (rect.top + rect.height / 2 - window.innerHeight / 2) * parseFloat(f.dataset.parallax || '0');
-        f.style.transform = 'translate3d(0,' + (-offset).toFixed(1) + 'px,0)';
-      });
-      ticking = false;
-    }
-    on(window, 'scroll', () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(apply);
-    }, { passive: true });
-    on(window, 'resize', apply, { passive: true });
-    apply();
-  }
-
-  /* ---------- navigation ---------- */
   function initNav() {
     const nav = $('#nav');
     const burger = $('#navBurger');
     const menu = $('#navMenu');
     const scrim = $('#navScrim');
-    const progress = $('#navProgress');
+    const bar = $('#progress');
     const links = $$('.nav__menu a');
 
     function closeMenu() {
@@ -158,76 +84,346 @@
       burger.setAttribute('aria-expanded', 'false');
       burger.setAttribute('aria-label', 'Open menu');
       if (scrim) { scrim.classList.remove('is-on'); scrim.hidden = true; }
-      document.body.classList.remove('is-locked');
     }
-    function openMenu() {
-      if (!menu || !burger) return;
+    on(burger, 'click', () => {
+      if (burger.getAttribute('aria-expanded') === 'true') return closeMenu();
       menu.classList.add('is-open');
       burger.setAttribute('aria-expanded', 'true');
       burger.setAttribute('aria-label', 'Close menu');
       if (scrim) { scrim.hidden = false; requestAnimationFrame(() => scrim.classList.add('is-on')); }
-    }
-    on(burger, 'click', () => {
-      burger.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu();
     });
     on(scrim, 'click', closeMenu);
     links.forEach(a => on(a, 'click', closeMenu));
     on(document, 'keydown', e => { if (e.key === 'Escape') closeMenu(); });
-    on(window, 'resize', () => { if (window.innerWidth > 860) closeMenu(); }, { passive: true });
+    on(window, 'resize', () => { if (window.innerWidth > 900) closeMenu(); }, { passive: true });
 
     let ticking = false;
-    function onScroll() {
+    function paint() {
       const y = window.scrollY || window.pageYOffset;
-      if (nav) nav.classList.toggle('is-solid', y > 40);
-      const toTop = $('#toTop');
-      if (toTop) toTop.classList.toggle('is-on', y > window.innerHeight * 0.7);
-      if (progress) {
+      if (nav) nav.classList.toggle('is-on', y > window.innerHeight * 0.72);
+      if (bar) {
         const h = document.documentElement.scrollHeight - window.innerHeight;
-        progress.style.width = (h > 0 ? Math.min(100, (y / h) * 100) : 0) + '%';
+        bar.style.width = (h > 0 ? Math.min(100, (y / h) * 100) : 0) + '%';
       }
       ticking = false;
     }
     on(window, 'scroll', () => {
       if (ticking) return;
       ticking = true;
-      window.requestAnimationFrame(onScroll);
+      window.requestAnimationFrame(paint);
     }, { passive: true });
-    onScroll();
+    paint();
 
-    /* active section highlighting */
     if ('IntersectionObserver' in window) {
-      const sections = links
-        .map(a => ({ a: a, el: document.querySelector(a.getAttribute('href')) }))
-        .filter(s => s.el);
-      const spy = new IntersectionObserver((entries) => {
+      const map = links.map(a => ({ a: a, el: document.querySelector(a.getAttribute('href')) })).filter(m => m.el);
+      const spy = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-          const match = sections.find(s => s.el === entry.target);
-          if (!match) return;
-          if (entry.isIntersecting) {
-            sections.forEach(s => s.a.classList.remove('is-active'));
-            match.a.classList.add('is-active');
-          }
+          if (!entry.isIntersecting) return;
+          const hit = map.find(m => m.el === entry.target);
+          if (!hit) return;
+          map.forEach(m => m.a.classList.remove('is-active'));
+          hit.a.classList.add('is-active');
         });
-      }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
-      sections.forEach(s => spy.observe(s.el));
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      map.forEach(m => spy.observe(m.el));
+    }
+  }
+
+  /* ================= soft parallax on the two full-screen photographs ================= */
+
+  function initParallax() {
+    if (REDUCED) return;
+    const layers = [
+      { el: $('.hero__img'), speed: 0.16 },
+      { el: $('.closing__img'), speed: 0.10 }
+    ].filter(l => l.el);
+    if (!layers.length) return;
+
+    let ticking = false;
+    function apply() {
+      layers.forEach(l => {
+        const rect = l.el.parentElement.getBoundingClientRect();
+        if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return;
+        const shift = (rect.top + rect.height / 2 - window.innerHeight / 2) * -l.speed;
+        l.el.style.transform = 'scale(1.06) translate3d(0,' + shift.toFixed(1) + 'px,0)';
+      });
+      ticking = false;
+    }
+    on(window, 'scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(apply);
+    }, { passive: true });
+    apply();
+  }
+
+  /* ================= decorative washes =================
+     Purely ornamental, so they load only once the page itself is
+     ready and never compete with the photographs. */
+
+  function initWashes() {
+    const load = () => $$('.wash img[data-src]').forEach(img => {
+      img.setAttribute('fetchpriority', 'low');
+      img.src = img.dataset.src;
+      img.removeAttribute('data-src');
+    });
+    if (document.readyState === 'complete') load();
+    else on(window, 'load', load);
+  }
+
+  /* ================= drifting petals ================= */
+
+  function initPetals() {
+    const host = $('#petals');
+    if (!host || REDUCED) return;
+    const tints = ['rgba(232,201,201,.85)', 'rgba(207,168,168,.7)', 'rgba(199,161,90,.45)', 'rgba(168,184,163,.5)'];
+    const count = window.innerWidth < 700 ? 7 : 12;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('span');
+      const size = 7 + Math.random() * 11;
+      p.className = 'petal';
+      p.style.left = (Math.random() * 100) + 'vw';
+      p.style.width = size + 'px';
+      p.style.height = (size * 0.72) + 'px';
+      p.style.background = tints[i % tints.length];
+      p.style.setProperty('--dx', (Math.random() * 16 - 8) + 'vw');
+      p.style.animationDuration = (17 + Math.random() * 16) + 's';
+      p.style.animationDelay = (-Math.random() * 24) + 's';
+      host.appendChild(p);
+    }
+  }
+
+  /* ================= countdown ================= */
+
+  function initCountdown() {
+    const grid = $('#cdGrid');
+    const done = $('#cdDone');
+    const out = { d: $('#cdDays'), h: $('#cdHours'), m: $('#cdMins'), s: $('#cdSecs') };
+    if (!grid || !out.d) return;
+
+    const nikkah    = new Date(NIKKAH_AT).getTime();
+    const reception = new Date(RECEPTION_AT).getTime();
+    const thanksAt  = new Date(THANKS_FROM).getTime();
+    const last = {};
+
+    function paint(el, value) {
+      if (!el || last[el.id] === value) return;
+      last[el.id] = value;
+      el.textContent = value;
     }
 
-    /* back to top */
-    on($('#toTop'), 'click', () => {
-      window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+    function tick() {
+      const now = Date.now();
+      if (now >= thanksAt) {
+        grid.hidden = true;
+        if (done) done.hidden = false;
+        return false;
+      }
+      const goal = now < nikkah ? nikkah : (now < reception ? reception : now);
+      let diff = Math.max(0, goal - now);
+      const d = Math.floor(diff / 86400000); diff -= d * 86400000;
+      const h = Math.floor(diff / 3600000);  diff -= h * 3600000;
+      const m = Math.floor(diff / 60000);    diff -= m * 60000;
+      paint(out.d, String(d).padStart(3, '0'));
+      paint(out.h, String(h).padStart(2, '0'));
+      paint(out.m, String(m).padStart(2, '0'));
+      paint(out.s, String(Math.floor(diff / 1000)).padStart(2, '0'));
+      return true;
+    }
+
+    if (tick()) {
+      const id = setInterval(() => { if (!tick()) clearInterval(id); }, 1000);
+    }
+  }
+
+  /* ================= venue maps ================= */
+
+  function initMaps() {
+    $$('[data-maps]').forEach(btn => {
+      on(btn, 'click', () => {
+        const key = btn.dataset.maps;
+        const pin = key === 'nikkah' ? NIKKAH_MAP : RECEPTION_MAP;
+        const venue = VENUES[key];
+        const url = pin || ('https://www.google.com/maps/search/?api=1&query=' +
+          encodeURIComponent(venue.name + ', ' + venue.address));
+        window.open(url, '_blank', 'noopener,noreferrer');
+      });
     });
   }
 
-  /* ===========================================================
-     4 · SPLASH SCREEN & BACKGROUND MUSIC
-     =========================================================== */
+  /* ================= gallery lightbox ================= */
+
+  function initGallery() {
+    const thumbs = $$('#masonry .ph');
+    const lb = $('#lightbox');
+    const img = $('#lbImg');
+    const cap = $('#lbCap');
+    if (!thumbs.length || !lb || !img) return;
+
+    const items = thumbs.map(btn => {
+      const i = $('img', btn);
+      return { src: i.getAttribute('src'), alt: i.getAttribute('alt') || 'Photograph' };
+    });
+    let index = 0, lastFocus = null;
+
+    const preload = i => {
+      const item = items[(i + items.length) % items.length];
+      if (item) { const im = new Image(); im.decoding = 'async'; im.src = item.src; }
+    };
+
+    function show(i) {
+      index = (i + items.length) % items.length;
+      img.src = items[index].src;
+      img.alt = items[index].alt;
+      if (cap) cap.textContent = (index + 1) + ' of ' + items.length;
+      preload(index + 1);
+      preload(index - 1);
+    }
+    function open(i) {
+      lastFocus = document.activeElement;
+      show(i);
+      lb.hidden = false;
+      document.body.classList.add('is-locked');
+      requestAnimationFrame(() => lb.classList.add('is-on'));
+      const x = $('#lbClose');
+      if (x) x.focus({ preventScroll: true });
+    }
+    function close() {
+      lb.classList.remove('is-on');
+      document.body.classList.remove('is-locked');
+      setTimeout(() => { lb.hidden = true; img.src = ''; }, 380);
+      if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+    }
+
+    thumbs.forEach((btn, i) => on(btn, 'click', () => open(i)));
+    on($('#lbClose'), 'click', close);
+    on($('#lbPrev'), 'click', () => show(index - 1));
+    on($('#lbNext'), 'click', () => show(index + 1));
+    on(lb, 'click', e => { if (e.target === lb) close(); });
+    on(document, 'keydown', e => {
+      if (lb.hidden) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') show(index - 1);
+      else if (e.key === 'ArrowRight') show(index + 1);
+    });
+
+    let sx = 0, sy = 0, swiping = false;
+    on(lb, 'touchstart', e => { const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; swiping = true; }, { passive: true });
+    on(lb, 'touchend', e => {
+      if (!swiping) return;
+      swiping = false;
+      const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1));
+      else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) close();
+    }, { passive: true });
+
+    const idle = window.requestIdleCallback || (fn => setTimeout(fn, 2400));
+    idle(() => { [0, 1, 2].forEach(preload); });
+  }
+
+  /* ================= RSVP ================= */
+
+  const RSVP_KEY = 'wedding-rsvp-entries';
+
+  function saveRsvp(entry) {
+    try {
+      const list = JSON.parse(localStorage.getItem(RSVP_KEY) || '[]');
+      list.push(entry);
+      localStorage.setItem(RSVP_KEY, JSON.stringify(list));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function initRsvp() {
+    const form = $('#rsvpForm');
+    if (!form) return;
+    const name = $('#rsvpName');
+    const guests = $('#rsvpGuests');
+    const message = $('#rsvpMessage');
+    const button = $('#rsvpSubmit');
+    const note = $('#rsvpNote');
+    const modal = $('#thanks');
+
+    function setError(input, text) {
+      const slot = $('[data-err-for="' + input.id + '"]');
+      if (slot) slot.textContent = text || '';
+      input.setAttribute('aria-invalid', text ? 'true' : 'false');
+      return !text;
+    }
+    function validate() {
+      let ok = setError(name, name.value.trim().length < 2 ? 'Please tell us your name.' : '');
+      const n = parseInt(guests.value, 10);
+      ok = setError(guests, (!n || n < 1 || n > 30) ? 'Enter a number between 1 and 30.' : '') && ok;
+      return ok;
+    }
+    [name, guests].forEach(i => on(i, 'input', () => {
+      if (i.getAttribute('aria-invalid') === 'true') validate();
+    }));
+
+    function openModal(text) {
+      if (!modal) return toast('Thank you — your reply has been saved.');
+      const body = $('#thanksText');
+      if (body) body.textContent = text;
+      modal.hidden = false;
+      document.body.classList.add('is-locked');
+      requestAnimationFrame(() => modal.classList.add('is-on'));
+      const close = $('#thanksClose');
+      if (close) close.focus({ preventScroll: true });
+    }
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.remove('is-on');
+      document.body.classList.remove('is-locked');
+      setTimeout(() => { modal.hidden = true; }, 400);
+    }
+    on($('#thanksClose'), 'click', closeModal);
+    on(modal, 'click', e => { if (e.target === modal) closeModal(); });
+    on(document, 'keydown', e => { if (modal && !modal.hidden && e.key === 'Escape') closeModal(); });
+
+    on(form, 'submit', event => {
+      event.preventDefault();
+      if (!validate()) { if (note) note.textContent = 'Please check the highlighted fields.'; return; }
+
+      const entry = {
+        name: name.value.trim(),
+        guests: String(parseInt(guests.value, 10)),
+        message: message ? message.value.trim() : '',
+        savedAt: new Date().toISOString()
+      };
+
+      const stored = saveRsvp(entry);
+      if (note) note.textContent = '';
+      form.reset();
+      guests.value = '1';
+      setError(name, '');
+      setError(guests, '');
+
+      const first = entry.name.split(' ')[0];
+      openModal(stored
+        ? 'We have your reply, ' + first + '. We cannot wait to celebrate with you.'
+        : 'We have your reply, ' + first + '.');
+
+      if (!SCRIPT_URL) return;
+      button.classList.add('is-busy');
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: new URLSearchParams(entry).toString()
+      })
+        .catch(() => { /* the reply is safe in localStorage either way */ })
+        .finally(() => button.classList.remove('is-busy'));
+    });
+  }
+
+  /* ================= music (default off) ================= */
 
   const Music = (function () {
-    let ctx = null, master = null, timer = null, audioEl = null;
-    let playing = false, step = 0;
+    let ctx = null, master = null, timer = null, el = null, playing = false, step = 0;
     const SCALE = [220.00, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
 
-    function ensureContext() {
+    function build() {
       if (ctx) return ctx;
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return null;
@@ -238,16 +434,13 @@
       filter.type = 'lowpass';
       filter.frequency.value = 2200;
       master.connect(filter).connect(ctx.destination);
-      master._filter = filter;
       return ctx;
     }
-
     function note(freq, when, dur, gain, type) {
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
+      const osc = ctx.createOscillator(), g = ctx.createGain();
       osc.type = type || 'sine';
       osc.frequency.value = freq;
-      osc.detune.value = (Math.random() * 8) - 4;
+      osc.detune.value = Math.random() * 8 - 4;
       g.gain.setValueAtTime(0.0001, when);
       g.gain.exponentialRampToValueAtTime(gain, when + dur * 0.28);
       g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
@@ -255,506 +448,103 @@
       osc.start(when);
       osc.stop(when + dur + 0.1);
     }
-
     function tick() {
       if (!ctx || !playing) return;
       const t = ctx.currentTime + 0.08;
       const pattern = [0, 2, 4, 3, 5, 4, 2, 1];
-      const idx = pattern[step % pattern.length];
-      note(SCALE[idx], t, 3.4, 0.09, 'sine');
-      if (step % 2 === 0) note(SCALE[(idx + 2) % SCALE.length] / 2, t + 0.32, 4.2, 0.045, 'triangle');
+      const i = pattern[step % pattern.length];
+      note(SCALE[i], t, 3.4, 0.09, 'sine');
+      if (step % 2 === 0) note(SCALE[(i + 2) % SCALE.length] / 2, t + 0.32, 4.2, 0.045, 'triangle');
       if (step % 4 === 0) note(110, t, 6.5, 0.05, 'sine');
       step++;
     }
-
-    function startSynth() {
-      if (!ensureContext()) return false;
-      if (ctx.state === 'suspended') ctx.resume();
-      playing = true;
-      master.gain.cancelScheduledValues(ctx.currentTime);
-      master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), ctx.currentTime);
-      master.gain.exponentialRampToValueAtTime(0.34, ctx.currentTime + 2.2);
-      tick();
-      clearInterval(timer);
-      timer = setInterval(tick, 2400);
-      return true;
+    function audio() {
+      if (el) return el;
+      el = new Audio(MUSIC_URL);
+      el.loop = true;
+      el.volume = 0;
+      el.preload = 'none';
+      return el;
     }
-
-    function stopSynth() {
-      playing = false;
-      clearInterval(timer);
-      if (ctx && master) {
-        master.gain.cancelScheduledValues(ctx.currentTime);
-        master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
-        master.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
-      }
-    }
-
-    function ensureAudio() {
-      if (audioEl) return audioEl;
-      audioEl = new Audio(MUSIC_URL);
-      audioEl.loop = true;
-      audioEl.volume = 0;
-      audioEl.preload = 'none';
-      return audioEl;
-    }
-
-    function fadeAudio(to, ms) {
-      const el = ensureAudio();
-      const from = el.volume;
-      const start = performance.now();
+    function fade(to, ms) {
+      const a = audio(), from = a.volume, start = performance.now();
       (function frame(now) {
         const p = Math.min(1, (now - start) / ms);
-        el.volume = Math.max(0, Math.min(1, from + (to - from) * p));
+        a.volume = Math.max(0, Math.min(1, from + (to - from) * p));
         if (p < 1) requestAnimationFrame(frame);
-        else if (to === 0) el.pause();
+        else if (to === 0) a.pause();
       })(start);
     }
-
     return {
-      isPlaying: function () { return playing; },
+      isPlaying: () => playing,
       start: function () {
         if (MUSIC_URL) {
-          const el = ensureAudio();
-          const p = el.play();
-          if (p && p.catch) p.catch(() => toast('Tap the music button once more to start the music.'));
-          fadeAudio(0.55, 1600);
+          const a = audio(), p = a.play();
+          if (p && p.catch) p.catch(() => toast('Tap the music button once more to start.'));
+          fade(0.55, 1600);
           playing = true;
           return true;
         }
-        return startSynth();
+        if (!build()) return false;
+        if (ctx.state === 'suspended') ctx.resume();
+        playing = true;
+        master.gain.cancelScheduledValues(ctx.currentTime);
+        master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), ctx.currentTime);
+        master.gain.exponentialRampToValueAtTime(0.34, ctx.currentTime + 2.2);
+        tick();
+        clearInterval(timer);
+        timer = setInterval(tick, 2400);
+        return true;
       },
       stop: function () {
-        if (MUSIC_URL) { fadeAudio(0, 900); playing = false; return; }
-        stopSynth();
+        if (MUSIC_URL) { fade(0, 900); playing = false; return; }
+        playing = false;
+        clearInterval(timer);
+        if (ctx && master) {
+          master.gain.cancelScheduledValues(ctx.currentTime);
+          master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+          master.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+        }
       }
     };
   })();
 
-  function setMusicButtons(isOn) {
-    $$('[data-music-toggle]').forEach(btn => {
-      btn.setAttribute('aria-pressed', isOn ? 'true' : 'false');
-      const label = $('.music-btn__label', btn);
-      if (label) label.textContent = isOn ? 'Music on' : 'Music off';
-    });
-  }
-
   function initMusic() {
-    $$('[data-music-toggle]').forEach(btn => {
-      on(btn, 'click', () => {
-        if (Music.isPlaying()) {
-          Music.stop();
-          setMusicButtons(false);
-        } else {
-          const ok = Music.start();
-          setMusicButtons(ok !== false);
-          if (ok === false) toast('Background music is not supported on this browser.');
-        }
-      });
+    const btn = $('#music');
+    if (!btn) return;
+    on(btn, 'click', () => {
+      if (Music.isPlaying()) {
+        Music.stop();
+        btn.setAttribute('aria-pressed', 'false');
+      } else {
+        const ok = Music.start();
+        btn.setAttribute('aria-pressed', ok ? 'true' : 'false');
+        if (!ok) toast('Background music is not supported on this browser.');
+      }
     });
-    /* pause when the tab is hidden, resume when it returns */
-    let wasPlaying = false;
+    let resume = false;
     on(document, 'visibilitychange', () => {
       if (document.hidden) {
-        wasPlaying = Music.isPlaying();
-        if (wasPlaying) { Music.stop(); setMusicButtons(false); }
-      } else if (wasPlaying) {
-        Music.start(); setMusicButtons(true); wasPlaying = false;
+        resume = Music.isPlaying();
+        if (resume) { Music.stop(); btn.setAttribute('aria-pressed', 'false'); }
+      } else if (resume) {
+        Music.start();
+        btn.setAttribute('aria-pressed', 'true');
+        resume = false;
       }
     });
   }
 
-  /* ---------- splash ---------- */
-  function initSplash() {
-    const splash = $('#splash');
-    const openBtn = $('#openInvite');
-    if (!splash) { document.body.classList.add('invite-open'); return; }
+  /* ================= sharing ================= */
 
-    document.body.classList.add('is-locked');
-
-    function open(startMusic) {
-      if (splash.classList.contains('is-open')) return;
-      splash.classList.add('is-open');
-      document.body.classList.remove('is-locked');
-      document.body.classList.add('invite-open');
-      setTimeout(() => { splash.setAttribute('aria-hidden', 'true'); splash.style.display = 'none'; }, 1000);
-      const main = $('#main');
-      if (main) { main.setAttribute('tabindex', '-1'); main.focus({ preventScroll: true }); }
-      if (startMusic && !Music.isPlaying()) {
-        const ok = Music.start();
-        setMusicButtons(ok !== false);
-      }
-      if (location.hash && $(location.hash)) {
-        setTimeout(() => { $(location.hash).scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' }); }, 260);
-      }
-    }
-
-    on(openBtn, 'click', () => open(true));
-    on(document, 'keydown', e => {
-      if (splash.classList.contains('is-open')) return;
-      if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') {
-        if (document.activeElement && document.activeElement.hasAttribute('data-music-toggle')) return;
-        e.preventDefault();
-        open(e.key === 'Enter');
-      }
-    });
-    /* keep focus inside the splash while it is showing */
-    on(splash, 'keydown', e => {
-      if (e.key !== 'Tab') return;
-      const focusable = $$('button, [href], input, [tabindex]:not([tabindex="-1"])', splash);
-      if (!focusable.length) return;
-      const first = focusable[0], last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    });
-    if (openBtn) setTimeout(() => openBtn.focus({ preventScroll: true }), 600);
-  }
-
-  /* ===========================================================
-     5 · COUNTDOWN
-     Automatically switches Nikkah → Reception → Thank you.
-     =========================================================== */
-  function initCountdown() {
-    const grid   = $('#cdGrid');
-    const title  = $('#cdTitle');
-    const eyebrow= $('#cdEyebrow');
-    const target = $('#cdTarget');
-    const thanks = $('#cdThanks');
-    const out = { days: $('#cdDays'), hours: $('#cdHours'), mins: $('#cdMins'), secs: $('#cdSecs') };
-    if (!grid || !out.days) return;
-
-    const nikkah    = new Date(NIKKAH_AT).getTime();
-    const reception = new Date(RECEPTION_AT).getTime();
-    const thanksAt  = new Date(THANKS_FROM).getTime();
-    let last = {};
-
-    function paint(el, value) {
-      if (!el || last[el.id] === value) return;
-      last[el.id] = value;
-      el.textContent = value;
-      if (REDUCED) return;
-      el.classList.add('is-tick');
-      setTimeout(() => el.classList.remove('is-tick'), 320);
-    }
-
-    function showThanks() {
-      grid.hidden = true;
-      if (target) target.hidden = true;
-      if (thanks) thanks.hidden = false;
-      if (title) title.textContent = 'With all our love';
-      if (eyebrow) eyebrow.textContent = 'The celebrations have ended';
-      document.title = 'Thank you for celebrating with us — Thawfeeq & Shini Yassmin';
-    }
-
-    function tick() {
-      const now = Date.now();
-
-      if (now >= thanksAt) { showThanks(); return false; }
-
-      let goal, heading, eye, detail;
-      if (now < nikkah) {
-        goal = nikkah;
-        heading = 'Countdown to the Nikkah';
-        eye = 'Counting the days';
-        detail = VENUES.nikkah.label;
-      } else if (now < reception) {
-        goal = reception;
-        heading = 'Countdown to the Reception';
-        eye = 'The Nikkah is complete, alhamdulillah';
-        detail = VENUES.reception.label;
-      } else {
-        goal = now;
-        heading = 'The Reception is Today';
-        eye = 'We are so happy you are here';
-        detail = VENUES.reception.label;
-      }
-
-      if (title && title.textContent !== heading) title.textContent = heading;
-      if (eyebrow && eyebrow.textContent !== eye) eyebrow.textContent = eye;
-      if (target && target.textContent !== detail) target.textContent = detail;
-
-      let diff = Math.max(0, goal - now);
-      const d = Math.floor(diff / 86400000); diff -= d * 86400000;
-      const h = Math.floor(diff / 3600000);  diff -= h * 3600000;
-      const m = Math.floor(diff / 60000);    diff -= m * 60000;
-      const s = Math.floor(diff / 1000);
-
-      paint(out.days,  String(d).padStart(3, '0'));
-      paint(out.hours, String(h).padStart(2, '0'));
-      paint(out.mins,  String(m).padStart(2, '0'));
-      paint(out.secs,  String(s).padStart(2, '0'));
-      return true;
-    }
-
-    if (tick()) {
-      const id = setInterval(() => { if (!tick()) clearInterval(id); }, 1000);
-    }
-  }
-
-  /* ===========================================================
-     6 · INTERACTIVE TIMELINE
-     =========================================================== */
-  function initTimeline() {
-    const heads = $$('.tl__head');
-    if (!heads.length) return;
-
-    heads.forEach(head => {
-      const panel = document.getElementById(head.getAttribute('aria-controls'));
-      if (!panel) return;
-      panel.hidden = false;
-      panel.style.maxHeight = '0px';
-
-      on(head, 'click', () => {
-        const isOpen = head.getAttribute('aria-expanded') === 'true';
-
-        heads.forEach(other => {
-          if (other === head) return;
-          const p = document.getElementById(other.getAttribute('aria-controls'));
-          other.setAttribute('aria-expanded', 'false');
-          if (p) { p.classList.remove('is-open'); p.style.maxHeight = '0px'; }
-        });
-
-        head.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-        panel.classList.toggle('is-open', !isOpen);
-        panel.style.maxHeight = isOpen ? '0px' : (panel.scrollHeight + 32) + 'px';
-      });
-    });
-
-    on(window, 'resize', () => {
-      heads.forEach(head => {
-        if (head.getAttribute('aria-expanded') !== 'true') return;
-        const panel = document.getElementById(head.getAttribute('aria-controls'));
-        if (panel) panel.style.maxHeight = (panel.scrollHeight + 32) + 'px';
-      });
-    }, { passive: true });
-  }
-
-  /* ===========================================================
-     7 · EVENT CARDS · MAP BUTTONS
-     =========================================================== */
-  function mapLinks(key) {
-    const custom = key === 'nikkah' ? NIKKAH_MAP : RECEPTION_MAP;
-    const venue = VENUES[key];
-    const query = encodeURIComponent(venue.name + ', ' + venue.address);
-    return {
-      /* "Google Maps" — the exact pin from the invitation QR code */
-      view: custom || ('https://www.google.com/maps/search/?api=1&query=' + query),
-      /* "Navigate" — always turn-by-turn, which a short link cannot carry */
-      navigate: 'https://www.google.com/maps/dir/?api=1&destination=' + query
-    };
-  }
-
-  function initEvents() {
-    $$('[data-maps]').forEach(btn => {
-      on(btn, 'click', () => {
-        window.open(mapLinks(btn.dataset.maps).view, '_blank', 'noopener,noreferrer');
-      });
-    });
-    $$('[data-navigate]').forEach(btn => {
-      on(btn, 'click', () => {
-        window.open(mapLinks(btn.dataset.navigate).navigate, '_blank', 'noopener,noreferrer');
-      });
-    });
-  }
-
-  /* ===========================================================
-     8 · RSVP → GOOGLE SHEETS (Google Apps Script)
-     =========================================================== */
-  function initRsvp() {
-    const form   = $('#rsvpForm');
-    const status = $('#rsvpStatus');
-    const button = $('#rsvpSubmit');
-    if (!form) return;
-
-    const nameInput   = $('#rsvpName');
-    const guestsInput = $('#rsvpGuests');
-
-    function setStatus(message, kind) {
-      if (!status) return;
-      status.textContent = message;
-      status.className = 'rsvp__status is-on ' + (kind ? 'is-' + kind : '');
-    }
-    function setError(input, message) {
-      const err = $('[data-err-for="' + input.id + '"]');
-      if (err) err.textContent = message || '';
-      input.setAttribute('aria-invalid', message ? 'true' : 'false');
-      return !message;
-    }
-    function validate() {
-      let ok = true;
-      const name = nameInput.value.trim();
-      const guests = parseInt(guestsInput.value, 10);
-      ok = setError(nameInput, name.length < 2 ? 'Please tell us your name.' : '') && ok;
-      ok = setError(guestsInput,
-        (!guests || guests < 1 || guests > 30) ? 'Enter a number between 1 and 30.' : '') && ok;
-      return ok;
-    }
-
-    [nameInput, guestsInput].forEach(input => {
-      on(input, 'input', () => {
-        if (input.getAttribute('aria-invalid') === 'true') validate();
-      });
-    });
-
-    on(form, 'submit', function (event) {
-      event.preventDefault();
-      if (!validate()) { setStatus('Please check the highlighted fields.', 'err'); return; }
-
-      const payload = {
-        name: nameInput.value.trim(),
-        guests: String(parseInt(guestsInput.value, 10)),
-        timestamp: new Date().toISOString(),
-        page: location.href
-      };
-
-      if (!SCRIPT_URL) {
-        setStatus('RSVP is not connected yet. Add your Google Apps Script URL to SCRIPT_URL in script.js.', 'info');
-        return;
-      }
-
-      button.classList.add('is-loading');
-      button.setAttribute('aria-busy', 'true');
-      setStatus('Sending your RSVP…', 'info');
-
-      const controller = ('AbortController' in window) ? new AbortController() : null;
-      const timeout = setTimeout(() => { if (controller) controller.abort(); }, 15000);
-
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        /* URL-encoded keeps the request "simple" so Apps Script
-           answers without a CORS pre-flight */
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-        body: new URLSearchParams(payload).toString(),
-        signal: controller ? controller.signal : undefined
-      })
-        .then(response => {
-          if (!response.ok) throw new Error('HTTP ' + response.status);
-          return response.text();
-        })
-        .then(() => {
-          setStatus('Thank you, ' + payload.name.split(' ')[0] + '! Your RSVP has been received. ❤️', 'ok');
-          form.reset();
-          guestsInput.value = '1';
-          setError(nameInput, '');
-          setError(guestsInput, '');
-          toast('RSVP received — thank you!');
-        })
-        .catch(error => {
-          const aborted = error && error.name === 'AbortError';
-          setStatus(aborted
-            ? 'The request timed out. Please check your connection and try again.'
-            : 'Sorry, we could not send your RSVP. Please try again or message us directly.', 'err');
-        })
-        .finally(() => {
-          clearTimeout(timeout);
-          button.classList.remove('is-loading');
-          button.removeAttribute('aria-busy');
-        });
-    });
-  }
-
-  /* ===========================================================
-     9 · GALLERY · FULLSCREEN VIEWER
-     =========================================================== */
-  function initGallery() {
-    const thumbs = $$('#masonry .ph');
-    const lb    = $('#lightbox');
-    const lbImg = $('#lbImg');
-    const lbCap = $('#lbCap');
-    if (!thumbs.length || !lb || !lbImg) return;
-
-    const items = thumbs.map(btn => {
-      const img = $('img', btn);
-      return { src: img.getAttribute('src'), alt: img.getAttribute('alt') || 'Wedding photograph' };
-    });
-    let index = 0, lastFocus = null;
-
-    function preload(i) {
-      const item = items[(i + items.length) % items.length];
-      if (!item) return;
-      const img = new Image();
-      img.decoding = 'async';
-      img.src = item.src;
-    }
-
-    function show(i) {
-      index = (i + items.length) % items.length;
-      const item = items[index];
-      lbImg.src = item.src;
-      lbImg.alt = item.alt;
-      if (lbCap) lbCap.textContent = (index + 1) + ' of ' + items.length;
-      preload(index + 1);
-      preload(index - 1);
-    }
-
-    function open(i) {
-      lastFocus = document.activeElement;
-      show(i);
-      lb.hidden = false;
-      document.body.classList.add('is-locked');
-      requestAnimationFrame(() => lb.classList.add('is-on'));
-      const close = $('#lbClose');
-      if (close) close.focus({ preventScroll: true });
-    }
-
-    function close() {
-      lb.classList.remove('is-on');
-      document.body.classList.remove('is-locked');
-      setTimeout(() => { lb.hidden = true; lbImg.src = ''; }, 380);
-      if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
-    }
-
-    thumbs.forEach((btn, i) => on(btn, 'click', () => open(i)));
-    on($('#lbClose'), 'click', close);
-    on($('#lbPrev'), 'click', () => show(index - 1));
-    on($('#lbNext'), 'click', () => show(index + 1));
-    on(lb, 'click', e => { if (e.target === lb) close(); });
-
-    on(document, 'keydown', e => {
-      if (lb.hidden) return;
-      if (e.key === 'Escape') close();
-      else if (e.key === 'ArrowLeft') show(index - 1);
-      else if (e.key === 'ArrowRight') show(index + 1);
-    });
-
-    /* swipe on touch devices */
-    let startX = 0, startY = 0, swiping = false;
-    on(lb, 'touchstart', e => {
-      const t = e.changedTouches[0];
-      startX = t.clientX; startY = t.clientY; swiping = true;
-    }, { passive: true });
-    on(lb, 'touchend', e => {
-      if (!swiping) return;
-      swiping = false;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - startX, dy = t.clientY - startY;
-      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1));
-      else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) close();
-    }, { passive: true });
-
-    /* warm the cache for the first few photographs when the browser is idle */
-    const idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 2400); };
-    idle(() => { [0, 1, 2].forEach(preload); });
-  }
-
-  /* ===========================================================
-     10 · SHARING
-     =========================================================== */
   function initShare() {
     const url = location.href.split('#')[0];
-
     on($('#shareWhatsApp'), 'click', () => {
-      const text = encodeURIComponent(SHARE_TEXT + '\n\n' + url);
-      window.open('https://api.whatsapp.com/send?text=' + text, '_blank', 'noopener,noreferrer');
+      window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(SHARE_TEXT + '\n\n' + url),
+        '_blank', 'noopener,noreferrer');
     });
-
     on($('#copyLink'), 'click', () => {
-      const done = () => toast('Invitation link copied.');
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(done).catch(fallback);
-      } else {
-        fallback();
-      }
+      const done = () => toast('Link copied.');
       function fallback() {
         const temp = document.createElement('textarea');
         temp.value = url;
@@ -766,69 +556,40 @@
         catch (e) { toast('Copy failed — please copy the address bar link.'); }
         document.body.removeChild(temp);
       }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done).catch(fallback);
+      } else {
+        fallback();
+      }
     });
-
-    const year = $('#year');
-    if (year) year.textContent = new Date().getFullYear();
   }
 
-  /* ===========================================================
-     11 · PWA · SERVICE WORKER · INSTALL PROMPT
-     =========================================================== */
+  /* ================= service worker ================= */
+
   function initPwa() {
-    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => { /* offline support unavailable */ });
-      });
-    }
-
-    let deferredPrompt = null;
-    on(window, 'beforeinstallprompt', e => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const btn = $('#installApp');
-      if (btn) btn.hidden = false;
+    if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* offline support unavailable */ });
     });
-    on($('#installApp'), 'click', () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.finally(() => {
-        deferredPrompt = null;
-        const btn = $('#installApp');
-        if (btn) btn.hidden = true;
-      });
-    });
-    on(window, 'appinstalled', () => toast('Invitation added to your home screen.'));
   }
 
-  /* ===========================================================
-     12 · BOOT
-     =========================================================== */
-  function boot() {
-    /* keep 100vh honest on mobile browsers with dynamic toolbars */
-    const setVh = () => document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
-    setVh();
-    on(window, 'resize', setVh, { passive: true });
-    on(window, 'orientationchange', setVh);
+  /* ================= boot ================= */
 
+  function boot() {
     initReveal();
-    initWatercolour();
-    initParallax();
     initNav();
-    initSplash();
-    initMusic();
+    initParallax();
+    initWashes();
+    initPetals();
     initCountdown();
-    initTimeline();
-    initEvents();
-    initRsvp();
+    initMaps();
     initGallery();
+    initRsvp();
+    initMusic();
     initShare();
     initPwa();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    boot();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
