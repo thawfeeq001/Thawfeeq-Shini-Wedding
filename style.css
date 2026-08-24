@@ -691,6 +691,41 @@ body.invite-open .music-btn--float{opacity:1;transform:none;pointer-events:auto}
 .ev-card__actions{display:flex;gap:.7rem;margin-top:auto;padding-top:1.2rem;flex-wrap:wrap}
 .ev-card__actions .btn{flex:1 1 auto}
 
+/* ================= RSVP ================= */
+.rsvp__form{margin-top:2rem;padding:clamp(1.6rem,4vw,2.6rem);display:grid;gap:1.2rem}
+.field{display:grid;gap:.45rem}
+.field label{font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-deep)}
+.field input{
+  width:100%;padding:.9rem 1.1rem;border-radius:12px;
+  border:1px solid var(--line);background:rgba(255,255,255,.62);
+  font-family:var(--font-serif);font-size:1.08rem;color:var(--ink);
+  transition:border-color .35s var(--ease),background-color .35s var(--ease),box-shadow .35s var(--ease);
+  -webkit-appearance:none;appearance:none;
+}
+.field input::placeholder{color:var(--ink-35);font-family:var(--font-sans);font-size:.9rem}
+.field input:focus{outline:none;border-color:var(--gold);background:#fff;box-shadow:0 0 0 4px rgba(176,141,87,.12)}
+.field input[aria-invalid="true"]{border-color:#C0563F;box-shadow:0 0 0 4px rgba(192,86,63,.1)}
+.field__err{font-size:.76rem;color:#A8452F;min-height:1.1em}
+
+#rsvpSubmit{position:relative;margin-top:.4rem}
+.btn__spinner{
+  width:15px;height:15px;border-radius:50%;
+  border:1.6px solid rgba(255,255,255,.45);border-top-color:#fff;
+  display:none;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#rsvpSubmit.is-loading .btn__spinner{display:block}
+#rsvpSubmit.is-loading{pointer-events:none;opacity:.85}
+
+.rsvp__status{
+  min-height:1.4em;text-align:center;font-size:.9rem;margin-top:.2rem;
+  opacity:0;transform:translateY(6px);transition:opacity .4s var(--ease),transform .4s var(--ease);
+}
+.rsvp__status.is-on{opacity:1;transform:none}
+.rsvp__status.is-ok{color:#2E7D50}
+.rsvp__status.is-err{color:#A8452F}
+.rsvp__status.is-info{color:var(--ink-70)}
+
 /* ================= FOOTER ================= */
 .footer{
   position:relative;z-index:1;text-align:center;

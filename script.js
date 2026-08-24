@@ -542,6 +542,102 @@
   }
 
   /* ===========================================================
+     8 · RSVP → GOOGLE SHEETS (Google Apps Script)
+     =========================================================== */
+  function initRsvp() {
+    const form   = $('#rsvpForm');
+    const status = $('#rsvpStatus');
+    const button = $('#rsvpSubmit');
+    if (!form) return;
+
+    const nameInput   = $('#rsvpName');
+    const guestsInput = $('#rsvpGuests');
+
+    function setStatus(message, kind) {
+      if (!status) return;
+      status.textContent = message;
+      status.className = 'rsvp__status is-on ' + (kind ? 'is-' + kind : '');
+    }
+    function setError(input, message) {
+      const err = $('[data-err-for="' + input.id + '"]');
+      if (err) err.textContent = message || '';
+      input.setAttribute('aria-invalid', message ? 'true' : 'false');
+      return !message;
+    }
+    function validate() {
+      let ok = true;
+      const name = nameInput.value.trim();
+      const guests = parseInt(guestsInput.value, 10);
+      ok = setError(nameInput, name.length < 2 ? 'Please tell us your name.' : '') && ok;
+      ok = setError(guestsInput,
+        (!guests || guests < 1 || guests > 30) ? 'Enter a number between 1 and 30.' : '') && ok;
+      return ok;
+    }
+
+    [nameInput, guestsInput].forEach(input => {
+      on(input, 'input', () => {
+        if (input.getAttribute('aria-invalid') === 'true') validate();
+      });
+    });
+
+    on(form, 'submit', function (event) {
+      event.preventDefault();
+      if (!validate()) { setStatus('Please check the highlighted fields.', 'err'); return; }
+
+      const payload = {
+        name: nameInput.value.trim(),
+        guests: String(parseInt(guestsInput.value, 10)),
+        timestamp: new Date().toISOString(),
+        page: location.href
+      };
+
+      if (!SCRIPT_URL) {
+        setStatus('RSVP is not connected yet. Add your Google Apps Script URL to SCRIPT_URL in script.js.', 'info');
+        return;
+      }
+
+      button.classList.add('is-loading');
+      button.setAttribute('aria-busy', 'true');
+      setStatus('Sending your RSVP…', 'info');
+
+      const controller = ('AbortController' in window) ? new AbortController() : null;
+      const timeout = setTimeout(() => { if (controller) controller.abort(); }, 15000);
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        /* URL-encoded keeps the request "simple" so Apps Script
+           answers without a CORS pre-flight */
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: new URLSearchParams(payload).toString(),
+        signal: controller ? controller.signal : undefined
+      })
+        .then(response => {
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          return response.text();
+        })
+        .then(() => {
+          setStatus('Thank you, ' + payload.name.split(' ')[0] + '! Your RSVP has been received. ❤️', 'ok');
+          form.reset();
+          guestsInput.value = '1';
+          setError(nameInput, '');
+          setError(guestsInput, '');
+          toast('RSVP received — thank you!');
+        })
+        .catch(error => {
+          const aborted = error && error.name === 'AbortError';
+          setStatus(aborted
+            ? 'The request timed out. Please check your connection and try again.'
+            : 'Sorry, we could not send your RSVP. Please try again or message us directly.', 'err');
+        })
+        .finally(() => {
+          clearTimeout(timeout);
+          button.classList.remove('is-loading');
+          button.removeAttribute('aria-busy');
+        });
+    });
+  }
+
+  /* ===========================================================
      10 · SHARING
      =========================================================== */
   function initShare() {
@@ -594,6 +690,7 @@
     initCountdown();
     initTimeline();
     initEvents();
+    initRsvp();
     initShare();
   }
 
