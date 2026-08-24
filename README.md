@@ -289,12 +289,16 @@ git push origin main
 Give it one or two minutes, then reload
 https://thawfeeq001.github.io/Thawfeeq-Shini-Wedding/.
 
-**Turning Pages on (only needed once):** repository **Settings → Pages →
-Build and deployment**. Either source works:
+**Turning Pages on (only needed once):** go to **Settings → Pages → Build and
+deployment → Source** and choose **GitHub Actions**. That is the only manual
+step in the whole project — GitHub does not allow a workflow to switch Pages on
+by itself. From then on every push to `main` republishes the site through
+`.github/workflows/deploy.yml`, and each deployment is listed under the
+**Actions** tab.
 
-- **Deploy from a branch** → branch `main`, folder `/ (root)` — simplest.
-- **GitHub Actions** — uses `.github/workflows/deploy.yml`, included here, and
-  shows each deployment under the **Actions** tab.
+*Alternative:* choosing **Deploy from a branch** → `main` → `/ (root)` also
+works and needs no workflow — but then delete `.github/workflows/deploy.yml`,
+otherwise it will report a failure on every push.
 
 **Guests still see the old version?** The service worker keeps a copy for
 offline use. Open `sw.js`, change `const CACHE_VERSION = 'v1';` to `'v2'`, and
