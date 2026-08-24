@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://thawfeeq001.github.io/Thawfeeq-Shini-Wedding/sitemap.xml
