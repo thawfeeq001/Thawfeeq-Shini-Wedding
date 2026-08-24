@@ -3,7 +3,7 @@
    Bump CACHE_VERSION whenever you change site files so returning
    guests receive the update on their next visit.
    ============================================================= */
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const SHELL_CACHE = 'wedding-shell-' + CACHE_VERSION;
 const ASSET_CACHE = 'wedding-assets-' + CACHE_VERSION;
 const FONT_CACHE  = 'wedding-fonts-' + CACHE_VERSION;
@@ -18,6 +18,8 @@ const PRECACHE = [
   'manifest.json',
   'favicon.png',
   'assets/gold-divider.svg',
+  'assets/logo-gold.png',
+  'assets/logo-ivory.png',
   'assets/mosque-silhouette.png',
   'assets/qr-nikkah.png',
   'assets/qr-reception.png',

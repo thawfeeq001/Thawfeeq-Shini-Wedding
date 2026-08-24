@@ -34,37 +34,53 @@ out of their way.
 
 ## Which photo goes where
 
-Every photograph is now a real one, named for the place it appears. Replacing a
-photo is a matter of dropping in a new file with the same name.
+Every photograph is a real one, named for the place it appears. Replacing a
+photo means dropping in a new file with the same name.
 
 | File | Where it appears |
 | --- | --- |
 | `photos/hero-couple.jpg` | Hero — the black &amp; white couple portrait |
 | `photos/groom-portrait.jpg` | Meet the Groom |
 | `photos/bride-portrait.jpg` | Meet the Bride |
-| `photos/groom-family.jpg` | Groom Family |
-| `photos/bride-family.jpg` | Bride Family — the large photograph |
-| `photos/bride-parents.jpg` | Bride Family — the small overlapping inset |
-| `photos/fixing-ceremony.jpg` | Blessings Begin |
+| `photos/groom-family.jpg` | Groom Family — the large photograph |
+| `photos/groom-sister.jpg` | Groom Family — the small overlapping inset |
+| `photos/bride-family.jpg` | Bride Family — the bride with her parents |
+| `photos/fixing-ceremony.jpg` | Blessings Begin — left |
+| `photos/bride-seated.jpg` | Blessings Begin — right |
 | `photos/gallery-restaurant.jpg` | Gallery |
 | `photos/gallery-car.jpg` | Gallery |
 | `photos/gallery-mirror.jpg` | Gallery |
 | `photos/gallery-parrot.jpg` | Gallery |
 | `photos/gallery-casual.jpg` | Gallery |
+| `photos/gallery-families-1.jpg` | Gallery — both families |
+| `photos/gallery-families-2.jpg` | Gallery — both families |
 | `photos/closing-couple.jpg` | Closing — the full-screen portrait |
 | `venues/engagement.jpg`, `venues/nikkah.jpg`, `venues/reception.jpg` | The three venue cards (still placeholders) |
 
 Each photograph is cropped to the aspect ratio its slot needs and compressed to
-between 100 and 230 KB. If you replace one, keep it roughly the same shape —
-portraits at 4:5, the family and ceremony photographs at about 10:7 — and update
-the `width` and `height` attributes on that `<img>` in `index.html` so the page
-does not shift while it loads.
+between 85 and 230 KB. If you replace one, keep it roughly the same shape —
+portraits at 4:5, family and ceremony photographs at about 10:7 — and update the
+`width` and `height` attributes on that `<img>` in `index.html` so the page does
+not shift while it loads.
 
 The hero renders through `filter: grayscale(1)`, so a colour photograph placed
 there still appears black &amp; white.
 
-**Adding more gallery photographs:** copy one `<button class="ph" …>` block
-inside `<div class="masonry">` in `index.html` and point it at your new file.
+## The monogram
+
+The TS monogram was traced from the artwork supplied by the couple and stored as
+two transparent PNGs:
+
+| File | Colour | Used on |
+| --- | --- | --- |
+| `assets/logo-gold.png` | Champagne gold `#C7A15A` | the navigation bar, over the ivory paper |
+| `assets/logo-ivory.png` | Ivory `#FCF9F4` | the hero and the closing page, over the photographs |
+
+The same monogram is the browser tab icon and the home-screen icon
+(`favicon.png`, `assets/icon-192.png`, `assets/icon-512.png`,
+`assets/icon-maskable-512.png`, `assets/apple-touch-icon.png`) and appears on the
+WhatsApp/social share card (`assets/og-image.jpg`). Replace the two PNGs to
+change it everywhere on the page; regenerate the icons to change it in the tab.
 
 ## Editing the words
 
@@ -140,9 +156,9 @@ Lighthouse (mobile, simulated slow 4G, Chromium 141):
 
 | Performance | Accessibility | Best Practices | SEO |
 | --- | --- | --- | --- |
-| **97** | **100** | **96** | **100** |
+| **91** | **100** | **96** | **100** |
 
-FCP 0.9 s · LCP 2.6 s · TBT 0 ms · CLS 0 · Speed Index 1.0 s. The Best Practices
+FCP 0.9 s · LCP 3.5 s · TBT 0 ms · CLS 0 · Speed Index 0.9 s. The Best Practices
 score reflects one console error in the offline test environment where Google
 Fonts was unreachable; it does not occur on the live site.
 

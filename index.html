@@ -90,7 +90,9 @@
 
 <header class="nav" id="nav">
   <div class="nav__bar">
-    <a class="nav__brand" href="#hero" aria-label="T&amp;S — back to top">T<span>&amp;</span>S</a>
+    <a class="nav__brand" href="#hero" aria-label="Thawfeeq and Shini — back to top">
+      <img src="assets/logo-gold.png" alt="" width="260" height="260" decoding="async">
+    </a>
     <button class="nav__burger" id="navBurger" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="Open menu">
       <span></span><span></span><span></span>
     </button>
@@ -114,6 +116,7 @@
   <img class="hero__img" src="photos/hero-couple.jpg" alt="Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin" width="1080" height="1370" fetchpriority="high" decoding="async">
   <div class="hero__veil" aria-hidden="true"></div>
   <div class="hero__inner">
+    <img class="hero__mark" src="assets/logo-ivory.png" alt="" width="260" height="260" fetchpriority="low" decoding="async">
     <h1 class="hero__names">
       <span>Dr. M. Thawfeeq Ahamed</span>
       <em>&amp;</em>
@@ -159,18 +162,18 @@
     <figure class="frame frame--wide reveal">
       <img src="photos/groom-family.jpg" alt="The groom's family" width="1360" height="950" loading="lazy" decoding="async">
     </figure>
+    <figure class="frame frame--soft fam__inset fam__inset--a reveal">
+      <img src="photos/groom-sister.jpg" alt="The groom with his sister" width="880" height="1100" loading="lazy" decoding="async">
+    </figure>
   </div>
 </section>
 
 <!-- 5 · BRIDE FAMILY -->
 <section class="fam fam--alt" id="bride-family">
   <h2 class="display display--center reveal">Bride Family</h2>
-  <div class="fam__stage">
-    <figure class="frame frame--wide reveal">
-      <img src="photos/bride-family.jpg" alt="The bride's family" width="1360" height="950" loading="lazy" decoding="async">
-    </figure>
-    <figure class="frame frame--soft fam__inset fam__inset--a reveal">
-      <img src="photos/bride-parents.jpg" alt="The bride with her parents" width="880" height="1100" loading="lazy" decoding="async">
+  <div class="fam__stage fam__stage--tall">
+    <figure class="frame frame--arch reveal">
+      <img src="photos/bride-family.jpg" alt="The bride with her parents" width="880" height="1100" loading="lazy" decoding="async">
     </figure>
   </div>
 </section>
@@ -179,9 +182,14 @@
 <section class="bless" id="blessings">
   <h2 class="display display--center reveal">Blessings Begin</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <figure class="frame frame--wide bless__single reveal">
-    <img src="photos/fixing-ceremony.jpg" alt="The fixing ceremony" width="1360" height="950" loading="lazy" decoding="async">
-  </figure>
+  <div class="bless__pair">
+    <figure class="frame frame--wide bless__a reveal">
+      <img src="photos/fixing-ceremony.jpg" alt="The fixing ceremony" width="1360" height="950" loading="lazy" decoding="async">
+    </figure>
+    <figure class="frame frame--arch bless__b reveal">
+      <img src="photos/bride-seated.jpg" alt="The bride on the day of the fixing ceremony" width="900" height="1125" loading="lazy" decoding="async">
+    </figure>
+  </div>
 </section>
 
 <!-- 7 · COUPLE GALLERY -->
@@ -194,6 +202,8 @@
     <button class="ph reveal" type="button"><img src="photos/gallery-mirror.jpg" alt="The couple" width="900" height="1125" loading="lazy" decoding="async"></button>
     <button class="ph reveal" type="button"><img src="photos/gallery-parrot.jpg" alt="The couple" width="900" height="1125" loading="lazy" decoding="async"></button>
     <button class="ph reveal" type="button"><img src="photos/gallery-casual.jpg" alt="The couple" width="900" height="1125" loading="lazy" decoding="async"></button>
+    <button class="ph reveal" type="button"><img src="photos/gallery-families-1.jpg" alt="Both families together" width="900" height="720" loading="lazy" decoding="async"></button>
+    <button class="ph reveal" type="button"><img src="photos/gallery-families-2.jpg" alt="Both families together" width="900" height="720" loading="lazy" decoding="async"></button>
   </div>
 </section>
 
@@ -300,6 +310,7 @@
   <img class="closing__img" src="photos/closing-couple.jpg" alt="Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">
   <div class="closing__veil" aria-hidden="true"></div>
   <div class="closing__inner">
+    <img class="closing__mark" src="assets/logo-ivory.png" alt="" width="260" height="260" loading="lazy" decoding="async">
     <p class="closing__line">We look forward to celebrating with you.</p>
     <div class="closing__acts">
       <button class="icon-btn" type="button" id="shareWhatsApp" aria-label="Share on WhatsApp">

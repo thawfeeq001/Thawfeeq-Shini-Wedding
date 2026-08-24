@@ -138,8 +138,9 @@ section{position:relative;z-index:1}
   box-shadow:0 10px 30px -28px rgba(92,70,56,.8);
 }
 .nav__bar{width:min(100% - 2rem,var(--wrap));margin-inline:auto;height:60px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.nav__brand{font-family:var(--serif);font-size:1.28rem;letter-spacing:.16em;display:inline-flex;gap:.16em;align-items:baseline}
-.nav__brand span{color:var(--gold)}
+.nav__brand{display:inline-flex;align-items:center}
+.nav__brand img{width:38px;height:38px;transition:transform .5s var(--ease)}
+.nav__brand:hover img{transform:rotate(-6deg) scale(1.06)}
 .nav__menu{display:flex;gap:clamp(.9rem,2vw,1.8rem)}
 .nav__menu a{position:relative;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-70);padding:.35rem 0;transition:color .35s var(--ease)}
 .nav__menu a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:right;transition:transform .45s var(--ease)}
@@ -177,6 +178,10 @@ section{position:relative;z-index:1}
 /* transform only: a full-screen photograph is ignored by Chrome's LCP, so the
    hero type is the largest paint — fading it in from zero would delay LCP */
 @keyframes heroText{from{transform:translateY(18px)}to{transform:none}}
+.hero__mark{
+  width:clamp(64px,8vw,96px);height:auto;margin:0 auto clamp(.9rem,2.2vw,1.5rem);
+  opacity:.94;filter:drop-shadow(0 2px 18px rgba(0,0,0,.42));
+}
 .hero__names{
   font-family:var(--serif);font-weight:300;
   display:flex;flex-direction:column;align-items:center;gap:.1em;
@@ -207,13 +212,20 @@ section{position:relative;z-index:1}
 /* ---------- 4/5 · families ---------- */
 .fam__stage{position:relative;margin-top:clamp(2.2rem,5vw,3.4rem)}
 .fam__stage .frame--wide{width:min(100%,900px);margin-inline:auto}
+.fam__stage--tall .frame--arch{width:min(100%,460px);margin-inline:auto}
 .fam__inset{position:absolute;width:clamp(116px,15vw,186px);aspect-ratio:4/5;z-index:2}
 .fam__inset--a{right:3%;bottom:-9%}
 .fam__inset--b{left:3%;top:6%}
 .fam--alt .fam__inset--a{left:3%;right:auto;bottom:-9%}
 
 /* ---------- 6 · blessings ---------- */
-.bless__single{width:min(100%,940px);margin:clamp(2.4rem,5vw,3.6rem) auto 0}
+.bless__pair{
+  margin-top:clamp(2.4rem,5vw,3.6rem);
+  display:grid;grid-template-columns:1.35fr .95fr;
+  gap:clamp(.8rem,2vw,1.6rem);align-items:start;
+}
+.bless__a{aspect-ratio:10/7}
+.bless__b{margin-top:8%}
 
 /* ---------- 7 · gallery ---------- */
 .masonry{margin-top:clamp(2.2rem,5vw,3.4rem);column-count:3;column-gap:clamp(.6rem,1.6vw,1.1rem)}
@@ -328,6 +340,10 @@ section{position:relative;z-index:1}
     linear-gradient(180deg, rgba(58,42,32,.20) 0%, rgba(58,42,32,.10) 42%, rgba(58,42,32,.44) 100%);
 }
 .closing__inner{position:relative;text-align:center;padding:0 1.4rem;color:#fff}
+.closing__mark{
+  width:clamp(58px,7vw,84px);height:auto;margin:0 auto clamp(1rem,2.4vw,1.6rem);
+  opacity:.92;filter:drop-shadow(0 2px 16px rgba(0,0,0,.4));
+}
 .closing__line{
   font-family:var(--serif);font-weight:300;font-style:italic;
   font-size:clamp(1.5rem,4.2vw,2.6rem);line-height:1.35;text-shadow:0 2px 28px rgba(0,0,0,.42);
@@ -442,9 +458,13 @@ section{position:relative;z-index:1}
   .person__solo{width:min(100%,340px)}
   .fam__inset{width:clamp(104px,26vw,150px)}
   .fam__inset--a{bottom:-6%}
+  .bless__pair{grid-template-columns:1fr;gap:1.2rem}
+  .bless__b{margin-top:0;width:74%;margin-inline:auto}
   .masonry{column-count:2}
 }
 @media (max-width:640px){
+  .bless__pair{grid-template-columns:1fr;gap:1.2rem}
+  .bless__b{margin-top:0;width:74%;margin-inline:auto}
   .masonry{column-count:2}
   .lb{grid-template-columns:1fr;grid-template-rows:1fr auto;gap:1rem}
   .lb__nav--p{grid-row:2;justify-self:start;margin-left:1rem}
