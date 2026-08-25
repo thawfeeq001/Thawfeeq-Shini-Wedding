@@ -22,26 +22,44 @@ out of their way.
 
 ---
 
-## Page order (version 2.0)
+## Page order (version 2.2)
 
-1. **Hero** — coloured couple portrait, monogram, names, date
-2. **Countdown** — horizontal ivory card over a watercolour mosque
-3. *"Two hearts. One beautiful journey."*
-4. **Meet the Groom**
-5. *"The man whose kindness became home."*
-6. **Meet the Bride**
-7. *"Behind every love story stand the families who shaped it."*
-8. **Groom Family** · 9. **Bride Family**
-10. *"A day where two families became one."*
-11. **Fixing Ceremony** — masonry collage
-12. **Couple Gallery** — masonry with lightbox
-13. *"And now, we joyfully invite you to celebrate with us."*
-14. **Events** · 15. **Timeline** · 16. **RSVP**
-17. **Closing** — black &amp; white portrait, *"And so our forever begins."*
+Hero + Countdown → *"Two hearts. One beautiful journey."* → **Our Story** (couple
+gallery) → *"The man whose kindness became home."* → **Meet Thawfeeq** →
+*"The woman who made forever feel effortless."* → **Meet Shini** →
+*"Behind every love story stand the families who shaped it."* → **Groom Family** →
+**Bride Family** → *"A day where two families became one."* → **Blessings Begin** →
+*"And now, we joyfully invite you to celebrate with us."* → **Wedding Events** →
+*"The days that lead us to forever."* → **Celebration Timeline** →
+**Wedding Memories** → *"Your presence will be our greatest gift."* → **RSVP** →
+**Cinematic Farewell**
 
-**Palette** Background `#FDF9F5` · Paper `#F8F2EC` · Blush `#EFD8D8` ·
-Rose `#B76E79` · Sage `#A8B49A` · Gold `#C8A46A` · Text `#463636`
+**Palette** Ivory `#FDF9F5` · Paper `#F8F2EC` · Blush `#EFD8D8` · Rose `#B76E79` ·
+Sage `#A8B49A` · Gold `#C8A46A` · Text `#463636`
 **Type** Playfair Display (headings) · Great Vibes (names) · Inter (body)
+
+### Wedding Memories links
+
+Three constants at the top of `script.js` drive that section:
+
+```js
+const DRIVE_URL   = "";   // shared album
+const YOUTUBE_URL = "";   // live ceremony
+const QR_URL      = "";   // where assets/qr-message.png points
+const LIVE_NOTE   = "Live on 25 October";
+```
+
+Leave one empty and its card simply stays on its poster. Replace
+`assets/qr-message.png` with your real QR image.
+
+### Why images can never vanish again
+
+Every photograph lives inside an element that starts at `opacity: 0` and is
+revealed by IntersectionObserver. If a browser never delivers those callbacks -
+some iOS Safari builds do exactly that - a watchdog in the Scroll Animation
+Module reveals everything instead. `<html>` also carries no `overflow`, because
+setting it there makes the root a scroll container on iOS and stops the
+observer reporting at all.
 
 ---
 

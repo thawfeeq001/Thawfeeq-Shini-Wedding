@@ -5,7 +5,7 @@ Project : Thawfeeq & Shini Wedding
 Purpose : Stable editable baseline before redesign
 Do not delete this marker.
 
-VERSION 2.0 - luxury watercolour editorial redesign.
+VERSION 2.2 - production watercolour editorial experience.
 Built on the landmark baseline; structure and comments preserved.
 =========================================================== -->
 <html lang="en">
@@ -30,6 +30,7 @@ PHOTO ORDER REFERENCE  (developer only)
   grid grows on its own. Family photographs never appear in the couple gallery.
 -->
 
+<!-- viewport-fit=cover lets the safe-area insets work around the Dynamic Island -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thawfeeq &amp; Shini Yassmin</title>
 <meta name="description" content="Thawfeeq and Shini Yassmin. 25 October 2026, Courtallam.">
@@ -183,13 +184,28 @@ PHOTO ORDER REFERENCE  (developer only)
 </section>
 
 <!-- ===== 03. TRANSITION ===== -->
-<section class="quote" id="story">
+<section class="quote">
   <p class="quote__line reveal">Two hearts. One beautiful journey.</p>
 </section>
 
-<!-- ===== 04. MEET THE GROOM ===== -->
+<!-- ===== 04. OUR STORY =====
+     The couple gallery, in the order the moments happened. Built from
+     COUPLE_PHOTOS in script.js; tiles open the swipe/pinch viewer.
+     Family and ceremony photographs never appear here. -->
+<section class="gal" id="story">
+  <h2 class="title reveal">Our Story</h2>
+  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
+  <div class="masonry" id="galleryGrid"></div>
+</section>
+
+<!-- ===== TRANSITION ===== -->
+<section class="quote">
+  <p class="quote__line reveal">The man whose kindness became home.</p>
+</section>
+
+<!-- ===== MEET THAWFEEQ ===== -->
 <section class="person" id="groom">
-  <p class="kicker reveal">Meet the Groom</p>
+  <p class="kicker reveal">Meet Thawfeeq</p>
   <h2 class="name reveal">Thawfeeq</h2>
   <figure class="frame frame--arch person__photo reveal-right">
     <img src="photos/groom-portrait.jpg" alt="Thawfeeq" width="1000" height="1270" loading="lazy" decoding="async">
@@ -198,14 +214,14 @@ PHOTO ORDER REFERENCE  (developer only)
   <p class="person__line reveal">A surgeon by training, and the calmest person in any room.</p>
 </section>
 
-<!-- ===== 05. TRANSITION ===== -->
+<!-- ===== TRANSITION ===== -->
 <section class="quote">
-  <p class="quote__line reveal">The man whose kindness became home.</p>
+  <p class="quote__line reveal">The woman who made forever feel effortless.</p>
 </section>
 
-<!-- ===== 06. MEET THE BRIDE ===== -->
+<!-- ===== MEET SHINI ===== -->
 <section class="person person--alt" id="bride">
-  <p class="kicker reveal">Meet the Bride</p>
+  <p class="kicker reveal">Meet Shini</p>
   <h2 class="name reveal">Shini Yassmin</h2>
   <figure class="frame frame--arch person__photo reveal-left">
     <img src="photos/bride-portrait.jpg" alt="Shini Yassmin" width="1000" height="1270" loading="lazy" decoding="async">
@@ -214,12 +230,12 @@ PHOTO ORDER REFERENCE  (developer only)
   <p class="person__line reveal">A physician with a quiet strength and an easy laugh.</p>
 </section>
 
-<!-- ===== 07. TRANSITION ===== -->
+<!-- ===== TRANSITION ===== -->
 <section class="quote">
   <p class="quote__line reveal">Behind every love story stand the families who shaped it.</p>
 </section>
 
-<!-- ===== 08. GROOM FAMILY =====
+<!-- ===== GROOM FAMILY =====
      Groom-side photographs only. No couple images here. -->
 <section class="fam" id="groom-family">
   <h2 class="title reveal">Groom Family</h2>
@@ -233,7 +249,7 @@ PHOTO ORDER REFERENCE  (developer only)
   </div>
 </section>
 
-<!-- ===== 09. BRIDE FAMILY =====
+<!-- ===== BRIDE FAMILY =====
      Bride-side photographs only. -->
 <section class="fam fam--alt" id="bride-family">
   <h2 class="title reveal">Bride Family</h2>
@@ -244,88 +260,134 @@ PHOTO ORDER REFERENCE  (developer only)
   </div>
 </section>
 
-<!-- ===== 10. TRANSITION ===== -->
+<!-- ===== TRANSITION ===== -->
 <section class="quote">
   <p class="quote__line reveal">A day where two families became one.</p>
 </section>
 
-<!-- ===== 11. FIXING CEREMONY =====
+<!-- ===== BLESSINGS BEGIN =====
      Masonry collage, no captions. Rendered from FIXING_PHOTOS in script.js. -->
 <section class="fixing" id="fixing">
-  <h2 class="title reveal">Fixing Ceremony</h2>
+  <h2 class="title reveal">Blessings Begin</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
   <div class="masonry" id="fixingGrid"></div>
 </section>
 
-<!-- ===== 12. COUPLE GALLERY =====
-     Couple photographs only - never family or ceremony images.
-     Rendered from COUPLE_PHOTOS in script.js; opens the lightbox. -->
-<section class="gal" id="gallery">
-  <h2 class="title reveal">Together</h2>
-  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <div class="masonry" id="galleryGrid"></div>
-</section>
 
-<!-- ===== 13. TRANSITION ===== -->
+<!-- ===== TRANSITION ===== -->
 <section class="quote">
   <p class="quote__line reveal">And now, we joyfully invite you to celebrate with us.</p>
 </section>
 
-<!-- ===== 14. EVENTS =====
+<!-- ===== WEDDING EVENTS =====
      Three watercolour cards. Map buttons are wired by the Maps Module. -->
 <section class="ev" id="events">
   <h2 class="title reveal">Events</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
   <div class="ev__grid">
-
     <article class="ecard reveal-right">
-      <span class="ecard__icon" aria-hidden="true">
-        <svg viewBox="0 0 48 32"><circle cx="18" cy="18" r="11"/><circle cx="30" cy="18" r="11"/><path d="M18 7l-3-5h6z"/></svg>
-      </span>
+      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><path d="M12 28C12 14 22 5 36 4c1 14-8 24-24 24z"/><path d="M12 28c6-6 12-11 20-15"/></svg></span>
+      <h3 class="ecard__title">Mehendi</h3>
+      <p class="ecard__date">23 October 2026</p>
+      <p class="ecard__place"><i>Thanjavur</i></p>
+    </article>
+    <article class="ecard reveal">
+      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><path d="M14 30V6l14-4v28"/><path d="M10 30h28"/><circle cx="24" cy="17" r="1.4"/></svg></span>
+      <h3 class="ecard__title">Guests Arrival</h3>
+      <p class="ecard__date">24 October 2026</p>
+      <p class="ecard__time">4:00 PM</p>
+      <p class="ecard__place"><i>Courtallam</i></p>
+    </article>
+    <article class="ecard reveal-left">
+      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><circle cx="18" cy="18" r="11"/><circle cx="30" cy="18" r="11"/><path d="M18 7l-3-5h6z"/></svg></span>
       <h3 class="ecard__title">Engagement</h3>
       <p class="ecard__date">24 October 2026</p>
       <p class="ecard__time">7:00 PM</p>
+      <p class="ecard__place"><i>Courtallam</i></p>
     </article>
-
-    <article class="ecard reveal">
-      <span class="ecard__icon" aria-hidden="true">
-        <svg viewBox="0 0 48 32"><path d="M24 4c7 4 11 9 11 15v11H13V19c0-6 4-11 11-15z"/><path d="M8 30V17M40 30V17"/><circle cx="24" cy="2" r="1.6"/></svg>
-      </span>
+    <article class="ecard reveal-right">
+      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><path d="M24 4c7 4 11 9 11 15v11H13V19c0-6 4-11 11-15z"/><path d="M8 30V17M40 30V17"/><circle cx="24" cy="2" r="1.6"/></svg></span>
       <h3 class="ecard__title">Nikkah</h3>
       <p class="ecard__date">25 October 2026</p>
       <p class="ecard__time">11:00 AM</p>
       <p class="ecard__place">Drizzle Elite Mahal<i>Courtallam</i></p>
       <button class="pill" type="button" data-maps="nikkah">Open Maps</button>
     </article>
-
     <article class="ecard reveal-left">
-      <span class="ecard__icon" aria-hidden="true">
-        <svg viewBox="0 0 48 32"><path d="M16 3h16l-2 11a6 6 0 01-12 0z"/><path d="M24 20v9M18 29h12"/></svg>
-      </span>
+      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><path d="M16 3h16l-2 11a6 6 0 01-12 0z"/><path d="M24 20v9M18 29h12"/></svg></span>
       <h3 class="ecard__title">Reception</h3>
       <p class="ecard__date">1 November 2026</p>
       <p class="ecard__time">12:00 PM</p>
       <p class="ecard__place">Arulanandham Mahal<i>Thanjavur</i></p>
       <button class="pill" type="button" data-maps="reception">Open Maps</button>
     </article>
-
   </div>
 </section>
 
-<!-- ===== 15. TIMELINE =====
+<!-- ===== TRANSITION ===== -->
+<section class="quote">
+  <p class="quote__line reveal">The days that lead us to forever.</p>
+</section>
+
+<!-- ===== CELEBRATION TIMELINE =====
      Four dates on a gold vine connector. -->
 <section class="tl-sec" id="timeline">
   <h2 class="title reveal">Timeline</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
   <ol class="tl">
-    <li class="tl__i reveal"><span class="tl__d">23 Oct</span><span class="tl__t">Guests Arrive</span></li>
+    <li class="tl__i reveal"><span class="tl__d">23 Oct</span><span class="tl__t">Mehendi</span></li>
+    <li class="tl__i reveal"><span class="tl__d">24 Oct</span><span class="tl__t">Guests Arrival</span></li>
     <li class="tl__i reveal"><span class="tl__d">24 Oct</span><span class="tl__t">Engagement</span></li>
     <li class="tl__i reveal"><span class="tl__d">25 Oct</span><span class="tl__t">Nikkah</span></li>
     <li class="tl__i reveal"><span class="tl__d">1 Nov</span><span class="tl__t">Reception</span></li>
   </ol>
 </section>
 
-<!-- ===== 16. RSVP =====
+<!-- ===== WEDDING MEMORIES =====
+     Three cards. The Drive, YouTube and QR destinations are editable
+     constants at the top of script.js. -->
+<section class="mem" id="memories">
+  <h2 class="title reveal">Wedding Memories</h2>
+  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
+  <div class="mem__grid">
+
+    <article class="mcard reveal-right">
+      <span class="mcard__icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><path d="M4 24 12 6h8l8 18z"/><path d="M4 24h24"/><path d="M12 6l8 18"/></svg>
+      </span>
+      <h3 class="mcard__title">Shared Album</h3>
+      <p class="mcard__text">Add your photographs to our album.</p>
+      <button class="pill" type="button" id="driveBtn">Open Drive</button>
+    </article>
+
+    <article class="mcard mcard--live reveal">
+      <div class="mcard__media" id="livePoster">
+        <img src="assets/live-poster.jpg" alt="Live ceremony" width="1280" height="720" loading="lazy" decoding="async">
+        <button class="mcard__play" type="button" id="liveBtn" aria-label="Watch the live ceremony">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
+        </button>
+      </div>
+      <h3 class="mcard__title">Live Ceremony</h3>
+      <p class="mcard__text" id="liveNote">Live on 25 October</p>
+    </article>
+
+    <article class="mcard reveal-left">
+      <div class="mcard__qr">
+        <img src="assets/qr-message.png" alt="QR code to a message from the couple" width="560" height="560" loading="lazy" decoding="async">
+      </div>
+      <h3 class="mcard__title">A Special Message</h3>
+      <p class="mcard__text">Scan for a note from the two of us.</p>
+    </article>
+
+  </div>
+</section>
+
+<!-- ===== TRANSITION ===== -->
+<section class="quote">
+  <p class="quote__line reveal">Your presence will be our greatest gift.</p>
+</section>
+
+<!-- ===== RSVP =====
      Single row: name, guest stepper, send. Writes to the Google Sheet
      when SCRIPT_URL is set, and always keeps a copy in this browser. -->
 <section class="rsvp" id="rsvp">
@@ -351,7 +413,7 @@ PHOTO ORDER REFERENCE  (developer only)
   <p class="rsvp__note" id="rsvpNote" role="status" aria-live="polite"></p>
 </section>
 
-<!-- ===== 17. CLOSING =====
+<!-- ===== CINEMATIC FAREWELL =====
      Black & white portrait, full screen, overlay text only. -->
 <section class="closing" id="closing">
   <img class="closing__img" src="photos/closing-couple.jpg" alt="Thawfeeq and Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">

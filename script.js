@@ -4,7 +4,7 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.0 - luxury watercolour editorial redesign.
+   VERSION 2.2 - production watercolour editorial experience.
    ========================================================== */
 
 /* ==========================================================
@@ -19,6 +19,7 @@
      08  Maps Module
      09  Gallery Module       builds both grids, drives the lightbox
      10  RSVP Module          stepper + Google Sheet + local copy
+     10b Memories Module      album, live ceremony, QR message
      11  Music Module
      12  Share Module
      13  PWA Module
@@ -89,6 +90,14 @@
   };
 
   const SHARE_TEXT = 'Thawfeeq & Shini Yassmin — 25 October 2026, Courtallam.';
+
+  /* ---- WEDDING MEMORIES -------------------------------------------
+     Paste your own links here. Empty values simply disable the button
+     or leave the card showing its poster.                            */
+  const DRIVE_URL   = "";   /* shared photo album, e.g. a Drive folder link */
+  const YOUTUBE_URL = "";   /* live ceremony, e.g. https://youtu.be/xxxxxxxxxxx */
+  const QR_URL      = "";   /* where assets/qr-message.png should point       */
+  const LIVE_NOTE   = "Live on 25 October";
 
   // ==================================
   // 02 · Utilities
@@ -174,6 +183,7 @@
      No bounce, no scroll-linked layout work. */
 
   let revealObserver = null;
+  let observerReported = false;   /* proof the browser actually delivers callbacks */
 
   function observeReveals(root) {
     const items = $$('.reveal, .reveal-left, .reveal-right, .tl__i', root || document);
@@ -183,6 +193,7 @@
     }
     if (!revealObserver) {
       revealObserver = new IntersectionObserver(entries => {
+        observerReported = true;
         entries.forEach(entry => {
           if (!entry.isIntersecting) return;
           const el = entry.target;
@@ -197,7 +208,24 @@
     items.forEach(el => revealObserver.observe(el));
   }
 
-  function initReveal() { observeReveals(document); }
+  /* Safety net. Content must never be permanently invisible. If the browser
+     has not delivered a single observer callback - some iOS Safari builds do
+     exactly that - reveal everything, and keep watching so that grids built
+     later are caught too. */
+  function revealWatchdog(attempt) {
+    if (observerReported || attempt > 6) return;
+    setTimeout(function () {
+      if (observerReported) return;
+      $$('.reveal:not(.is-in), .reveal-left:not(.is-in), .reveal-right:not(.is-in)')
+        .forEach(el => el.classList.add('is-in'));
+      revealWatchdog(attempt + 1);
+    }, 1600);
+  }
+
+  function initReveal() {
+    observeReveals(document);
+    revealWatchdog(0);
+  }
 
   // ==================================
   // 04 · Navigation Module
@@ -368,10 +396,11 @@
       const d = Math.floor(diff / 86400000); diff -= d * 86400000;
       const h = Math.floor(diff / 3600000);  diff -= h * 3600000;
       const m = Math.floor(diff / 60000);    diff -= m * 60000;
-      paint(out.d, String(d).padStart(3, '0'));
-      paint(out.h, String(h).padStart(2, '0'));
-      paint(out.m, String(m).padStart(2, '0'));
-      paint(out.s, String(Math.floor(diff / 1000)).padStart(2, '0'));
+      /* plain numerals - 5 rather than 05 */
+      paint(out.d, String(d));
+      paint(out.h, String(h));
+      paint(out.m, String(m));
+      paint(out.s, String(Math.floor(diff / 1000)));
       return true;
     }
 
@@ -404,32 +433,54 @@
      the configuration block, then wires the couple tiles to the viewer.
      Arrow keys and swipes move between photographs. */
 
-  function initGallery() {
-    const fixingGrid = $('#fixingGrid');
-    const galleryGrid = $('#galleryGrid');
-
-    if (fixingGrid) {
-      FIXING_PHOTOS.forEach(file => fixingGrid.appendChild(buildTile(file, 'The fixing ceremony', false)));
-      observeReveals(fixingGrid);
+  /* Build a grid only when the reader is close to it. Nothing in these
+     sections exists as an <img> during the first paint, so none of it
+     competes with the hero for bandwidth. */
+  function buildGridWhenNear(grid, files, clickable, alt, onBuilt) {
+    let built = false;
+    function build() {
+      if (built || !grid) return;
+      built = true;
+      files.forEach(file => grid.appendChild(buildTile(file, alt, clickable)));
+      observeReveals(grid);
+      /* Anything already level with or above the fold is shown at once -
+         the observer only reports elements that are still to be reached. */
+      $$('.ph', grid).forEach(tile => {
+        if (tile.getBoundingClientRect().top < window.innerHeight) tile.classList.add('is-in');
+      });
+      if (onBuilt) onBuilt();
     }
-    if (!galleryGrid) return;
+    if (!grid) return;
+    if (!('IntersectionObserver' in window)) { build(); return; }
+    const io = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) { io.disconnect(); build(); }
+    }, { rootMargin: '600px 0px' });
+    io.observe(grid);
+    setTimeout(build, 4000);   /* safety net - never leave a grid empty */
+  }
 
-    COUPLE_PHOTOS.forEach(file => galleryGrid.appendChild(buildTile(file, 'Thawfeeq and Shini Yassmin', true)));
-    observeReveals(galleryGrid);
+  function initGallery() {
+    buildGridWhenNear($('#fixingGrid'), FIXING_PHOTOS, false, 'The fixing ceremony');
 
+    const galleryGrid = $('#galleryGrid');
     const lb = $('#lightbox');
     const img = $('#lbImg');
     const cap = $('#lbCap');
-    if (!lb || !img) return;
+    if (!galleryGrid) return;
 
-    const tiles = $$('.ph', galleryGrid);
-    let index = 0;
+    let index = 0, scale = 1;
+
+    buildGridWhenNear(galleryGrid, COUPLE_PHOTOS, true, 'Thawfeeq and Shini Yassmin', () => {
+      $$('.ph', galleryGrid).forEach((btn, i) => on(btn, 'click', () => { show(i); viewer.open(); }));
+    });
+
+    if (!lb || !img) return;
 
     const viewer = createOverlay(lb, {
       delay: 380,
       restoreFocus: true,
       focus: () => $('#lbClose'),
-      onClosed: () => { img.src = ''; }
+      onClosed: () => { img.src = ''; img.style.transform = ''; scale = 1; }
     });
 
     const preload = i => {
@@ -446,7 +497,6 @@
       preload(index - 1);
     }
 
-    tiles.forEach((btn, i) => on(btn, 'click', () => { show(i); viewer.open(); }));
     on($('#lbClose'), 'click', viewer.close);
     on($('#lbPrev'), 'click', () => show(index - 1));
     on($('#lbNext'), 'click', () => show(index + 1));
@@ -456,15 +506,36 @@
       else if (e.key === 'ArrowRight') show(index + 1);
     });
 
+    /* Swipe between photographs, and pinch to zoom the one on screen. */
     let sx = 0, sy = 0, swiping = false;
-    on(lb, 'touchstart', e => { const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; swiping = true; }, { passive: true });
+    let startDist = 0, startScale = 1;
+
+    const setScale = v => {
+      scale = Math.max(1, Math.min(4, v));
+      img.style.transform = scale === 1 ? '' : 'scale(' + scale.toFixed(3) + ')';
+    };
+    const resetZoom = () => setScale(1);
+    const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+
+    on(lb, 'touchstart', e => {
+      if (e.touches.length === 2) { swiping = false; startDist = dist(e.touches); startScale = scale; }
+      else if (e.touches.length === 1 && scale === 1) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true; }
+    }, { passive: true });
+
+    on(lb, 'touchmove', e => {
+      if (e.touches.length === 2 && startDist) { e.preventDefault(); setScale(startScale * (dist(e.touches) / startDist)); }
+    }, { passive: false });
+
     on(lb, 'touchend', e => {
+      if (e.touches.length === 0) startDist = 0;
       if (!swiping) return;
       swiping = false;
       const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
-      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1));
-      else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) viewer.close();
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) { resetZoom(); show(index + (dx < 0 ? 1 : -1)); }
+      else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) { resetZoom(); viewer.close(); }
     }, { passive: true });
+
+    on(lb, 'dblclick', resetZoom);
   }
 
   // ==================================
@@ -549,6 +620,51 @@
         .catch(() => { /* the reply is safe in localStorage either way */ })
         .finally(() => button.classList.remove('is-busy'));
     });
+  }
+
+  // ==================================
+  // 10b · Memories Module
+  // ==================================
+  /* Shared album, the live ceremony card and the QR message. The live
+     card only loads the YouTube iframe once it is asked for, so the
+     player never costs anything on first paint. */
+
+  function initMemories() {
+    const drive = $('#driveBtn');
+    if (drive) {
+      if (DRIVE_URL) {
+        on(drive, 'click', () => window.open(DRIVE_URL, '_blank', 'noopener,noreferrer'));
+      } else {
+        drive.disabled = true;
+        drive.title = 'Add DRIVE_URL in script.js';
+      }
+    }
+
+    const note = $('#liveNote');
+    if (note && LIVE_NOTE) note.textContent = LIVE_NOTE;
+
+    const live = $('#liveBtn');
+    const poster = $('#livePoster');
+    if (live && poster) {
+      on(live, 'click', () => {
+        if (!YOUTUBE_URL) { toast('The live link will be added closer to the day.'); return; }
+        const id = (YOUTUBE_URL.match(/(?:v=|youtu\.be\/|embed\/|live\/)([\w-]{6,})/) || [])[1];
+        if (!id) { window.open(YOUTUBE_URL, '_blank', 'noopener,noreferrer'); return; }
+        const frame = document.createElement('iframe');
+        frame.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
+        frame.title = 'Live ceremony';
+        frame.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
+        frame.allowFullscreen = true;
+        poster.innerHTML = '';
+        poster.appendChild(frame);
+      });
+    }
+
+    const qr = $('.mcard__qr');
+    if (qr && QR_URL) {
+      qr.style.cursor = 'pointer';
+      on(qr, 'click', () => window.open(QR_URL, '_blank', 'noopener,noreferrer'));
+    }
   }
 
   // ==================================
@@ -728,6 +844,7 @@
     initCountdown();
     initMaps();
     initRsvp();
+    initMemories();
     initMusic();
     initShare();
     initPwa();
