@@ -10,11 +10,24 @@ Do not delete this marker.
 A luxury editorial wedding website. Photographs carry the story; the type stays
 out of their way.
 
+**Version 2.4.** Portrait phones keep the stacked reading experience; every
+landscape viewport — a phone turned sideways, an iPad, a desktop — switches to
+a split screen, automatically, on rotation. Every photograph is WebP under
+`images/`, named for what it is. One viewer serves the whole page, with pinch
+to 4×, drag, double-tap and swipe.
+
+| Branch | What it holds |
+| --- | --- |
+| `main` | the live site |
+| `v2.3` | archived — iOS hardening, reversible reveals, the storytelling chapter |
+| `v2.2` | archived — the watercolour editorial build |
+| `landmark-v1.0` | the original clean baseline |
+
 **Dr. M. Thawfeeq Ahamed**, MS (General Surgery) &nbsp;·&nbsp; **Dr. S. Shini Yassmin**, MD (General Medicine)
 
 | Event | When | Where |
 | --- | --- | --- |
-| Engagement | 24 October 2026 · 7:00 PM | — |
+| Engagement | 24 October 2026 · 7:00 PM | Drizzle Elite Mahal, Courtallam |
 | Nikah | 25 October 2026 · 11:00 AM | Drizzle Elite Mahal, Courtallam |
 | Reception | 1 November 2026 · 12:00 PM | Arulanandham Mahal, Thanjavur |
 
@@ -22,44 +35,15 @@ out of their way.
 
 ---
 
-## Page order (version 2.2)
+## Page order (version 2.4)
 
-Hero + Countdown → *"Two hearts. One beautiful journey."* → **Our Story** (couple
-gallery) → *"The man whose kindness became home."* → **Meet Thawfeeq** →
-*"The woman who made forever feel effortless."* → **Meet Shini** →
-*"Behind every love story stand the families who shaped it."* → **Groom Family** →
-**Bride Family** → *"A day where two families became one."* → **Blessings Begin** →
-*"And now, we joyfully invite you to celebrate with us."* → **Wedding Events** →
-*"The days that lead us to forever."* → **Celebration Timeline** →
-**Wedding Memories** → *"Your presence will be our greatest gift."* → **RSVP** →
-**Cinematic Farewell**
+Home (logo, groom's name, names, countdown) → **Groom &amp; Bride** on one split
+screen → **Groom Family &amp; Bride Family** on the next → **Our Story** →
+**Family Memories** → **Events** → Timeline → **Wishes &amp; RSVP** → Farewell.
 
-**Palette** Ivory `#FDF9F5` · Paper `#F8F2EC` · Blush `#EFD8D8` · Rose `#B76E79` ·
-Sage `#A8B49A` · Gold `#C8A46A` · Text `#463636`
-**Type** Playfair Display (headings) · Great Vibes (names) · Inter (body)
-
-### Wedding Memories links
-
-Three constants at the top of `script.js` drive that section:
-
-```js
-const DRIVE_URL   = "";   // shared album
-const YOUTUBE_URL = "";   // live ceremony
-const QR_URL      = "";   // where assets/qr-message.png points
-const LIVE_NOTE   = "Live on 25 October";
-```
-
-Leave one empty and its card simply stays on its poster. Replace
-`assets/qr-message.png` with your real QR image.
-
-### Why images can never vanish again
-
-Every photograph lives inside an element that starts at `opacity: 0` and is
-revealed by IntersectionObserver. If a browser never delivers those callbacks -
-some iOS Safari builds do exactly that - a watchdog in the Scroll Animation
-Module reveals everything instead. `<html>` also carries no `overflow`, because
-setting it there makes the root a scroll container on iOS and stops the
-observer reporting at all.
+Our Story deliberately follows both family chapters, and holds only
+photographs of the two of them together. Anything with an extra person in the
+frame lives in Family Memories.
 
 ---
 
@@ -111,34 +95,55 @@ git checkout -b redesign-v2 landmark-v1.0
 
 ## Which photo goes where
 
-| File | Where it appears |
-| --- | --- |
-| `photos/hero-couple.jpg` | Hero — the coloured studio portrait |
-| `photos/groom-portrait.jpg` | Meet the Groom |
-| `photos/bride-portrait.jpg` | Meet the Bride |
-| `photos/groom-family.jpg` + `photos/groom-sister.jpg` | Groom Family |
-| `photos/bride-family.jpg` | Bride Family |
-| `photos/fixing-*.jpg`, `photos/bride-seated.jpg` | Fixing Ceremony collage (9) |
-| `photos/gallery-*.jpg` | Couple Gallery (12) |
-| `photos/closing-couple.jpg` | Closing — the black &amp; white portrait |
-| `venues/*.jpg` | not used by version 2.0 |
+Every photograph is WebP and lives under `images/`, in a folder named for the
+part of the page it belongs to, under a filename that says what it is.
+
+| Folder | Files | Where it appears |
+| --- | --- | --- |
+| `images/hero/` | `hero-couple-main.webp` | Home — the coloured studio portrait |
+| | `farewell-couple-bw.webp` | Farewell — the black &amp; white portrait |
+| `images/groom/` | `groom-portrait-1.webp` | Groom, left half of the split screen |
+| `images/bride/` | `bride-portrait-1.webp`, `bride-at-dinner-1.webp` | Bride, right half |
+| `images/family/` | `groom-family-group-1.webp`, `groom-with-sister-1.webp` | Groom Family |
+| | `bride-family-group-1.webp` | Bride Family |
+| `images/story/` | `story-couple-*.webp` (12) | Our Story — **only** the two of them together |
+| `images/gallery/` | `gallery-family-*.webp` (11) | Family Memories — every frame with extra people |
+| `images/events/` | `event-engagement/-wedding/-reception.webp` | the three event cards |
+| `images/qr/` | `engagement-/wedding-/reception-location.png` | the venue QR codes |
+
+QR codes stay PNG on purpose. A lossy codec smears the module edges and costs
+scans; the photographs have no such constraint, so they are all WebP — roughly
+a third smaller than the JPEGs they replaced, at the same size on screen.
 
 ### Adding or removing photographs
 
-The two grids are built in JavaScript from lists at the top of `script.js`, so
-no count is written into the HTML — add a filename and the grid grows:
+Our Story is written directly into `index.html`, because the prose has to sit
+between the pictures. Family Memories is built in JavaScript from one list at
+the top of `script.js`, so no count is written into the HTML — add a filename
+and the grid grows:
 
 ```js
-const FIXING_PHOTOS = [ 'fixing-ceremony.jpg', … ];
-const COUPLE_PHOTOS = [ 'gallery-selfie.jpg', … ];
+const FAMILY_DIR = 'images/gallery/';
+const FAMILY_PHOTOS = [
+  { file: 'gallery-family-fixing-ceremony.webp', cap: 'The fixing ceremony' },
+  …
+];
 ```
 
-Keep the three groups apart: family photographs never go in `COUPLE_PHOTOS`,
-and couple photographs never go in `FIXING_PHOTOS`.
+Keep the two groups apart: a photograph with anybody else in the frame belongs
+in Family Memories, never in Our Story.
 
 > A page served from GitHub Pages cannot read its own folder — there is no
-> server to ask for a directory listing — so these lists are the manifest.
-> Drop the file into `photos/` and add its name here; that is the whole step.
+> server to ask for a directory listing — so this list is the manifest. Drop
+> the file into `images/gallery/` and add its name here; that is the whole step.
+
+### The one viewer
+
+Any element carrying `data-lb="<group>"` opens the photo viewer, and the group
+name decides which pictures it can page through. Clicks are delegated from the
+document, so a tile built minutes later needs no wiring. The viewer supports
+arrows, the keyboard, swipe, pinch to 4×, drag while zoomed, double-tap and a
+thumbnail strip; the zoom resets whenever the photograph changes.
 
 ---
 

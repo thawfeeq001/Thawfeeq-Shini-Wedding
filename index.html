@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <!-- ==========================================================
 LANDMARK VERSION 1.0 - stable editable baseline. Do not delete.
-VERSION 2.3 - iOS-hardened editorial experience.
+VERSION 2.4 - renamed image library, split-screen landscape layout,
+gallery 2.0 with pinch zoom, three-field RSVP, three event cards.
 Order: Home, Groom, Groom Family, Bride, Bride Family,
        Our Story, Gallery, Events, Wishes, Farewell.
 =========================================================== -->
@@ -11,22 +12,26 @@ Order: Home, Groom, Groom Family, Bride, Bride Family,
 <meta charset="utf-8">
 
 <!--
-PHOTO ORDER REFERENCE  (developer only)
+IMAGE LIBRARY  (developer only)
 
-  HERO             photos/hero-couple.jpg        coloured studio portrait
-  GROOM            photos/groom-portrait.jpg
-  GROOM FAMILY     photos/groom-family.jpg + photos/groom-sister.jpg
-  BRIDE            photos/bride-portrait.jpg + photos/gallery-dinner.jpg
-  BRIDE FAMILY     photos/bride-family.jpg
-  OUR STORY        photos/gallery-*.jpg   ONLY the bride and groom together
-                   (12 frames, woven between the narrative paragraphs)
-  FAMILY MEMORIES  photos/fixing-*.jpg, bride-seated, gallery-restaurant,
-                   gallery-friends - every frame with extra people in it
-  FAREWELL         photos/closing-couple.jpg     black & white portrait
+  Every photograph is WebP and lives under images/, named for what it is.
+  QR codes stay PNG - a lossy codec would cost them scans.
+
+    images/hero/      hero-couple-main, farewell-couple-bw
+    images/groom/     groom-portrait-1
+    images/bride/     bride-portrait-1, bride-at-dinner-1
+    images/family/    groom-family-group-1, groom-with-sister-1,
+                      bride-family-group-1
+    images/story/     story-couple-*      ONLY the two of them together
+    images/gallery/   gallery-family-*    every frame with extra people
+    images/events/    event-engagement, event-wedding, event-reception
+    images/qr/        engagement-location, wedding-location,
+                      reception-location            (PNG, scannable)
 
   Family photographs never appear inside Our Story. The Family Memories
   grid is built from FAMILY_PHOTOS at the top of script.js.
 -->
+
 
 <!-- viewport-fit=cover lets the safe-area insets work around the Dynamic Island -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -61,7 +66,7 @@ PHOTO ORDER REFERENCE  (developer only)
 <meta name="twitter:image" content="https://thawfeeq001.github.io/Thawfeeq-Shini-Wedding/assets/og-image.jpg">
 
 <!-- Hero image is the only preload; every other photograph is lazy. -->
-<link rel="preload" as="image" href="photos/hero-couple.jpg" fetchpriority="high">
+<link rel="preload" as="image" href="images/hero/hero-couple-main.webp" fetchpriority="high" type="image/webp">
 <link rel="stylesheet" href="style.css">
 
 <!-- Reveal animations are opt-in. The stylesheet only hides an element while
@@ -149,10 +154,8 @@ PHOTO ORDER REFERENCE  (developer only)
   <img class="sidenav__mark" src="assets/logo-gold.png" alt="" width="260" height="260" loading="lazy" decoding="async">
   <ul class="sidenav__list">
     <li><a href="#hero">Home</a></li>
-    <li><a href="#groom">Groom</a></li>
-    <li><a href="#groom-family">Groom Family</a></li>
-    <li><a href="#bride">Bride</a></li>
-    <li><a href="#bride-family">Bride Family</a></li>
+    <li><a href="#groom">Groom &amp; Bride</a></li>
+    <li><a href="#groom-family">Families</a></li>
     <li><a href="#story">Our Story</a></li>
     <li><a href="#gallery">Gallery</a></li>
     <li><a href="#events">Events</a></li>
@@ -172,7 +175,7 @@ PHOTO ORDER REFERENCE  (developer only)
      in Playfair Display. The photograph is nudged left with
      object-position so both faces sit the same distance from the edges. -->
 <section class="hero" id="hero">
-  <img class="hero__img" src="photos/hero-couple.jpg" alt="Thawfeeq Ahamed and Shini Yassmin" width="1080" height="1370" fetchpriority="high" decoding="async">
+  <img class="hero__img" src="images/hero/hero-couple-main.webp" alt="Thawfeeq Ahamed and Shini Yassmin" width="1080" height="1370" fetchpriority="high" decoding="async">
   <div class="hero__wash" aria-hidden="true"></div>
 
   <div class="hero__head">
@@ -206,70 +209,83 @@ PHOTO ORDER REFERENCE  (developer only)
 
 <!-- ===== TRANSITION ===== -->
 <section class="quote">
-  <p class="quote__line reveal">The man whose kindness became home.</p>
+  <p class="quote__line reveal">Two people, two families, one beginning.</p>
 </section>
 
-<!-- ===== 02. GROOM ===== -->
-<section class="person" id="groom">
-  <p class="kicker reveal">Meet the Groom</p>
-  <h2 class="name reveal">Thawfeeq Ahamed</h2>
-  <figure class="frame frame--arch person__photo reveal-right">
-    <img src="photos/groom-portrait.jpg" alt="Thawfeeq Ahamed" width="1000" height="1270" loading="lazy" decoding="async">
-  </figure>
-  <!-- one short sentence - edit freely -->
-  <p class="person__line reveal">A surgeon by training, and the calmest person in any room.</p>
-</section>
+<!-- ===== 02+04. GROOM AND BRIDE =====
+     One screen, split down the middle from 900px up (and on any phone
+     held sideways). Both panels are the same grid template, so the
+     portraits, the names and the sentences line up exactly. On a
+     portrait phone the same markup simply stacks. -->
+<section class="duo" id="groom">
+  <div class="duo__grid">
 
-<!-- ===== TRANSITION ===== -->
-<section class="quote">
-  <p class="quote__line reveal">Raised by the hands that taught him gentleness.</p>
-</section>
+    <article class="duo__side" id="groom-side">
+      <p class="kicker reveal">Meet the Groom</p>
+      <h2 class="name reveal">Thawfeeq Ahamed</h2>
+      <div class="duo__stage">
+        <figure class="frame frame--arch duo__photo reveal-right">
+          <img src="images/groom/groom-portrait-1.webp" alt="Thawfeeq Ahamed" width="1000" height="1270" loading="lazy" decoding="async">
+        </figure>
+      </div>
+      <!-- one short sentence - edit freely -->
+      <p class="duo__line reveal">A surgeon by training, and the calmest person in any room.</p>
+    </article>
 
-<!-- ===== 03. GROOM FAMILY =====
-     Groom-side photographs only. No couple images here. -->
-<section class="fam" id="groom-family">
-  <h2 class="title reveal">Groom Family</h2>
-  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <div class="fam__stage">
-    <figure class="frame frame--wide reveal">
-      <img src="photos/groom-family.jpg" alt="The groom's family" width="1360" height="950" loading="lazy" decoding="async">
-    </figure>
-    <figure class="frame frame--soft fam__inset reveal-right">
-      <img src="photos/groom-sister.jpg" alt="Thawfeeq with his sister" width="880" height="1100" loading="lazy" decoding="async">
-    </figure>
+    <article class="duo__side" id="bride">
+      <p class="kicker reveal">Meet the Bride</p>
+      <h2 class="name reveal">Shini Yassmin</h2>
+      <div class="duo__stage">
+        <figure class="frame frame--arch duo__photo reveal-left">
+          <img src="images/bride/bride-portrait-1.webp" alt="Shini Yassmin" width="1000" height="1270" loading="lazy" decoding="async">
+        </figure>
+        <!-- absolutely placed, so it costs the panel no height and the two
+             sides keep identical row heights -->
+        <figure class="frame frame--soft duo__inset reveal-right">
+          <img src="images/bride/bride-at-dinner-1.webp" alt="Shini Yassmin" width="900" height="720" loading="lazy" decoding="async">
+        </figure>
+      </div>
+      <!-- one short sentence - edit freely -->
+      <p class="duo__line reveal">A physician with a quiet strength and an easy laugh.</p>
+    </article>
+
   </div>
 </section>
 
 <!-- ===== TRANSITION ===== -->
 <section class="quote">
-  <p class="quote__line reveal">The woman who made forever feel effortless.</p>
+  <p class="quote__line reveal">Behind every love story stand the families who shaped it.</p>
 </section>
 
-<!-- ===== 04. BRIDE ===== -->
-<section class="person person--alt" id="bride">
-  <p class="kicker reveal">Meet the Bride</p>
-  <h2 class="name reveal">Shini Yassmin</h2>
-  <figure class="frame frame--arch person__photo reveal-left">
-    <img src="photos/bride-portrait.jpg" alt="Shini Yassmin" width="1000" height="1270" loading="lazy" decoding="async">
-  </figure>
-  <!-- one short sentence - edit freely -->
-  <p class="person__line reveal">A physician with a quiet strength and an easy laugh.</p>
-</section>
-
-<!-- ===== TRANSITION ===== -->
-<section class="quote">
-  <p class="quote__line reveal">And the family who never let her walk alone.</p>
-</section>
-
-<!-- ===== 05. BRIDE FAMILY =====
-     Bride-side photographs only. -->
-<section class="fam fam--alt" id="bride-family">
-  <h2 class="title reveal">Bride Family</h2>
+<!-- ===== 03+05. THE TWO FAMILIES =====
+     The same split screen, so both sides of the family sit together on
+     one screen instead of one scrolling past the other. -->
+<section class="duo duo--fam" id="groom-family">
+  <h2 class="title reveal">Our Families</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <div class="fam__stage fam__stage--tall">
-    <figure class="frame frame--arch reveal">
-      <img src="photos/bride-family.jpg" alt="Shini Yassmin with her parents" width="880" height="1100" loading="lazy" decoding="async">
-    </figure>
+  <div class="duo__grid">
+
+    <article class="duo__side">
+      <p class="kicker reveal">Groom Family</p>
+      <div class="fam__stage">
+        <figure class="frame frame--wide reveal">
+          <img src="images/family/groom-family-group-1.webp" alt="The groom's family" width="1360" height="950" loading="lazy" decoding="async">
+        </figure>
+        <figure class="frame frame--soft fam__inset reveal-right">
+          <img src="images/family/groom-with-sister-1.webp" alt="Thawfeeq with his sister" width="880" height="1100" loading="lazy" decoding="async">
+        </figure>
+      </div>
+    </article>
+
+    <article class="duo__side" id="bride-family">
+      <p class="kicker reveal">Bride Family</p>
+      <div class="fam__stage fam__stage--tall">
+        <figure class="frame frame--arch reveal">
+          <img src="images/family/bride-family-group-1.webp" alt="Shini Yassmin with her parents" width="880" height="1100" loading="lazy" decoding="async">
+        </figure>
+      </div>
+    </article>
+
   </div>
 </section>
 
@@ -295,8 +311,8 @@ PHOTO ORDER REFERENCE  (developer only)
   </p>
 
   <figure class="story__solo reveal">
-    <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-selfie.jpg" data-cap="The first photograph of us">
-      <img src="photos/gallery-selfie.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+    <button class="ph ph--frame" type="button" data-lb="story" data-cap="The first photograph of us">
+      <img src="images/story/story-couple-first-selfie.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
     </button>
     <figcaption class="story__cap">The first photograph of us</figcaption>
   </figure>
@@ -310,13 +326,13 @@ PHOTO ORDER REFERENCE  (developer only)
 
   <div class="story__pair">
     <figure class="reveal-right">
-      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-car.jpg" data-cap="Somewhere on the road">
-        <img src="photos/gallery-car.jpg" alt="Thawfeeq and Shini Yassmin on a drive" width="900" height="1125" loading="lazy" decoding="async">
+      <button class="ph ph--frame" type="button" data-lb="story" data-cap="Somewhere on the road">
+        <img src="images/story/story-couple-road-trip.webp" alt="Thawfeeq and Shini Yassmin on a drive" width="900" height="1125" loading="lazy" decoding="async">
       </button>
     </figure>
     <figure class="reveal-left">
-      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-night-drive.jpg" data-cap="The long way home">
-        <img src="photos/gallery-night-drive.jpg" alt="Thawfeeq and Shini Yassmin on an evening drive" width="1200" height="900" loading="lazy" decoding="async">
+      <button class="ph ph--frame" type="button" data-lb="story" data-cap="The long way home">
+        <img src="images/story/story-couple-night-drive.webp" alt="Thawfeeq and Shini Yassmin on an evening drive" width="1200" height="900" loading="lazy" decoding="async">
       </button>
     </figure>
   </div>
@@ -329,8 +345,8 @@ PHOTO ORDER REFERENCE  (developer only)
   </p>
 
   <figure class="story__wide reveal">
-    <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-cafe.jpg" data-cap="Our corner table">
-      <img src="photos/gallery-cafe.jpg" alt="Thawfeeq and Shini Yassmin at a cafe" width="900" height="1125" loading="lazy" decoding="async">
+    <button class="ph ph--frame" type="button" data-lb="story" data-cap="Our corner table">
+      <img src="images/story/story-couple-cafe-table.webp" alt="Thawfeeq and Shini Yassmin at a cafe" width="900" height="1125" loading="lazy" decoding="async">
     </button>
     <figcaption class="story__cap">Our corner table</figcaption>
   </figure>
@@ -344,13 +360,13 @@ PHOTO ORDER REFERENCE  (developer only)
 
   <div class="story__pair">
     <figure class="reveal-right">
-      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-mirror.jpg" data-cap="Caught in a mirror">
-        <img src="photos/gallery-mirror.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+      <button class="ph ph--frame" type="button" data-lb="story" data-cap="Caught in a mirror">
+        <img src="images/story/story-couple-mirror.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
       </button>
     </figure>
     <figure class="reveal-left">
-      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-parrot.jpg" data-cap="A day out together">
-        <img src="photos/gallery-parrot.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+      <button class="ph ph--frame" type="button" data-lb="story" data-cap="A day out together">
+        <img src="images/story/story-couple-day-out.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
       </button>
     </figure>
   </div>
@@ -363,8 +379,8 @@ PHOTO ORDER REFERENCE  (developer only)
   </p>
 
   <figure class="story__wide reveal">
-    <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-hills.jpg" data-cap="Evening at the hills">
-      <img src="photos/gallery-hills.jpg" alt="Thawfeeq and Shini Yassmin in the hills at sunset" width="1100" height="1467" loading="lazy" decoding="async">
+    <button class="ph ph--frame" type="button" data-lb="story" data-cap="Evening at the hills">
+      <img src="images/story/story-couple-hills-sunset.webp" alt="Thawfeeq and Shini Yassmin in the hills at sunset" width="1100" height="1467" loading="lazy" decoding="async">
     </button>
     <figcaption class="story__cap">Evening at the hills</figcaption>
   </figure>
@@ -378,13 +394,13 @@ PHOTO ORDER REFERENCE  (developer only)
 
   <div class="story__pair">
     <figure class="reveal-right">
-      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-casual.jpg" data-cap="An ordinary, perfect afternoon">
-        <img src="photos/gallery-casual.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+      <button class="ph ph--frame" type="button" data-lb="story" data-cap="An ordinary, perfect afternoon">
+        <img src="images/story/story-couple-afternoon.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
       </button>
     </figure>
     <figure class="reveal-left">
-      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-together.jpg" data-cap="Just the two of us">
-        <img src="photos/gallery-together.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1200" loading="lazy" decoding="async">
+      <button class="ph ph--frame" type="button" data-lb="story" data-cap="Just the two of us">
+        <img src="images/story/story-couple-close.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1200" loading="lazy" decoding="async">
       </button>
     </figure>
   </div>
@@ -397,8 +413,8 @@ PHOTO ORDER REFERENCE  (developer only)
   </p>
 
   <figure class="story__wide reveal">
-    <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-red.jpg" data-cap="Dressed for the occasion">
-      <img src="photos/gallery-red.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+    <button class="ph ph--frame" type="button" data-lb="story" data-cap="Dressed for the occasion">
+      <img src="images/story/story-couple-in-red.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
     </button>
     <figcaption class="story__cap">Dressed for the occasion</figcaption>
   </figure>
@@ -412,13 +428,13 @@ PHOTO ORDER REFERENCE  (developer only)
 
   <div class="story__pair">
     <figure class="reveal-right">
-      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-boat-1.jpg" data-cap="On the water">
-        <img src="photos/gallery-boat-1.jpg" alt="Thawfeeq and Shini Yassmin on the water" width="900" height="1125" loading="lazy" decoding="async">
+      <button class="ph ph--frame" type="button" data-lb="story" data-cap="On the water">
+        <img src="images/story/story-couple-on-the-water.webp" alt="Thawfeeq and Shini Yassmin on the water" width="900" height="1125" loading="lazy" decoding="async">
       </button>
     </figure>
     <figure class="reveal-left">
-      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-boat-2.jpg" data-cap="Golden hour">
-        <img src="photos/gallery-boat-2.jpg" alt="Thawfeeq and Shini Yassmin on the water" width="900" height="1125" loading="lazy" decoding="async">
+      <button class="ph ph--frame" type="button" data-lb="story" data-cap="Golden hour">
+        <img src="images/story/story-couple-golden-hour.webp" alt="Thawfeeq and Shini Yassmin on the water" width="900" height="1125" loading="lazy" decoding="async">
       </button>
     </figure>
   </div>
@@ -451,101 +467,87 @@ PHOTO ORDER REFERENCE  (developer only)
 </section>
 
 <!-- ===== 08. EVENTS =====
-     Five watercolour cards. Map buttons are wired by the Maps Module. -->
+     Three cards: Engagement, Wedding, Reception. Each carries its own
+     photograph, the date and time, the venue and a scannable Google Maps
+     QR code. The QR codes are the ones printed on the invitation - the
+     Maps button opens the same pin for anybody reading on the phone that
+     is showing the code. -->
 <section class="ev" id="events">
   <h2 class="title reveal">Events</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
   <div class="ev__grid">
+
     <article class="ecard reveal-right">
-      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><path d="M12 28C12 14 22 5 36 4c1 14-8 24-24 24z"/><path d="M12 28c6-6 12-11 20-15"/></svg></span>
-      <h3 class="ecard__title">Mehendi</h3>
-      <p class="ecard__date">23 October 2026</p>
-      <p class="ecard__place"><i>Thanjavur</i></p>
+      <div class="ecard__art">
+        <img src="images/events/event-engagement.webp" alt="Engagement" width="1200" height="750" loading="lazy" decoding="async">
+      </div>
+      <div class="ecard__body">
+        <h3 class="ecard__title">Engagement</h3>
+        <p class="ecard__when">24 October 2026 <span>7:00 PM</span></p>
+        <p class="ecard__place">Drizzle Elite Mahal<i>Ilanji, Courtallam</i></p>
+        <figure class="ecard__qr">
+          <button class="qr-btn" type="button" data-maps="engagement" aria-label="Open the engagement venue in Google Maps">
+            <img src="images/qr/engagement-location.png" alt="QR code for the engagement venue" width="630" height="630" loading="lazy" decoding="async">
+          </button>
+          <figcaption>Scan for Directions</figcaption>
+        </figure>
+      </div>
     </article>
+
     <article class="ecard reveal">
-      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><path d="M14 30V6l14-4v28"/><path d="M10 30h28"/><circle cx="24" cy="17" r="1.4"/></svg></span>
-      <h3 class="ecard__title">Guests Arrival</h3>
-      <p class="ecard__date">24 October 2026</p>
-      <p class="ecard__time">4:00 PM</p>
-      <p class="ecard__place"><i>Courtallam</i></p>
+      <div class="ecard__art">
+        <img src="images/events/event-wedding.webp" alt="Wedding" width="1080" height="675" loading="lazy" decoding="async">
+      </div>
+      <div class="ecard__body">
+        <h3 class="ecard__title">Wedding</h3>
+        <p class="ecard__when">25 October 2026 <span>11:00 AM</span></p>
+        <p class="ecard__place">Drizzle Elite Mahal<i>Ilanji, Courtallam</i></p>
+        <figure class="ecard__qr">
+          <button class="qr-btn" type="button" data-maps="nikkah" aria-label="Open the wedding venue in Google Maps">
+            <img src="images/qr/wedding-location.png" alt="QR code for the wedding venue" width="630" height="630" loading="lazy" decoding="async">
+          </button>
+          <figcaption>Scan for Directions</figcaption>
+        </figure>
+      </div>
     </article>
+
     <article class="ecard reveal-left">
-      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><circle cx="18" cy="18" r="11"/><circle cx="30" cy="18" r="11"/><path d="M18 7l-3-5h6z"/></svg></span>
-      <h3 class="ecard__title">Engagement</h3>
-      <p class="ecard__date">24 October 2026</p>
-      <p class="ecard__time">7:00 PM</p>
-      <p class="ecard__place"><i>Courtallam</i></p>
+      <div class="ecard__art">
+        <img src="images/events/event-reception.webp" alt="Reception" width="1150" height="719" loading="lazy" decoding="async">
+      </div>
+      <div class="ecard__body">
+        <h3 class="ecard__title">Reception</h3>
+        <p class="ecard__when">1 November 2026 <span>12:00 PM</span></p>
+        <p class="ecard__place">Arulanandham Mahal<i>Eswari Nagar, Thanjavur</i></p>
+        <figure class="ecard__qr">
+          <button class="qr-btn" type="button" data-maps="reception" aria-label="Open the reception venue in Google Maps">
+            <img src="images/qr/reception-location.png" alt="QR code for the reception venue" width="630" height="630" loading="lazy" decoding="async">
+          </button>
+          <figcaption>Scan for Directions</figcaption>
+        </figure>
+      </div>
     </article>
-    <article class="ecard reveal-right">
-      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><path d="M24 4c7 4 11 9 11 15v11H13V19c0-6 4-11 11-15z"/><path d="M8 30V17M40 30V17"/><circle cx="24" cy="2" r="1.6"/></svg></span>
-      <h3 class="ecard__title">Nikkah</h3>
-      <p class="ecard__date">25 October 2026</p>
-      <p class="ecard__time">11:00 AM</p>
-      <p class="ecard__place">Drizzle Elite Mahal<i>Courtallam</i></p>
-      <button class="pill" type="button" data-maps="nikkah">Open Maps</button>
-    </article>
-    <article class="ecard reveal-left">
-      <span class="ecard__icon" aria-hidden="true"><svg viewBox="0 0 48 32"><path d="M16 3h16l-2 11a6 6 0 01-12 0z"/><path d="M24 20v9M18 29h12"/></svg></span>
-      <h3 class="ecard__title">Reception</h3>
-      <p class="ecard__date">1 November 2026</p>
-      <p class="ecard__time">12:00 PM</p>
-      <p class="ecard__place">Arulanandham Mahal<i>Thanjavur</i></p>
-      <button class="pill" type="button" data-maps="reception">Open Maps</button>
-    </article>
+
   </div>
 </section>
 
-<!-- ===== 08b. CELEBRATION TIMELINE ===== -->
+<!-- ===== 08b. CELEBRATION TIMELINE =====
+     The smaller gatherings live here rather than as cards of their own. -->
 <section class="tl-sec" id="timeline">
   <h2 class="title reveal">Timeline</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
   <ol class="tl">
-    <li class="tl__i reveal"><span class="tl__d">23 Oct</span><span class="tl__t">Mehendi</span></li>
-    <li class="tl__i reveal"><span class="tl__d">24 Oct</span><span class="tl__t">Guests Arrival</span></li>
-    <li class="tl__i reveal"><span class="tl__d">24 Oct</span><span class="tl__t">Engagement</span></li>
-    <li class="tl__i reveal"><span class="tl__d">25 Oct</span><span class="tl__t">Nikkah</span></li>
-    <li class="tl__i reveal"><span class="tl__d">1 Nov</span><span class="tl__t">Reception</span></li>
+    <li class="tl__i reveal"><span class="tl__d">23 Oct</span><span class="tl__t">Mehendi<i>Thanjavur</i></span></li>
+    <li class="tl__i reveal"><span class="tl__d">24 Oct</span><span class="tl__t">Guests Arrival<i>Courtallam · 4:00 PM</i></span></li>
+    <li class="tl__i reveal"><span class="tl__d">24 Oct</span><span class="tl__t">Engagement<i>Courtallam · 7:00 PM</i></span></li>
+    <li class="tl__i reveal"><span class="tl__d">25 Oct</span><span class="tl__t">Wedding<i>Courtallam · 11:00 AM</i></span></li>
+    <li class="tl__i reveal"><span class="tl__d">1 Nov</span><span class="tl__t">Reception<i>Thanjavur · 12:00 PM</i></span></li>
   </ol>
 </section>
 
-<!-- ===== 08c. WEDDING MEMORIES =====
-     The Drive, YouTube and QR destinations are editable constants at the
-     top of script.js. -->
-<section class="mem" id="memories">
-  <h2 class="title reveal">Wedding Memories</h2>
-  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <div class="mem__grid">
-
-    <article class="mcard reveal-right">
-      <span class="mcard__icon" aria-hidden="true">
-        <svg viewBox="0 0 32 32"><path d="M4 24 12 6h8l8 18z"/><path d="M4 24h24"/><path d="M12 6l8 18"/></svg>
-      </span>
-      <h3 class="mcard__title">Shared Album</h3>
-      <p class="mcard__text">Add your photographs to our album.</p>
-      <button class="pill" type="button" id="driveBtn">Open Drive</button>
-    </article>
-
-    <article class="mcard mcard--live reveal">
-      <div class="mcard__media" id="livePoster">
-        <img src="assets/live-poster.jpg" alt="Live ceremony" width="1280" height="720" loading="lazy" decoding="async">
-        <button class="mcard__play" type="button" id="liveBtn" aria-label="Watch the live ceremony">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
-        </button>
-      </div>
-      <h3 class="mcard__title">Live Ceremony</h3>
-      <p class="mcard__text" id="liveNote">Live on 25 October</p>
-    </article>
-
-    <article class="mcard reveal-left">
-      <div class="mcard__qr">
-        <img src="assets/qr-message.png" alt="QR code to a message from the couple" width="560" height="560" loading="lazy" decoding="async">
-      </div>
-      <h3 class="mcard__title">A Special Message</h3>
-      <p class="mcard__text">Scan for a note from the two of us.</p>
-    </article>
-
-  </div>
-</section>
+<!-- V2.4 removed the Wedding Memories section outright: the live-video
+     card, its poster and the message QR that never resolved to a link.
+     Nothing takes its place, and no empty container is left behind. -->
 
 <!-- ===== TRANSITION ===== -->
 <section class="quote">
@@ -553,35 +555,56 @@ PHOTO ORDER REFERENCE  (developer only)
 </section>
 
 <!-- ===== 09. WISHES / RSVP =====
-     Name, guest stepper, send. Writes to the Google Sheet when
-     SCRIPT_URL is set, and always keeps a copy in this browser. -->
+     Three fields only: name, how many are coming, and a note. Replies go
+     to the Google Sheet when SCRIPT_URL is set, and a copy is always kept
+     in this browser so nothing is lost while it is empty. -->
 <section class="rsvp" id="rsvp">
   <h2 class="title reveal">Wishes &amp; RSVP</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <form class="rsvp__row reveal" id="rsvpForm" novalidate>
+  <p class="rsvp__lead reveal">Tell us you are coming, and leave a few words we can keep.</p>
+
+  <form class="rsvp__card reveal" id="rsvpForm" novalidate>
     <div class="rsvp__field">
       <label for="rsvpName">Name</label>
       <input type="text" id="rsvpName" name="name" autocomplete="name" required maxlength="80" placeholder="Your name">
     </div>
-    <div class="rsvp__field rsvp__field--count">
-      <label for="rsvpGuests">Guests</label>
-      <div class="stepper">
-        <button class="stepper__btn" type="button" id="guestMinus" aria-label="One guest fewer">&minus;</button>
-        <input type="number" id="rsvpGuests" name="guests" inputmode="numeric" min="1" max="30" step="1" value="1" required readonly aria-live="polite">
-        <button class="stepper__btn" type="button" id="guestPlus" aria-label="One guest more">+</button>
+
+    <div class="rsvp__field">
+      <label for="rsvpGuests">Number of Guests</label>
+      <div class="select">
+        <select id="rsvpGuests" name="guests" required>
+          <option value="1">1 guest</option>
+          <option value="2">2 guests</option>
+          <option value="3">3 guests</option>
+          <option value="4">4 guests</option>
+          <option value="5">5 guests</option>
+          <option value="6">6 guests</option>
+          <option value="7">7 guests</option>
+          <option value="8">8 guests</option>
+          <option value="9">9 guests</option>
+          <option value="10">10 guests</option>
+          <option value="10+">More than 10</option>
+        </select>
+        <span class="select__chev" aria-hidden="true"></span>
       </div>
     </div>
+
+    <div class="rsvp__field rsvp__field--wide">
+      <label for="rsvpNote">Write a Loving Note</label>
+      <textarea id="rsvpNote" name="note" rows="4" maxlength="600" placeholder="Leave your heartfelt wishes..."></textarea>
+    </div>
+
     <button class="pill pill--gold rsvp__send" type="submit" id="rsvpSubmit">
       <span class="pill__label">Send</span><span class="pill__spin" aria-hidden="true"></span>
     </button>
   </form>
-  <p class="rsvp__note" id="rsvpNote" role="status" aria-live="polite"></p>
+  <p class="rsvp__note" id="rsvpMsg" role="status" aria-live="polite"></p>
 </section>
 
 <!-- ===== 10. FAREWELL / FOOTER =====
      Black & white portrait, full screen, overlay text only. -->
 <section class="closing" id="closing">
-  <img class="closing__img" src="photos/closing-couple.jpg" alt="Thawfeeq Ahamed and Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">
+  <img class="closing__img" src="images/hero/farewell-couple-bw.webp" alt="Thawfeeq Ahamed and Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">
   <div class="closing__veil" aria-hidden="true"></div>
   <div class="closing__inner">
     <p class="closing__line">And so our forever begins.</p>
@@ -611,7 +634,7 @@ PHOTO ORDER REFERENCE  (developer only)
     <button class="lb__nav lb__nav--p" id="lbPrev" type="button" aria-label="Previous photo">&#8249;</button>
     <figure class="lb__fig">
       <!-- no src attribute: an empty one re-requests the page itself -->
-      <img id="lbImg" alt="">
+      <img id="lbImg" alt="" width="900" height="1125">
     </figure>
     <button class="lb__nav lb__nav--n" id="lbNext" type="button" aria-label="Next photo">&#8250;</button>
   </div>
@@ -625,8 +648,8 @@ PHOTO ORDER REFERENCE  (developer only)
     <span class="modal__mark" aria-hidden="true">
       <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="21"/><path d="M15 24.5l6.5 6.5L33 19"/></svg>
     </span>
-    <h3 class="modal__title" id="thanksTitle">Thank you!</h3>
-    <p class="modal__text" id="thanksText">We can't wait to celebrate with you.</p>
+    <h3 class="modal__title" id="thanksTitle">Thank you! <span aria-hidden="true">🤍</span></h3>
+    <p class="modal__text" id="thanksText">Your RSVP and loving note have been received. We look forward to celebrating with you.</p>
     <button class="pill pill--gold" type="button" id="thanksClose">Close</button>
   </div>
 </div>

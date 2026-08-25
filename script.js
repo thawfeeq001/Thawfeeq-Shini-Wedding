@@ -4,7 +4,7 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.3 - iOS-hardened editorial experience.
+   VERSION 2.4 - renamed image library, gallery 2.0, three-field RSVP.
    ========================================================== */
 
 /* ==========================================================
@@ -18,9 +18,8 @@
      07  Countdown Module
      08  Maps Module
      09  Gallery Module       family grid + the one shared photo viewer
-     10  RSVP Module          stepper + Google Sheet + local copy
-     10b Memories Module      album, live ceremony, QR message
-     11  Music Module
+     10  RSVP Module          name, guests, note + Sheet + local copy
+     11  Music Module         ambience with fades and a session memory
      12  Share Module
      13  PWA Module
      14  Boot
@@ -32,17 +31,25 @@
   // 01 · Configuration
   // ==================================
 
-  /* Exact venue pins, read from the printed invitation QR codes. */
-  const NIKKAH_MAP    = "https://maps.app.goo.gl/wXZqhk89NidwfUpZ6";
-  const RECEPTION_MAP = "https://maps.app.goo.gl/1XXwGVE348TApdXx5";
+  /* Exact venue pins, decoded from the QR codes printed on the
+     invitation. The three images under images/qr/ encode these same two
+     URLs, so scanning a card and tapping it land in the same place.
+     The engagement is at the Courtallam venue, so it shares that pin. */
+  const ENGAGEMENT_MAP = "https://maps.app.goo.gl/wXZqhk89NidwfUpZ6";
+  const NIKKAH_MAP     = "https://maps.app.goo.gl/wXZqhk89NidwfUpZ6";
+  const RECEPTION_MAP  = "https://maps.app.goo.gl/1XXwGVE348TApdXx5";
 
   /* Google Apps Script /exec URL. Paste yours here and every RSVP is
      written to the sheet. A copy is always kept in the guest's browser,
      so nothing is lost while this is empty. */
   const SCRIPT_URL = "";
 
-  /* Optional audio file. Empty = the built-in soft ambient melody. */
-  const MUSIC_URL = "";
+  /* Optional audio file. Empty = the built-in soft ambient melody,
+     generated in the browser so there is no file to ship.
+     MUSIC_LEVEL is the playing volume, 0 to 1. */
+  const MUSIC_URL   = "";
+  const MUSIC_LEVEL = 0.38;   /* the brief asked for 35-40% */
+  const MUSIC_FADE  = 2600;   /* fade in and out, milliseconds */
 
   /* Dates in IST. Change these and the countdown follows. */
   const NIKKAH_AT    = "2026-10-25T11:00:00+05:30";
@@ -59,34 +66,32 @@
      The couple-only photographs are NOT here; they are written straight
      into the Our Story chapter in index.html so the prose can sit
      between them. Keeping the two sets apart is deliberate. */
+  /* w and h are the file's own pixel dimensions. They are written onto
+     every tile so the browser can reserve the right box before the
+     photograph arrives - that is what keeps the layout shift at zero
+     while eleven lazy images stream in. */
+  const FAMILY_DIR = 'images/gallery/';
   const FAMILY_PHOTOS = [
-    { file: 'fixing-ceremony.jpg',   cap: 'The fixing ceremony' },
-    { file: 'bride-seated.jpg',      cap: 'The bride, waiting' },
-    { file: 'fixing-saree-box.jpg',  cap: 'Gifts exchanged' },
-    { file: 'fixing-blessing.jpg',   cap: 'A blessing from the elders' },
-    { file: 'fixing-garland.jpg',    cap: 'Garlands' },
-    { file: 'fixing-tray.jpg',       cap: 'The offering trays' },
-    { file: 'fixing-gathering.jpg',  cap: 'The gathering' },
-    { file: 'fixing-families-1.jpg', cap: 'Both families together' },
-    { file: 'fixing-families-2.jpg', cap: 'Both families together' },
-    { file: 'gallery-restaurant.jpg',cap: 'Dinner with family' },
-    { file: 'gallery-friends.jpg',   cap: 'With the people we love' }
+    { file: 'gallery-family-fixing-ceremony.webp', cap: 'The fixing ceremony',        w: 1360, h: 950 },
+    { file: 'gallery-family-bride-seated.webp',    cap: 'The bride, waiting',         w: 900, h: 1125 },
+    { file: 'gallery-family-gift-exchange.webp',   cap: 'Gifts exchanged',            w: 900, h: 1125 },
+    { file: 'gallery-family-elders-blessing.webp', cap: 'A blessing from the elders', w: 900, h: 1125 },
+    { file: 'gallery-family-garlands.webp',        cap: 'Garlands',                   w: 900, h: 1125 },
+    { file: 'gallery-family-offering-trays.webp',  cap: 'The offering trays',         w: 900, h: 720 },
+    { file: 'gallery-family-gathering.webp',       cap: 'The gathering',              w: 900, h: 720 },
+    { file: 'gallery-family-both-families-1.webp', cap: 'Both families together',     w: 900, h: 720 },
+    { file: 'gallery-family-both-families-2.webp', cap: 'Both families together',     w: 900, h: 720 },
+    { file: 'gallery-family-dinner-together.webp', cap: 'Dinner with family',         w: 900, h: 720 },
+    { file: 'gallery-family-with-friends.webp',    cap: 'With the people we love',    w: 900, h: 1125 }
   ];
 
   const VENUES = {
-    nikkah:    { name: 'Drizzle Elite Mahal', address: 'Madurai - Courtallam Main Road, Ilanji, Courtallam, Tamil Nadu' },
-    reception: { name: 'Arulanandham Mahal',  address: 'Eswari Nagar, Reddipalayam Main Road, Thanjavur, Tamil Nadu' }
+    engagement: { pin: ENGAGEMENT_MAP, name: 'Drizzle Elite Mahal', address: 'Madurai - Courtallam Main Road, Ilanji, Courtallam, Tamil Nadu' },
+    nikkah:     { pin: NIKKAH_MAP,     name: 'Drizzle Elite Mahal', address: 'Madurai - Courtallam Main Road, Ilanji, Courtallam, Tamil Nadu' },
+    reception:  { pin: RECEPTION_MAP,  name: 'Arulanandham Mahal',  address: 'Eswari Nagar, Reddipalayam Main Road, Thanjavur, Tamil Nadu' }
   };
 
   const SHARE_TEXT = 'Thawfeeq & Shini Yassmin — 25 October 2026, Courtallam.';
-
-  /* ---- WEDDING MEMORIES -------------------------------------------
-     Paste your own links here. Empty values simply disable the button
-     or leave the card showing its poster.                            */
-  const DRIVE_URL   = "";   /* shared photo album, e.g. a Drive folder link */
-  const YOUTUBE_URL = "";   /* live ceremony, e.g. https://youtu.be/xxxxxxxxxxx */
-  const QR_URL      = "";   /* where assets/qr-message.png should point       */
-  const LIVE_NOTE   = "Live on 25 October";
 
   // ==================================
   // 02 · Utilities
@@ -143,17 +148,25 @@
     root.style.scrollBehavior = smooth;
   }
 
-  /* One behaviour for both full-screen layers - lightbox and modal. */
+  /* One behaviour for both full-screen layers - lightbox and modal.
+
+     The fade-out runs for opts.delay before the layer is really hidden.
+     Reopening during that window used to leave the viewer blank: the
+     pending timeout still fired and cleared what had just been set. The
+     timer is therefore cancelled on open, and a layer that is mid-close
+     counts as closed so it can be brought straight back. */
   function createOverlay(el, options) {
     const opts = options || {};
-    let lastFocus = null;
-    const isOpen = () => !!el && !el.hidden;
+    let lastFocus = null, closeTimer = null;
+    const isOpen = () => !!el && !el.hidden && !closeTimer;
 
     function open() {
-      if (!el || isOpen()) return;
-      lastFocus = document.activeElement;
+      if (!el) return;
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      else if (!el.hidden) return;         /* already fully open */
+      else lockScroll();
+      lastFocus = lastFocus || document.activeElement;
       el.hidden = false;
-      lockScroll();
       requestAnimationFrame(() => el.classList.add('is-on'));
       const target = opts.focus && opts.focus();
       if (target) target.focus({ preventScroll: true });
@@ -162,13 +175,15 @@
       if (!isOpen()) return;
       el.classList.remove('is-on');
       unlockScroll();
-      setTimeout(() => {
+      closeTimer = setTimeout(() => {
+        closeTimer = null;
         el.hidden = true;
         if (opts.onClosed) opts.onClosed();
       }, opts.delay || 400);
       if (opts.restoreFocus && lastFocus && lastFocus.focus) {
         lastFocus.focus({ preventScroll: true });
       }
+      lastFocus = null;
     }
     on(el, 'click', e => { if (e.target === el) close(); });
     on(document, 'keydown', e => { if (e.key === 'Escape' && isOpen()) close(); });
@@ -183,13 +198,14 @@
     el.className = 'ph reveal';
     el.type = 'button';
     el.dataset.lb = group;
-    el.dataset.src = 'photos/' + item.file;
+    el.dataset.src = FAMILY_DIR + item.file;
     if (item.cap) el.dataset.cap = item.cap;
     const img = document.createElement('img');
     img.src = el.dataset.src;
     img.alt = item.cap || alt;
     img.loading = 'lazy';
     img.decoding = 'async';
+    if (item.w) { img.width = item.w; img.height = item.h; }
     el.appendChild(img);
     return el;
   }
@@ -443,13 +459,14 @@
   // 08 · Maps Module
   // ==================================
 
+  /* Tapping a QR code opens the same pin the code encodes, so the card
+     works whether it is scanned from another phone or tapped on this one. */
   function initMaps() {
     $$('[data-maps]').forEach(btn => {
       on(btn, 'click', () => {
-        const key = btn.dataset.maps;
-        const pin = key === 'nikkah' ? NIKKAH_MAP : RECEPTION_MAP;
-        const venue = VENUES[key];
-        const url = pin || ('https://www.google.com/maps/search/?api=1&query=' +
+        const venue = VENUES[btn.dataset.maps];
+        if (!venue) return;
+        const url = venue.pin || ('https://www.google.com/maps/search/?api=1&query=' +
           encodeURIComponent(venue.name + ', ' + venue.address));
         window.open(url, '_blank', 'noopener,noreferrer');
       });
@@ -514,19 +531,24 @@
 
     function resetZoom(smooth) { scale = 1; tx = 0; ty = 0; paintTransform(smooth !== false); }
 
-    /* Keep the picture from being dragged off screen. */
+    /* Keep the picture from being dragged off screen. getBoundingClientRect
+       already reflects the current scale, so the un-transformed size has to
+       be divided back out before working out how far it may travel. */
     function clampPan() {
       const r = img.getBoundingClientRect();
-      const maxX = Math.max(0, (r.width * scale - r.width) / 2 + 8);
-      const maxY = Math.max(0, (r.height * scale - r.height) / 2 + 8);
+      const baseW = r.width / scale, baseH = r.height / scale;
+      const maxX = Math.max(0, (baseW * scale - baseW) / 2);
+      const maxY = Math.max(0, (baseH * scale - baseH) / 2);
       tx = Math.max(-maxX, Math.min(maxX, tx));
       ty = Math.max(-maxY, Math.min(maxY, ty));
     }
 
+    /* 1x to 4x, exactly as the brief asks. */
     function setScale(next, smooth) {
       scale = Math.max(1, Math.min(4, next));
       if (scale === 1) { tx = 0; ty = 0; }
       else clampPan();
+      img.style.cursor = scale > 1 ? 'grab' : 'zoom-in';
       paintTransform(smooth !== false);
     }
 
@@ -547,6 +569,7 @@
         im.alt = '';
         im.loading = 'lazy';
         im.decoding = 'async';
+        im.width = 46; im.height = 58;      /* matches the CSS box */
         b.appendChild(im);
         on(b, 'click', () => show(i));
         thumbs.appendChild(b);
@@ -616,8 +639,8 @@
         const trigger = e.target.closest ? e.target.closest('[data-lb]') : null;
         if (!trigger) return;
         e.preventDefault();
-        open(trigger.dataset.lb, trigger.dataset.src ||
-          (trigger.querySelector('img') || {}).getAttribute('src'));
+        const inner = trigger.querySelector('img');
+        open(trigger.dataset.lb, trigger.dataset.src || (inner && inner.getAttribute('src')));
       });
 
       on($('#lbClose'), 'click', overlay.close);
@@ -690,6 +713,40 @@
       }, { passive: true });
 
       on(lb, 'dblclick', e => { e.preventDefault(); setScale(scale > 1 ? 1 : 2.4); });
+
+      /* ---- pointer: wheel zoom, and drag to pan once zoomed ---- */
+      on(lb, 'wheel', e => {
+        if (!overlay.isOpen()) return;
+        e.preventDefault();
+        setScale(scale * (e.deltaY < 0 ? 1.14 : 1 / 1.14), false);
+      }, { passive: false });
+
+      let dragging = false, dsx = 0, dsy = 0, dpx = 0, dpy = 0;
+      on(img, 'pointerdown', e => {
+        if (e.pointerType === 'touch' || scale === 1) return;
+        dragging = true; dsx = e.clientX; dsy = e.clientY; dpx = tx; dpy = ty;
+        img.setPointerCapture(e.pointerId);
+      });
+      on(img, 'pointermove', e => {
+        if (!dragging) return;
+        tx = dpx + (e.clientX - dsx);
+        ty = dpy + (e.clientY - dsy);
+        clampPan();
+        paintTransform(false);
+      });
+      const endDrag = e => {
+        if (!dragging) return;
+        dragging = false;
+        if (img.releasePointerCapture) { try { img.releasePointerCapture(e.pointerId); } catch (err) {} }
+      };
+      on(img, 'pointerup', endDrag);
+      on(img, 'pointercancel', endDrag);
+      img.style.cursor = 'zoom-in';
+
+      /* the picture is never left zoomed behind a closed viewer, and a
+         rotation invalidates the pan bounds, so both reset it */
+      on(window, 'orientationchange', () => resetZoom(false));
+      on(window, 'resize', () => { if (scale > 1) resetZoom(false); }, { passive: true });
     }
 
     return { init: init };
@@ -703,9 +760,10 @@
   // ==================================
   // 10 · RSVP Module
   // ==================================
-  /* Name + guest count only. The stepper animates the number, the reply
-     goes to the Google Sheet when SCRIPT_URL is set, and a copy is always
-     written to this browser so nothing is lost. */
+  /* Three fields: name, how many are coming, and a note. The reply goes
+     to the Google Sheet when SCRIPT_URL is set, and a copy is always
+     written to this browser first, so nothing is lost while it is empty
+     or while the guest is offline. */
 
   const RSVP_KEY = 'wedding-rsvp-entries';
 
@@ -716,7 +774,7 @@
       localStorage.setItem(RSVP_KEY, JSON.stringify(list));
       return true;
     } catch (e) {
-      return false;
+      return false;                 /* private mode, or storage full */
     }
   }
 
@@ -725,27 +783,17 @@
     if (!form) return;
     const name = $('#rsvpName');
     const guests = $('#rsvpGuests');
-    const button = $('#rsvpSubmit');
     const note = $('#rsvpNote');
+    const button = $('#rsvpSubmit');
+    const msg = $('#rsvpMsg');
 
     const thanks = createOverlay($('#thanks'), { delay: 400, focus: () => $('#thanksClose') });
     on($('#thanksClose'), 'click', thanks.close);
 
-    /* ---- guest stepper ---- */
-    function setGuests(next) {
-      const value = Math.max(1, Math.min(30, next));
-      if (String(value) === guests.value) return;
-      guests.value = String(value);
-      guests.classList.add('is-bump');
-      setTimeout(() => guests.classList.remove('is-bump'), 280);
-    }
-    on($('#guestMinus'), 'click', () => setGuests(parseInt(guests.value, 10) - 1));
-    on($('#guestPlus'), 'click', () => setGuests(parseInt(guests.value, 10) + 1));
-
     on(name, 'input', () => {
       if (name.getAttribute('aria-invalid') === 'true' && name.value.trim().length >= 2) {
         name.setAttribute('aria-invalid', 'false');
-        if (note) note.textContent = '';
+        if (msg) msg.textContent = '';
       }
     });
 
@@ -753,7 +801,7 @@
       event.preventDefault();
       if (name.value.trim().length < 2) {
         name.setAttribute('aria-invalid', 'true');
-        if (note) note.textContent = 'Please tell us your name.';
+        if (msg) msg.textContent = 'Please tell us your name.';
         name.focus();
         return;
       }
@@ -761,14 +809,14 @@
 
       const entry = {
         name: name.value.trim(),
-        guests: String(parseInt(guests.value, 10) || 1),
+        guests: guests ? guests.value : '1',
+        note: note ? note.value.trim() : '',
         timestamp: new Date().toISOString()
       };
 
       saveRsvp(entry);
-      if (note) note.textContent = '';
+      if (msg) msg.textContent = '';
       form.reset();
-      guests.value = '1';
 
       thanks.open();
 
@@ -785,58 +833,26 @@
   }
 
   // ==================================
-  // 10b · Memories Module
-  // ==================================
-  /* Shared album, the live ceremony card and the QR message. The live
-     card only loads the YouTube iframe once it is asked for, so the
-     player never costs anything on first paint. */
-
-  function initMemories() {
-    const drive = $('#driveBtn');
-    if (drive) {
-      if (DRIVE_URL) {
-        on(drive, 'click', () => window.open(DRIVE_URL, '_blank', 'noopener,noreferrer'));
-      } else {
-        drive.disabled = true;
-        drive.title = 'Add DRIVE_URL in script.js';
-      }
-    }
-
-    const note = $('#liveNote');
-    if (note && LIVE_NOTE) note.textContent = LIVE_NOTE;
-
-    const live = $('#liveBtn');
-    const poster = $('#livePoster');
-    if (live && poster) {
-      on(live, 'click', () => {
-        if (!YOUTUBE_URL) { toast('The live link will be added closer to the day.'); return; }
-        const id = (YOUTUBE_URL.match(/(?:v=|youtu\.be\/|embed\/|live\/)([\w-]{6,})/) || [])[1];
-        if (!id) { window.open(YOUTUBE_URL, '_blank', 'noopener,noreferrer'); return; }
-        const frame = document.createElement('iframe');
-        frame.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
-        frame.title = 'Live ceremony';
-        frame.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
-        frame.allowFullscreen = true;
-        poster.innerHTML = '';
-        poster.appendChild(frame);
-      });
-    }
-
-    const qr = $('.mcard__qr');
-    if (qr && QR_URL) {
-      qr.style.cursor = 'pointer';
-      on(qr, 'click', () => window.open(QR_URL, '_blank', 'noopener,noreferrer'));
-    }
-  }
-
-  // ==================================
   // 11 · Music Module
   // ==================================
-  /* Off by default. With no MUSIC_URL the melody is generated in the
-     browser with the Web Audio API, so there is no file to ship. */
+  /* Muted by default - every mobile browser blocks audio until the reader
+     asks for it, and starting silent is the polite default anyway.
+
+     With no MUSIC_URL the ambience is generated with the Web Audio API,
+     so there is no file to ship and the loop is seamless by construction:
+     notes are scheduled ahead of time against the audio clock rather than
+     restarted from the top of a track. With a MUSIC_URL the element loops
+     natively and gets the same fades.
+
+     The play/pause choice is remembered for the session, so moving between
+     sections never restarts or interrupts the ambience - nothing here is
+     tied to scrolling or to any section's lifecycle. */
+
+  const MUSIC_KEY = 'wedding-music-on';
 
   const Music = (function () {
     let ctx = null, master = null, timer = null, el = null, playing = false, step = 0;
+    let fadeFrame = null;
     const SCALE = [220.00, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
 
     function build() {
@@ -877,18 +893,20 @@
     function audio() {
       if (el) return el;
       el = new Audio(MUSIC_URL);
-      el.loop = true;
+      el.loop = true;              /* gapless repeat, handled by the element */
       el.volume = 0;
-      el.preload = 'none';
+      el.preload = 'auto';
       return el;
     }
+    /* Linear fade on the element, so a pause is never an abrupt cut. */
     function fade(to, ms) {
       const a = audio(), from = a.volume, start = performance.now();
+      if (fadeFrame) cancelAnimationFrame(fadeFrame);
       (function frame(now) {
         const p = Math.min(1, (now - start) / ms);
         a.volume = Math.max(0, Math.min(1, from + (to - from) * p));
-        if (p < 1) requestAnimationFrame(frame);
-        else if (to === 0) a.pause();
+        if (p < 1) fadeFrame = requestAnimationFrame(frame);
+        else { fadeFrame = null; if (to === 0) a.pause(); }
       })(start);
     }
     return {
@@ -897,7 +915,7 @@
         if (MUSIC_URL) {
           const a = audio(), p = a.play();
           if (p && p.catch) p.catch(() => toast('Tap the music button once more to start.'));
-          fade(0.55, 1600);
+          fade(MUSIC_LEVEL, MUSIC_FADE);
           playing = true;
           return true;
         }
@@ -906,20 +924,20 @@
         playing = true;
         master.gain.cancelScheduledValues(ctx.currentTime);
         master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), ctx.currentTime);
-        master.gain.exponentialRampToValueAtTime(0.34, ctx.currentTime + 2.2);
+        master.gain.exponentialRampToValueAtTime(MUSIC_LEVEL, ctx.currentTime + MUSIC_FADE / 1000);
         tick();
         clearInterval(timer);
         timer = setInterval(tick, 2400);
         return true;
       },
       stop: function () {
-        if (MUSIC_URL) { fade(0, 900); playing = false; return; }
+        if (MUSIC_URL) { fade(0, MUSIC_FADE); playing = false; return; }
         playing = false;
         clearInterval(timer);
         if (ctx && master) {
           master.gain.cancelScheduledValues(ctx.currentTime);
           master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
-          master.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+          master.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + MUSIC_FADE / 1000);
         }
       }
     };
@@ -928,25 +946,43 @@
   function initMusic() {
     const btn = $('#music');
     if (!btn) return;
-    on(btn, 'click', () => {
-      if (Music.isPlaying()) {
-        Music.stop();
-        btn.setAttribute('aria-pressed', 'false');
-      } else {
-        const ok = Music.start();
-        btn.setAttribute('aria-pressed', ok ? 'true' : 'false');
-        if (!ok) toast('Background music is not supported on this browser.');
-      }
-    });
-    let resume = false;
+
+    const remember = v => { try { sessionStorage.setItem(MUSIC_KEY, v ? '1' : '0'); } catch (e) {} };
+    const recall = () => { try { return sessionStorage.getItem(MUSIC_KEY) === '1'; } catch (e) { return false; } };
+
+    function setOn(next, save) {
+      let ok = true;
+      if (next) ok = Music.start(); else Music.stop();
+      btn.setAttribute('aria-pressed', next && ok ? 'true' : 'false');
+      if (save !== false) remember(next && ok);
+      if (next && !ok) toast('Background music is not supported on this browser.');
+    }
+
+    on(btn, 'click', () => setOn(!Music.isPlaying()));
+
+    /* Was it playing earlier in this session? Autoplay stays blocked until
+       the reader interacts, so the remembered choice is replayed on their
+       first gesture rather than on load. */
+    if (recall()) {
+      const resume = () => {
+        document.removeEventListener('pointerdown', resume);
+        document.removeEventListener('keydown', resume);
+        if (!Music.isPlaying()) setOn(true, false);
+      };
+      on(document, 'pointerdown', resume);
+      on(document, 'keydown', resume);
+    }
+
+    /* Pause while the tab is in the background and pick the ambience back
+       up on return, without touching the remembered preference. */
+    let wasPlaying = false;
     on(document, 'visibilitychange', () => {
       if (document.hidden) {
-        resume = Music.isPlaying();
-        if (resume) { Music.stop(); btn.setAttribute('aria-pressed', 'false'); }
-      } else if (resume) {
-        Music.start();
-        btn.setAttribute('aria-pressed', 'true');
-        resume = false;
+        wasPlaying = Music.isPlaying();
+        if (wasPlaying) setOn(false, false);
+      } else if (wasPlaying) {
+        setOn(true, false);
+        wasPlaying = false;
       }
     });
   }
@@ -1006,7 +1042,6 @@
     initCountdown();
     initMaps();
     initRsvp();
-    initMemories();
     initMusic();
     initShare();
     initPwa();
