@@ -4,7 +4,7 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.2 - production watercolour editorial experience.
+   VERSION 2.3 - iOS-hardened editorial experience.
    ========================================================== */
 
 /* ==========================================================
@@ -17,7 +17,7 @@
      06  Decoration Module    petals and drifting blobs
      07  Countdown Module
      08  Maps Module
-     09  Gallery Module       builds both grids, drives the lightbox
+     09  Gallery Module       family grid + the one shared photo viewer
      10  RSVP Module          stepper + Google Sheet + local copy
      10b Memories Module      album, live ceremony, QR message
      11  Music Module
@@ -50,38 +50,27 @@
   const THANKS_FROM  = "2026-11-02T00:00:00+05:30";
 
   /* ---- PHOTO LISTS -------------------------------------------------
-     Both grids are built from these arrays, so nothing about the count
-     is hard-coded in the HTML - add a filename and the grid grows.
-     A static site cannot read its own folder (there is no server to ask),
-     so this list is the manifest. Keep the three groups separate:
-     couple photographs never belong in the ceremony grid, and family
-     photographs never belong in the couple gallery.                   */
+     A static site cannot read its own folder - there is no server to
+     ask - so this list is the manifest. Add a filename here and the
+     grid grows on its own.                                            */
 
-  const FIXING_PHOTOS = [
-    'fixing-ceremony.jpg',
-    'bride-seated.jpg',
-    'fixing-saree-box.jpg',
-    'fixing-blessing.jpg',
-    'fixing-garland.jpg',
-    'fixing-tray.jpg',
-    'fixing-gathering.jpg',
-    'fixing-families-1.jpg',
-    'fixing-families-2.jpg'
-  ];
-
-  const COUPLE_PHOTOS = [
-    'gallery-selfie.jpg',      /* first selfie   */
-    'gallery-car.jpg',         /* road trip      */
-    'gallery-restaurant.jpg',  /* restaurant     */
-    'gallery-mirror.jpg',      /* mirror         */
-    'gallery-parrot.jpg',      /* parrot         */
-    'gallery-casual.jpg',      /* casual         */
-    'gallery-cafe.jpg',        /* newly uploaded */
-    'gallery-red.jpg',
-    'gallery-friends.jpg',
-    'gallery-dinner.jpg',
-    'gallery-boat-1.jpg',
-    'gallery-boat-2.jpg'
+  /* FAMILY MEMORIES - every photograph with somebody else in the frame:
+     parents, siblings, relatives, the fixing ceremony, group shots.
+     The couple-only photographs are NOT here; they are written straight
+     into the Our Story chapter in index.html so the prose can sit
+     between them. Keeping the two sets apart is deliberate. */
+  const FAMILY_PHOTOS = [
+    { file: 'fixing-ceremony.jpg',   cap: 'The fixing ceremony' },
+    { file: 'bride-seated.jpg',      cap: 'The bride, waiting' },
+    { file: 'fixing-saree-box.jpg',  cap: 'Gifts exchanged' },
+    { file: 'fixing-blessing.jpg',   cap: 'A blessing from the elders' },
+    { file: 'fixing-garland.jpg',    cap: 'Garlands' },
+    { file: 'fixing-tray.jpg',       cap: 'The offering trays' },
+    { file: 'fixing-gathering.jpg',  cap: 'The gathering' },
+    { file: 'fixing-families-1.jpg', cap: 'Both families together' },
+    { file: 'fixing-families-2.jpg', cap: 'Both families together' },
+    { file: 'gallery-restaurant.jpg',cap: 'Dinner with family' },
+    { file: 'gallery-friends.jpg',   cap: 'With the people we love' }
   ];
 
   const VENUES = {
@@ -130,6 +119,30 @@
     fn();
   }
 
+  /* ---- page scroll lock -------------------------------------------
+     iOS Safari happily scrolls the page behind a modal even when the
+     body has overflow:hidden, so the body is pinned with position:fixed
+     and the offset is handed to CSS as --lock-y. Reference-counted, so
+     two overlapping overlays cannot unlock each other. */
+  let lockY = 0, lockDepth = 0;
+  function lockScroll() {
+    if (lockDepth++) return;
+    lockY = window.scrollY || window.pageYOffset || 0;
+    document.documentElement.style.setProperty('--lock-y', (-lockY) + 'px');
+    document.body.classList.add('is-locked');
+  }
+  function unlockScroll() {
+    if (!lockDepth || --lockDepth) return;
+    const root = document.documentElement;
+    document.body.classList.remove('is-locked');
+    root.style.removeProperty('--lock-y');
+    /* smooth scrolling is on in CSS; restoring the offset must not animate */
+    const smooth = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    window.scrollTo(0, lockY);
+    root.style.scrollBehavior = smooth;
+  }
+
   /* One behaviour for both full-screen layers - lightbox and modal. */
   function createOverlay(el, options) {
     const opts = options || {};
@@ -140,7 +153,7 @@
       if (!el || isOpen()) return;
       lastFocus = document.activeElement;
       el.hidden = false;
-      document.body.classList.add('is-locked');
+      lockScroll();
       requestAnimationFrame(() => el.classList.add('is-on'));
       const target = opts.focus && opts.focus();
       if (target) target.focus({ preventScroll: true });
@@ -148,7 +161,7 @@
     function close() {
       if (!isOpen()) return;
       el.classList.remove('is-on');
-      document.body.classList.remove('is-locked');
+      unlockScroll();
       setTimeout(() => {
         el.hidden = true;
         if (opts.onClosed) opts.onClosed();
@@ -162,14 +175,19 @@
     return { open: open, close: close, isOpen: isOpen };
   }
 
-  /* Build one masonry tile. Every photograph below the fold is lazy. */
-  function buildTile(file, alt, clickable) {
-    const el = document.createElement(clickable ? 'button' : 'figure');
+  /* Build one masonry tile. Every photograph below the fold is lazy,
+     and every tile carries the data the viewer needs, so a tile built
+     later is picked up by the delegated click handler with no rewiring. */
+  function buildTile(item, group, alt) {
+    const el = document.createElement('button');
     el.className = 'ph reveal';
-    if (clickable) el.type = 'button';
+    el.type = 'button';
+    el.dataset.lb = group;
+    el.dataset.src = 'photos/' + item.file;
+    if (item.cap) el.dataset.cap = item.cap;
     const img = document.createElement('img');
-    img.src = 'photos/' + file;
-    img.alt = alt;
+    img.src = el.dataset.src;
+    img.alt = item.cap || alt;
     img.loading = 'lazy';
     img.decoding = 'async';
     el.appendChild(img);
@@ -179,8 +197,12 @@
   // ==================================
   // 03 · Scroll Animation Module
   // ==================================
-  /* Fade up, fade left and fade right - all driven by one observer.
-     No bounce, no scroll-linked layout work. */
+  /* Fade up, fade left and fade right - one observer for the whole page.
+     The element is NOT unobserved after it appears, so .is-in is added
+     on entry and removed on exit: the animation plays again every single
+     time that element scrolls back into view, in both directions.
+     Only opacity and transform change, which keeps the work on the
+     compositor - the same 60fps on iOS Safari as on Android Chrome. */
 
   let revealObserver = null;
   let observerReported = false;   /* proof the browser actually delivers callbacks */
@@ -188,43 +210,51 @@
   function observeReveals(root) {
     const items = $$('.reveal, .reveal-left, .reveal-right, .tl__i', root || document);
     if (!('IntersectionObserver' in window) || REDUCED) {
-      items.forEach(el => el.classList.add('is-in'));
+      showEverything();
       return;
     }
     if (!revealObserver) {
       revealObserver = new IntersectionObserver(entries => {
         observerReported = true;
+        window.__revealReady = true;
         entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          const el = entry.target;
-          const peers = el.parentElement
-            ? $$('.reveal, .reveal-left, .reveal-right, .tl__i', el.parentElement) : [];
-          el.style.setProperty('--d', Math.min(Math.max(0, peers.indexOf(el)), 5) * 80 + 'ms');
-          el.classList.add('is-in');
-          revealObserver.unobserve(el);
+          entry.target.classList.toggle('is-in', entry.isIntersecting);
         });
-      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
     }
-    items.forEach(el => revealObserver.observe(el));
+    items.forEach(el => {
+      /* the stagger is measured once, not on every crossing */
+      if (el.dataset.step === undefined) {
+        const peers = el.parentElement
+          ? $$('.reveal, .reveal-left, .reveal-right, .tl__i', el.parentElement) : [];
+        const step = Math.min(Math.max(0, peers.indexOf(el)), 5);
+        el.dataset.step = step;
+        if (step) el.style.setProperty('--d', step * 80 + 'ms');
+      }
+      revealObserver.observe(el);
+    });
   }
 
-  /* Safety net. Content must never be permanently invisible. If the browser
-     has not delivered a single observer callback - some iOS Safari builds do
-     exactly that - reveal everything, and keep watching so that grids built
-     later are caught too. */
-  function revealWatchdog(attempt) {
-    if (observerReported || attempt > 6) return;
+  /* The one guarantee: content is never permanently invisible.
+     Nothing is hidden by the stylesheet on its own - the hiding rules all
+     sit behind html.js-reveal, which the inline snippet in <head> adds and
+     this watchdog takes away again if the observer never reports. Some
+     iOS Safari builds deliver no callbacks at all; on those the page
+     simply renders with no animation instead of rendering blank. */
+  function showEverything() {
+    document.documentElement.classList.remove('js-reveal');
+    window.__revealReady = true;
+  }
+
+  function revealWatchdog() {
     setTimeout(function () {
-      if (observerReported) return;
-      $$('.reveal:not(.is-in), .reveal-left:not(.is-in), .reveal-right:not(.is-in)')
-        .forEach(el => el.classList.add('is-in'));
-      revealWatchdog(attempt + 1);
-    }, 1600);
+      if (!observerReported) showEverything();
+    }, 2200);
   }
 
   function initReveal() {
     observeReveals(document);
-    revealWatchdog(0);
+    revealWatchdog();
   }
 
   // ==================================
@@ -429,26 +459,24 @@
   // ==================================
   // 09 · Gallery Module
   // ==================================
-  /* Builds the ceremony collage and the couple gallery from the lists in
-     the configuration block, then wires the couple tiles to the viewer.
-     Arrow keys and swipes move between photographs. */
+  /* Two jobs.
+       1. Build the Family Memories masonry, but only when the reader is
+          near it, so none of it competes with the hero for bandwidth.
+       2. Drive ONE viewer for every photograph on the page. Any element
+          carrying data-lb="<group>" opens it; the group name decides
+          which photographs it can page through. Clicks are delegated
+          from the document, so tiles created later need no wiring. */
 
-  /* Build a grid only when the reader is close to it. Nothing in these
-     sections exists as an <img> during the first paint, so none of it
-     competes with the hero for bandwidth. */
-  function buildGridWhenNear(grid, files, clickable, alt, onBuilt) {
+  function buildGridWhenNear(grid, items, group, alt) {
     let built = false;
     function build() {
       if (built || !grid) return;
       built = true;
-      files.forEach(file => grid.appendChild(buildTile(file, alt, clickable)));
+      items.forEach(item => grid.appendChild(buildTile(item, group, alt)));
       observeReveals(grid);
-      /* Anything already level with or above the fold is shown at once -
-         the observer only reports elements that are still to be reached. */
-      $$('.ph', grid).forEach(tile => {
-        if (tile.getBoundingClientRect().top < window.innerHeight) tile.classList.add('is-in');
-      });
-      if (onBuilt) onBuilt();
+      if (!document.documentElement.classList.contains('js-reveal')) {
+        $$('.ph', grid).forEach(t => t.classList.add('is-in'));
+      }
     }
     if (!grid) return;
     if (!('IntersectionObserver' in window)) { build(); return; }
@@ -459,83 +487,217 @@
     setTimeout(build, 4000);   /* safety net - never leave a grid empty */
   }
 
-  function initGallery() {
-    buildGridWhenNear($('#fixingGrid'), FIXING_PHOTOS, false, 'The fixing ceremony');
+  /* ---- the viewer -------------------------------------------------- */
+  const Viewer = (function () {
+    let lb, img, capEl, countEl, thumbs, overlay;
+    let shots = [], index = 0;
+    let scale = 1, tx = 0, ty = 0;          /* current zoom and pan */
 
-    const galleryGrid = $('#galleryGrid');
-    const lb = $('#lightbox');
-    const img = $('#lbImg');
-    const cap = $('#lbCap');
-    if (!galleryGrid) return;
+    /* Every photograph in one group, in the order it appears on the page. */
+    function collect(group) {
+      return $$('[data-lb="' + group + '"]').map(el => {
+        const inner = el.querySelector('img');
+        return {
+          src: el.dataset.src || (inner ? inner.getAttribute('src') : ''),
+          cap: el.dataset.cap || '',
+          alt: (inner && inner.alt) || 'Thawfeeq Ahamed and Shini Yassmin'
+        };
+      }).filter(sh => sh.src);
+    }
 
-    let index = 0, scale = 1;
+    function paintTransform(smooth) {
+      img.classList.toggle('is-panning', !smooth);
+      img.style.transform = (scale === 1 && !tx && !ty)
+        ? ''
+        : 'translate3d(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,0) scale(' + scale.toFixed(3) + ')';
+    }
 
-    buildGridWhenNear(galleryGrid, COUPLE_PHOTOS, true, 'Thawfeeq and Shini Yassmin', () => {
-      $$('.ph', galleryGrid).forEach((btn, i) => on(btn, 'click', () => { show(i); viewer.open(); }));
-    });
+    function resetZoom(smooth) { scale = 1; tx = 0; ty = 0; paintTransform(smooth !== false); }
 
-    if (!lb || !img) return;
+    /* Keep the picture from being dragged off screen. */
+    function clampPan() {
+      const r = img.getBoundingClientRect();
+      const maxX = Math.max(0, (r.width * scale - r.width) / 2 + 8);
+      const maxY = Math.max(0, (r.height * scale - r.height) / 2 + 8);
+      tx = Math.max(-maxX, Math.min(maxX, tx));
+      ty = Math.max(-maxY, Math.min(maxY, ty));
+    }
 
-    const viewer = createOverlay(lb, {
-      delay: 380,
-      restoreFocus: true,
-      focus: () => $('#lbClose'),
-      onClosed: () => { img.src = ''; img.style.transform = ''; scale = 1; }
-    });
+    function setScale(next, smooth) {
+      scale = Math.max(1, Math.min(4, next));
+      if (scale === 1) { tx = 0; ty = 0; }
+      else clampPan();
+      paintTransform(smooth !== false);
+    }
+
+    function buildThumbs() {
+      if (!thumbs) return;
+      thumbs.textContent = '';
+      /* a single photograph needs no strip */
+      thumbs.hidden = shots.length < 2;
+      if (thumbs.hidden) return;
+      shots.forEach((shot, i) => {
+        const b = document.createElement('button');
+        b.className = 'lb__t';
+        b.type = 'button';
+        b.setAttribute('role', 'tab');
+        b.setAttribute('aria-label', 'Photo ' + (i + 1));
+        const im = document.createElement('img');
+        im.src = shot.src;
+        im.alt = '';
+        im.loading = 'lazy';
+        im.decoding = 'async';
+        b.appendChild(im);
+        on(b, 'click', () => show(i));
+        thumbs.appendChild(b);
+      });
+    }
+
+    function markThumb() {
+      if (!thumbs || thumbs.hidden) return;
+      const kids = $$('.lb__t', thumbs);
+      kids.forEach((b, i) => {
+        const active = i === index;
+        b.classList.toggle('is-on', active);
+        b.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      const hit = kids[index];
+      if (hit && hit.scrollIntoView) {
+        hit.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      }
+    }
 
     const preload = i => {
-      const file = COUPLE_PHOTOS[(i + COUPLE_PHOTOS.length) % COUPLE_PHOTOS.length];
-      if (file) { const im = new Image(); im.decoding = 'async'; im.src = 'photos/' + file; }
+      const shot = shots[(i + shots.length) % shots.length];
+      if (shot) { const im = new Image(); im.decoding = 'async'; im.src = shot.src; }
     };
 
     function show(i) {
-      index = (i + COUPLE_PHOTOS.length) % COUPLE_PHOTOS.length;
-      img.src = 'photos/' + COUPLE_PHOTOS[index];
-      img.alt = 'Thawfeeq and Shini Yassmin';
-      if (cap) cap.textContent = (index + 1) + ' of ' + COUPLE_PHOTOS.length;
+      if (!shots.length) return;
+      index = (i + shots.length) % shots.length;
+      const shot = shots[index];
+      resetZoom(false);                       /* a new photograph always starts at 1x */
+      img.src = shot.src;
+      img.alt = shot.alt;
+      if (capEl) capEl.textContent = shot.cap;
+      if (countEl) countEl.textContent = shots.length > 1 ? (index + 1) + ' / ' + shots.length : '';
+      markThumb();
       preload(index + 1);
       preload(index - 1);
     }
 
-    on($('#lbClose'), 'click', viewer.close);
-    on($('#lbPrev'), 'click', () => show(index - 1));
-    on($('#lbNext'), 'click', () => show(index + 1));
-    on(document, 'keydown', e => {
-      if (!viewer.isOpen()) return;
-      if (e.key === 'ArrowLeft') show(index - 1);
-      else if (e.key === 'ArrowRight') show(index + 1);
-    });
+    function open(group, startSrc) {
+      shots = collect(group);
+      if (!shots.length) return;
+      const at = shots.findIndex(sh => sh.src === startSrc);
+      buildThumbs();
+      show(at < 0 ? 0 : at);
+      overlay.open();
+    }
 
-    /* Swipe between photographs, and pinch to zoom the one on screen. */
-    let sx = 0, sy = 0, swiping = false;
-    let startDist = 0, startScale = 1;
+    function init() {
+      lb = $('#lightbox');
+      img = $('#lbImg');
+      if (!lb || !img) return;
+      capEl = $('#lbCap');
+      countEl = $('#lbCount');
+      thumbs = $('#lbThumbs');
 
-    const setScale = v => {
-      scale = Math.max(1, Math.min(4, v));
-      img.style.transform = scale === 1 ? '' : 'scale(' + scale.toFixed(3) + ')';
-    };
-    const resetZoom = () => setScale(1);
-    const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+      overlay = createOverlay(lb, {
+        delay: 380,
+        restoreFocus: true,
+        focus: () => $('#lbClose'),
+        onClosed: () => { img.removeAttribute('src'); resetZoom(false); }
+      });
 
-    on(lb, 'touchstart', e => {
-      if (e.touches.length === 2) { swiping = false; startDist = dist(e.touches); startScale = scale; }
-      else if (e.touches.length === 1 && scale === 1) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true; }
-    }, { passive: true });
+      /* Delegated: works for the frames written into Our Story and for
+         every masonry tile, including the ones built minutes later. */
+      on(document, 'click', e => {
+        const trigger = e.target.closest ? e.target.closest('[data-lb]') : null;
+        if (!trigger) return;
+        e.preventDefault();
+        open(trigger.dataset.lb, trigger.dataset.src ||
+          (trigger.querySelector('img') || {}).getAttribute('src'));
+      });
 
-    on(lb, 'touchmove', e => {
-      if (e.touches.length === 2 && startDist) { e.preventDefault(); setScale(startScale * (dist(e.touches) / startDist)); }
-    }, { passive: false });
+      on($('#lbClose'), 'click', overlay.close);
+      on($('#lbPrev'), 'click', () => show(index - 1));
+      on($('#lbNext'), 'click', () => show(index + 1));
+      /* tapping the dark surround closes; tapping the picture does not */
+      on($('#lbStage'), 'click', e => { if (e.target.id === 'lbStage' || e.target.className === 'lb__fig') overlay.close(); });
 
-    on(lb, 'touchend', e => {
-      if (e.touches.length === 0) startDist = 0;
-      if (!swiping) return;
-      swiping = false;
-      const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
-      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) { resetZoom(); show(index + (dx < 0 ? 1 : -1)); }
-      else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) { resetZoom(); viewer.close(); }
-    }, { passive: true });
+      on(document, 'keydown', e => {
+        if (!overlay.isOpen()) return;
+        if (e.key === 'ArrowLeft') show(index - 1);
+        else if (e.key === 'ArrowRight') show(index + 1);
+      });
 
-    on(lb, 'dblclick', resetZoom);
+      /* ---- touch: swipe, pinch, drag, double tap ---- */
+      let sx = 0, sy = 0, swiping = false, moved = false;
+      let startDist = 0, startScale = 1, panX = 0, panY = 0, lastTap = 0;
+      const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+
+      on(lb, 'touchstart', e => {
+        moved = false;
+        if (e.touches.length === 2) {
+          swiping = false;
+          startDist = dist(e.touches);
+          startScale = scale;
+        } else if (e.touches.length === 1) {
+          sx = e.touches[0].clientX;
+          sy = e.touches[0].clientY;
+          panX = tx; panY = ty;
+          swiping = scale === 1;             /* zoomed in, a drag pans instead */
+        }
+      }, { passive: true });
+
+      on(lb, 'touchmove', e => {
+        if (e.touches.length === 2 && startDist) {
+          e.preventDefault();
+          moved = true;
+          setScale(startScale * (dist(e.touches) / startDist), false);
+          return;
+        }
+        if (e.touches.length === 1 && scale > 1) {
+          e.preventDefault();
+          moved = true;
+          tx = panX + (e.touches[0].clientX - sx);
+          ty = panY + (e.touches[0].clientY - sy);
+          clampPan();
+          paintTransform(false);
+        }
+      }, { passive: false });
+
+      on(lb, 'touchend', e => {
+        if (e.touches.length === 0) startDist = 0;
+
+        /* double tap toggles between 1x and 2.4x */
+        if (!moved && e.changedTouches.length === 1) {
+          const now = Date.now();
+          if (now - lastTap < 300) {
+            setScale(scale > 1 ? 1 : 2.4);
+            lastTap = 0;
+            return;
+          }
+          lastTap = now;
+        }
+
+        if (!swiping) return;
+        swiping = false;
+        const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1));
+        else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) overlay.close();
+      }, { passive: true });
+
+      on(lb, 'dblclick', e => { e.preventDefault(); setScale(scale > 1 ? 1 : 2.4); });
+    }
+
+    return { init: init };
+  })();
+
+  function initGallery() {
+    Viewer.init();
+    buildGridWhenNear($('#familyGrid'), FAMILY_PHOTOS, 'family', 'A family memory');
   }
 
   // ==================================

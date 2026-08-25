@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <!-- ==========================================================
-LANDMARK VERSION 1.0
-Project : Thawfeeq & Shini Wedding
-Purpose : Stable editable baseline before redesign
-Do not delete this marker.
-
-VERSION 2.2 - production watercolour editorial experience.
-Built on the landmark baseline; structure and comments preserved.
+LANDMARK VERSION 1.0 - stable editable baseline. Do not delete.
+VERSION 2.3 - iOS-hardened editorial experience.
+Order: Home, Groom, Groom Family, Bride, Bride Family,
+       Our Story, Gallery, Events, Wishes, Farewell.
 =========================================================== -->
 <html lang="en">
 <head>
@@ -16,24 +13,24 @@ Built on the landmark baseline; structure and comments preserved.
 <!--
 PHOTO ORDER REFERENCE  (developer only)
 
-  01 HERO            photos/hero-couple.jpg         coloured studio portrait
-  03 GROOM           photos/groom-portrait.jpg
-  05 BRIDE           photos/bride-portrait.jpg
-  07 GROOM FAMILY    photos/groom-family.jpg  + photos/groom-sister.jpg
-  08 BRIDE FAMILY    photos/bride-family.jpg
-  10 FIXING          photos/fixing-*.jpg + photos/bride-seated.jpg   (9 images)
-  11 COUPLE GALLERY  photos/gallery-*.jpg                            (10 images)
-  16 CLOSING         photos/closing-couple.jpg      black & white portrait
+  HERO             photos/hero-couple.jpg        coloured studio portrait
+  GROOM            photos/groom-portrait.jpg
+  GROOM FAMILY     photos/groom-family.jpg + photos/groom-sister.jpg
+  BRIDE            photos/bride-portrait.jpg + photos/gallery-dinner.jpg
+  BRIDE FAMILY     photos/bride-family.jpg
+  OUR STORY        photos/gallery-*.jpg   ONLY the bride and groom together
+  FAMILY MEMORIES  photos/fixing-*.jpg, bride-seated, gallery-restaurant,
+                   gallery-friends - every frame with extra people in it
+  FAREWELL         photos/closing-couple.jpg     black & white portrait
 
-  The fixing and gallery sections are rendered from the FIXING_PHOTOS and
-  COUPLE_PHOTOS lists at the top of script.js - add a filename there and the
-  grid grows on its own. Family photographs never appear in the couple gallery.
+  Family photographs never appear inside Our Story. The Family Memories
+  grid is built from FAMILY_PHOTOS at the top of script.js.
 -->
 
 <!-- viewport-fit=cover lets the safe-area insets work around the Dynamic Island -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thawfeeq &amp; Shini Yassmin</title>
-<meta name="description" content="Thawfeeq and Shini Yassmin. 25 October 2026, Courtallam.">
+<meta name="description" content="Thawfeeq Ahamed and Shini Yassmin. 25 October 2026, Courtallam.">
 <link rel="canonical" href="https://thawfeeq001.github.io/Thawfeeq-Shini-Wedding/">
 <meta name="theme-color" content="#FDF9F5">
 <meta name="color-scheme" content="light">
@@ -66,6 +63,19 @@ PHOTO ORDER REFERENCE  (developer only)
 <link rel="preload" as="image" href="photos/hero-couple.jpg" fetchpriority="high">
 <link rel="stylesheet" href="style.css">
 
+<!-- Reveal animations are opt-in. The stylesheet only hides an element while
+     <html> carries js-reveal, so a page whose JavaScript never runs - or a
+     browser that never delivers an IntersectionObserver callback - renders
+     complete instead of blank. This is the guarantee that nothing on the
+     page can disappear permanently. -->
+<script>
+(function (d) {
+  var r = d.documentElement;
+  r.className += ' js-reveal';
+  setTimeout(function () { if (!window.__revealReady) r.classList.remove('js-reveal'); }, 4000);
+})(document);
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Great+Vibes&family=Inter:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
@@ -77,7 +87,7 @@ PHOTO ORDER REFERENCE  (developer only)
   "@graph": [
     {
       "@type": "Event",
-      "name": "Engagement of Thawfeeq and Shini Yassmin",
+      "name": "Engagement of Thawfeeq Ahamed and Shini Yassmin",
       "startDate": "2026-10-24T19:00:00+05:30",
       "eventStatus": "https://schema.org/EventScheduled",
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
@@ -87,7 +97,7 @@ PHOTO ORDER REFERENCE  (developer only)
     },
     {
       "@type": "Event",
-      "name": "Nikkah of Thawfeeq and Shini Yassmin",
+      "name": "Nikkah of Thawfeeq Ahamed and Shini Yassmin",
       "startDate": "2026-10-25T11:00:00+05:30",
       "eventStatus": "https://schema.org/EventScheduled",
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
@@ -98,7 +108,7 @@ PHOTO ORDER REFERENCE  (developer only)
     },
     {
       "@type": "Event",
-      "name": "Reception of Thawfeeq and Shini Yassmin",
+      "name": "Reception of Thawfeeq Ahamed and Shini Yassmin",
       "startDate": "2026-11-01T12:00:00+05:30",
       "eventStatus": "https://schema.org/EventScheduled",
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
@@ -138,28 +148,38 @@ PHOTO ORDER REFERENCE  (developer only)
   <img class="sidenav__mark" src="assets/logo-gold.png" alt="" width="260" height="260" loading="lazy" decoding="async">
   <ul class="sidenav__list">
     <li><a href="#hero">Home</a></li>
-    <li><a href="#story">Our Story</a></li>
     <li><a href="#groom">Groom</a></li>
+    <li><a href="#groom-family">Groom Family</a></li>
     <li><a href="#bride">Bride</a></li>
-    <li><a href="#groom-family">Families</a></li>
-    <li><a href="#fixing">Fixing</a></li>
+    <li><a href="#bride-family">Bride Family</a></li>
+    <li><a href="#story">Our Story</a></li>
     <li><a href="#gallery">Gallery</a></li>
     <li><a href="#events">Events</a></li>
-    <li><a href="#rsvp">RSVP</a></li>
+    <li><a href="#rsvp">Wishes</a></li>
   </ul>
 </nav>
 
-<!-- ===== PAGE SECTIONS ===== -->
+<!-- ===== PAGE SECTIONS =====
+     ORDER IS FIXED (V2.3):
+       01 Home  02 Groom  03 Groom Family  04 Bride  05 Bride Family
+       06 Our Story  07 Gallery  08 Events  09 Wishes  10 Farewell
+     Our Story deliberately sits after both family chapters. -->
 <main id="main">
 
-<!-- ===== 01. HERO =====
-     Coloured couple portrait, full screen, with a watercolour overlay.
-     No buttons: the site opens straight into this. -->
+<!-- ===== 01. HOME =====
+     Logo sits at the top centre with the groom's name directly beneath it
+     in Playfair Display. The photograph is nudged left with
+     object-position so both faces sit the same distance from the edges. -->
 <section class="hero" id="hero">
-  <img class="hero__img" src="photos/hero-couple.jpg" alt="Thawfeeq and Shini Yassmin" width="1080" height="1370" fetchpriority="high" decoding="async">
+  <img class="hero__img" src="photos/hero-couple.jpg" alt="Thawfeeq Ahamed and Shini Yassmin" width="1080" height="1370" fetchpriority="high" decoding="async">
   <div class="hero__wash" aria-hidden="true"></div>
-  <div class="hero__inner">
+
+  <div class="hero__head">
     <img class="hero__mark" src="assets/logo-ivory.png" alt="" width="260" height="260" fetchpriority="high" decoding="async">
+    <p class="hero__house">Thawfeeq Ahamed</p>
+  </div>
+
+  <div class="hero__inner">
     <p class="hero__eyebrow">Together with our families</p>
     <h1 class="hero__names">
       <span>Thawfeeq</span>
@@ -170,9 +190,9 @@ PHOTO ORDER REFERENCE  (developer only)
   </div>
 </section>
 
-<!-- ===== 02. COUNTDOWN =====
+<!-- ===== 01b. COUNTDOWN =====
      Horizontal ivory card over a watercolour mosque silhouette.
-     Ticks every second - see the Countdown Module. -->
+     Auto height, no fixed sizing - the numbers can never clip. -->
 <section class="cd-wrap" id="countdown">
   <div class="cd" id="cdGrid" role="timer" aria-live="off">
     <div class="cd__u"><span class="cd__n" id="cdDays">000</span><span class="cd__l">Days</span></div>
@@ -183,32 +203,17 @@ PHOTO ORDER REFERENCE  (developer only)
   <p class="cd__done" id="cdDone" hidden>Thank you for celebrating with us</p>
 </section>
 
-<!-- ===== 03. TRANSITION ===== -->
-<section class="quote">
-  <p class="quote__line reveal">Two hearts. One beautiful journey.</p>
-</section>
-
-<!-- ===== 04. OUR STORY =====
-     The couple gallery, in the order the moments happened. Built from
-     COUPLE_PHOTOS in script.js; tiles open the swipe/pinch viewer.
-     Family and ceremony photographs never appear here. -->
-<section class="gal" id="story">
-  <h2 class="title reveal">Our Story</h2>
-  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <div class="masonry" id="galleryGrid"></div>
-</section>
-
 <!-- ===== TRANSITION ===== -->
 <section class="quote">
   <p class="quote__line reveal">The man whose kindness became home.</p>
 </section>
 
-<!-- ===== MEET THAWFEEQ ===== -->
+<!-- ===== 02. GROOM ===== -->
 <section class="person" id="groom">
-  <p class="kicker reveal">Meet Thawfeeq</p>
-  <h2 class="name reveal">Thawfeeq</h2>
+  <p class="kicker reveal">Meet the Groom</p>
+  <h2 class="name reveal">Thawfeeq Ahamed</h2>
   <figure class="frame frame--arch person__photo reveal-right">
-    <img src="photos/groom-portrait.jpg" alt="Thawfeeq" width="1000" height="1270" loading="lazy" decoding="async">
+    <img src="photos/groom-portrait.jpg" alt="Thawfeeq Ahamed" width="1000" height="1270" loading="lazy" decoding="async">
   </figure>
   <!-- one short sentence - edit freely -->
   <p class="person__line reveal">A surgeon by training, and the calmest person in any room.</p>
@@ -216,29 +221,14 @@ PHOTO ORDER REFERENCE  (developer only)
 
 <!-- ===== TRANSITION ===== -->
 <section class="quote">
-  <p class="quote__line reveal">The woman who made forever feel effortless.</p>
+  <p class="quote__line reveal">Raised by the hands that taught him gentleness.</p>
 </section>
 
-<!-- ===== MEET SHINI ===== -->
-<section class="person person--alt" id="bride">
-  <p class="kicker reveal">Meet Shini</p>
-  <h2 class="name reveal">Shini Yassmin</h2>
-  <figure class="frame frame--arch person__photo reveal-left">
-    <img src="photos/bride-portrait.jpg" alt="Shini Yassmin" width="1000" height="1270" loading="lazy" decoding="async">
-  </figure>
-  <!-- one short sentence - edit freely -->
-  <p class="person__line reveal">A physician with a quiet strength and an easy laugh.</p>
-</section>
-
-<!-- ===== TRANSITION ===== -->
-<section class="quote">
-  <p class="quote__line reveal">Behind every love story stand the families who shaped it.</p>
-</section>
-
-<!-- ===== GROOM FAMILY =====
+<!-- ===== 03. GROOM FAMILY =====
      Groom-side photographs only. No couple images here. -->
 <section class="fam" id="groom-family">
   <h2 class="title reveal">Groom Family</h2>
+  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
   <div class="fam__stage">
     <figure class="frame frame--wide reveal">
       <img src="photos/groom-family.jpg" alt="The groom's family" width="1360" height="950" loading="lazy" decoding="async">
@@ -249,10 +239,32 @@ PHOTO ORDER REFERENCE  (developer only)
   </div>
 </section>
 
-<!-- ===== BRIDE FAMILY =====
+<!-- ===== TRANSITION ===== -->
+<section class="quote">
+  <p class="quote__line reveal">The woman who made forever feel effortless.</p>
+</section>
+
+<!-- ===== 04. BRIDE ===== -->
+<section class="person person--alt" id="bride">
+  <p class="kicker reveal">Meet the Bride</p>
+  <h2 class="name reveal">Shini Yassmin</h2>
+  <figure class="frame frame--arch person__photo reveal-left">
+    <img src="photos/bride-portrait.jpg" alt="Shini Yassmin" width="1000" height="1270" loading="lazy" decoding="async">
+  </figure>
+  <!-- one short sentence - edit freely -->
+  <p class="person__line reveal">A physician with a quiet strength and an easy laugh.</p>
+</section>
+
+<!-- ===== TRANSITION ===== -->
+<section class="quote">
+  <p class="quote__line reveal">And the family who never let her walk alone.</p>
+</section>
+
+<!-- ===== 05. BRIDE FAMILY =====
      Bride-side photographs only. -->
 <section class="fam fam--alt" id="bride-family">
   <h2 class="title reveal">Bride Family</h2>
+  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
   <div class="fam__stage fam__stage--tall">
     <figure class="frame frame--arch reveal">
       <img src="photos/bride-family.jpg" alt="Shini Yassmin with her parents" width="880" height="1100" loading="lazy" decoding="async">
@@ -262,25 +274,149 @@ PHOTO ORDER REFERENCE  (developer only)
 
 <!-- ===== TRANSITION ===== -->
 <section class="quote">
+  <p class="quote__line reveal">Two hearts. One beautiful journey.</p>
+</section>
+
+<!-- ===== 06. OUR STORY =====
+     ONLY photographs of the two of them together. The chapter alternates
+     narrative, single frame, pair and full-width frame so two picture
+     blocks are never neighbours. Every frame opens the viewer.
+     Prose is placeholder copy - rewrite any paragraph freely. -->
+<section class="story" id="story">
+  <h2 class="title reveal">Our Story</h2>
+  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
+
+  <p class="story__text reveal">
+    Every love story begins somewhere ordinary. Ours began with a conversation
+    that was meant to be short and somehow never ended. There was no thunder and
+    no grand gesture, only the quiet realisation that the day felt lighter when
+    the other one was in it — and that neither of us wanted the conversation to stop.
+  </p>
+
+  <figure class="story__solo reveal">
+    <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-selfie.jpg" data-cap="The first photograph of us">
+      <img src="photos/gallery-selfie.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+    </button>
+    <figcaption class="story__cap">The first photograph of us</figcaption>
+  </figure>
+
+  <p class="story__text reveal">
+    After that came the small things nobody photographs well — long drives with the
+    windows down, playlists argued over at every junction, tea that went cold because
+    we were still talking. Those unhurried hours taught us something simple. Home was
+    not a place we were travelling towards. It had quietly become a person.
+  </p>
+
+  <div class="story__pair">
+    <figure class="reveal-right">
+      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-car.jpg" data-cap="Somewhere on the road">
+        <img src="photos/gallery-car.jpg" alt="Thawfeeq and Shini Yassmin on a drive" width="900" height="1125" loading="lazy" decoding="async">
+      </button>
+    </figure>
+    <figure class="reveal-left">
+      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-casual.jpg" data-cap="An ordinary, perfect afternoon">
+        <img src="photos/gallery-casual.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+      </button>
+    </figure>
+  </div>
+
+  <p class="story__text reveal">
+    We learned each other slowly, the way you learn a favourite song. Which corner
+    table she prefers. How he goes quiet before he laughs hardest. The particular
+    silence that means everything is fine, and the one that means it isn't. Love, it
+    turned out, is mostly attention — paid patiently, and returned.
+  </p>
+
+  <figure class="story__wide reveal">
+    <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-cafe.jpg" data-cap="Our corner table">
+      <img src="photos/gallery-cafe.jpg" alt="Thawfeeq and Shini Yassmin at a cafe" width="900" height="1125" loading="lazy" decoding="async">
+    </button>
+    <figcaption class="story__cap">Our corner table</figcaption>
+  </figure>
+
+  <p class="story__text reveal">
+    Somewhere between the ordinary evenings and the ones we planned for weeks, the
+    question of forever stopped feeling like a question. It was simply the shape the
+    days were already taking. We told our families. They smiled as though they had
+    been waiting for us to catch up with what they had known all along.
+  </p>
+
+  <div class="story__pair">
+    <figure class="reveal-right">
+      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-mirror.jpg" data-cap="Caught in a mirror">
+        <img src="photos/gallery-mirror.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+      </button>
+    </figure>
+    <figure class="reveal-left">
+      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-parrot.jpg" data-cap="A day out together">
+        <img src="photos/gallery-parrot.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+      </button>
+    </figure>
+  </div>
+
+  <p class="story__text reveal">
+    There is a particular kind of happiness in being fully known and chosen anyway.
+    It is not loud. It arrives in the middle of a normal Tuesday and stays. We have
+    been carrying it quietly for a while now, and this year we decided it deserved
+    a celebration — with every person who helped it grow.
+  </p>
+
+  <figure class="story__wide reveal">
+    <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-red.jpg" data-cap="Dressed for the occasion">
+      <img src="photos/gallery-red.jpg" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
+    </button>
+    <figcaption class="story__cap">Dressed for the occasion</figcaption>
+  </figure>
+
+  <p class="story__text reveal">
+    So this is where the story pauses and the invitation begins. The water was calm
+    that evening, the light was gold, and neither of us said very much. We did not
+    need to. Some things you simply agree on without speaking, and then spend the
+    rest of your life keeping.
+  </p>
+
+  <div class="story__pair">
+    <figure class="reveal-right">
+      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-boat-1.jpg" data-cap="On the water">
+        <img src="photos/gallery-boat-1.jpg" alt="Thawfeeq and Shini Yassmin on the water" width="900" height="1125" loading="lazy" decoding="async">
+      </button>
+    </figure>
+    <figure class="reveal-left">
+      <button class="ph ph--frame" type="button" data-lb="story" data-src="photos/gallery-boat-2.jpg" data-cap="Golden hour">
+        <img src="photos/gallery-boat-2.jpg" alt="Thawfeeq and Shini Yassmin on the water" width="900" height="1125" loading="lazy" decoding="async">
+      </button>
+    </figure>
+  </div>
+
+  <p class="story__text story__text--end reveal">
+    And so, from one quiet conversation to a day surrounded by everyone we love —
+    thank you for being part of how we got here.
+  </p>
+</section>
+
+<!-- ===== TRANSITION ===== -->
+<section class="quote">
   <p class="quote__line reveal">A day where two families became one.</p>
 </section>
 
-<!-- ===== BLESSINGS BEGIN =====
-     Masonry collage, no captions. Rendered from FIXING_PHOTOS in script.js. -->
-<section class="fixing" id="fixing">
-  <h2 class="title reveal">Blessings Begin</h2>
+<!-- ===== 07. GALLERY — FAMILY MEMORIES =====
+     Every photograph that has somebody else in it: parents, siblings,
+     relatives and the fixing ceremony. Rendered from FAMILY_PHOTOS in
+     script.js; tiles open the same viewer as Our Story. -->
+<section class="gal" id="gallery">
+  <h2 class="title reveal">Family Memories</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <div class="masonry" id="fixingGrid"></div>
+  <p class="gal__lead reveal">The blessings, the gatherings and the people who made this day possible.</p>
+  <div class="masonry" id="familyGrid"></div>
 </section>
-
 
 <!-- ===== TRANSITION ===== -->
 <section class="quote">
   <p class="quote__line reveal">And now, we joyfully invite you to celebrate with us.</p>
 </section>
 
-<!-- ===== WEDDING EVENTS =====
-     Three watercolour cards. Map buttons are wired by the Maps Module. -->
+<!-- ===== 08. EVENTS =====
+     Five watercolour cards. Map buttons are wired by the Maps Module. -->
 <section class="ev" id="events">
   <h2 class="title reveal">Events</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
@@ -324,13 +460,7 @@ PHOTO ORDER REFERENCE  (developer only)
   </div>
 </section>
 
-<!-- ===== TRANSITION ===== -->
-<section class="quote">
-  <p class="quote__line reveal">The days that lead us to forever.</p>
-</section>
-
-<!-- ===== CELEBRATION TIMELINE =====
-     Four dates on a gold vine connector. -->
+<!-- ===== 08b. CELEBRATION TIMELINE ===== -->
 <section class="tl-sec" id="timeline">
   <h2 class="title reveal">Timeline</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
@@ -343,9 +473,9 @@ PHOTO ORDER REFERENCE  (developer only)
   </ol>
 </section>
 
-<!-- ===== WEDDING MEMORIES =====
-     Three cards. The Drive, YouTube and QR destinations are editable
-     constants at the top of script.js. -->
+<!-- ===== 08c. WEDDING MEMORIES =====
+     The Drive, YouTube and QR destinations are editable constants at the
+     top of script.js. -->
 <section class="mem" id="memories">
   <h2 class="title reveal">Wedding Memories</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
@@ -387,11 +517,11 @@ PHOTO ORDER REFERENCE  (developer only)
   <p class="quote__line reveal">Your presence will be our greatest gift.</p>
 </section>
 
-<!-- ===== RSVP =====
-     Single row: name, guest stepper, send. Writes to the Google Sheet
-     when SCRIPT_URL is set, and always keeps a copy in this browser. -->
+<!-- ===== 09. WISHES / RSVP =====
+     Name, guest stepper, send. Writes to the Google Sheet when
+     SCRIPT_URL is set, and always keeps a copy in this browser. -->
 <section class="rsvp" id="rsvp">
-  <h2 class="title reveal">RSVP</h2>
+  <h2 class="title reveal">Wishes &amp; RSVP</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
   <form class="rsvp__row reveal" id="rsvpForm" novalidate>
     <div class="rsvp__field">
@@ -413,10 +543,10 @@ PHOTO ORDER REFERENCE  (developer only)
   <p class="rsvp__note" id="rsvpNote" role="status" aria-live="polite"></p>
 </section>
 
-<!-- ===== CINEMATIC FAREWELL =====
+<!-- ===== 10. FAREWELL / FOOTER =====
      Black & white portrait, full screen, overlay text only. -->
 <section class="closing" id="closing">
-  <img class="closing__img" src="photos/closing-couple.jpg" alt="Thawfeeq and Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">
+  <img class="closing__img" src="photos/closing-couple.jpg" alt="Thawfeeq Ahamed and Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">
   <div class="closing__veil" aria-hidden="true"></div>
   <div class="closing__inner">
     <p class="closing__line">And so our forever begins.</p>
@@ -434,12 +564,23 @@ PHOTO ORDER REFERENCE  (developer only)
 
 </main>
 
-<!-- ===== OVERLAY. LIGHTBOX ===== -->
+<!-- ===== OVERLAY. LIGHTBOX =====
+     One viewer for every photograph on the page. Dark, blurred backdrop,
+     arrows, swipe, pinch and a thumbnail strip. -->
 <div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" hidden>
-  <button class="lb__x" id="lbClose" type="button" aria-label="Close viewer">&times;</button>
-  <button class="lb__nav lb__nav--p" id="lbPrev" type="button" aria-label="Previous photo">&#8249;</button>
-  <figure class="lb__stage"><img id="lbImg" src="" alt=""><figcaption class="lb__cap" id="lbCap"></figcaption></figure>
-  <button class="lb__nav lb__nav--n" id="lbNext" type="button" aria-label="Next photo">&#8250;</button>
+  <div class="lb__bar">
+    <span class="lb__count" id="lbCount"></span>
+    <button class="lb__x" id="lbClose" type="button" aria-label="Close viewer">&times;</button>
+  </div>
+  <div class="lb__stage" id="lbStage">
+    <button class="lb__nav lb__nav--p" id="lbPrev" type="button" aria-label="Previous photo">&#8249;</button>
+    <figure class="lb__fig">
+      <img id="lbImg" src="" alt="">
+    </figure>
+    <button class="lb__nav lb__nav--n" id="lbNext" type="button" aria-label="Next photo">&#8250;</button>
+  </div>
+  <p class="lb__cap" id="lbCap"></p>
+  <div class="lb__thumbs" id="lbThumbs" role="tablist" aria-label="Photo thumbnails"></div>
 </div>
 
 <!-- ===== OVERLAY. THANK-YOU MODAL ===== -->

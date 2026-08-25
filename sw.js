@@ -10,7 +10,7 @@
    Bump CACHE_VERSION whenever you change site files so returning
    guests receive the update on their next visit.
    ============================================================= */
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const SHELL_CACHE = 'wedding-shell-' + CACHE_VERSION;
 const ASSET_CACHE = 'wedding-assets-' + CACHE_VERSION;
 const FONT_CACHE  = 'wedding-fonts-' + CACHE_VERSION;
