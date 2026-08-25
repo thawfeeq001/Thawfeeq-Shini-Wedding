@@ -3,6 +3,8 @@
    Project : Thawfeeq & Shini Wedding
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
+
+   VERSION 2.0 - luxury watercolour editorial redesign.
    ========================================================== */
 
 /* ==========================================================
@@ -10,20 +12,17 @@
      01  Configuration        the only block you normally edit
      02  Utilities            selectors, events, toast, overlays
      03  Scroll Animation Module
-     04  Navigation Module
+     04  Navigation Module    sidebar, scrim, progress, active link
      05  Parallax Module
-     06  Decoration Module    watercolour corners and petals
+     06  Decoration Module    petals and drifting blobs
      07  Countdown Module
      08  Maps Module
-     09  Gallery Module
-     10  RSVP Module
+     09  Gallery Module       builds both grids, drives the lightbox
+     10  RSVP Module          stepper + Google Sheet + local copy
      11  Music Module
      12  Share Module
      13  PWA Module
      14  Boot
-
-   Every module is a single init function with no side effects until
-   Boot calls it, so a module can be removed by deleting its call.
    ========================================================== */
 (function () {
   'use strict';
@@ -36,8 +35,9 @@
   const NIKKAH_MAP    = "https://maps.app.goo.gl/wXZqhk89NidwfUpZ6";
   const RECEPTION_MAP = "https://maps.app.goo.gl/1XXwGVE348TApdXx5";
 
-  /* Optional: a Google Apps Script /exec URL. RSVPs are always kept
-     in this browser; if this is set they are posted to your sheet too. */
+  /* Google Apps Script /exec URL. Paste yours here and every RSVP is
+     written to the sheet. A copy is always kept in the guest's browser,
+     so nothing is lost while this is empty. */
   const SCRIPT_URL = "";
 
   /* Optional audio file. Empty = the built-in soft ambient melody. */
@@ -48,12 +48,45 @@
   const RECEPTION_AT = "2026-11-01T12:00:00+05:30";
   const THANKS_FROM  = "2026-11-02T00:00:00+05:30";
 
+  /* ---- PHOTO LISTS -------------------------------------------------
+     Both grids are built from these arrays, so nothing about the count
+     is hard-coded in the HTML - add a filename and the grid grows.
+     A static site cannot read its own folder (there is no server to ask),
+     so this list is the manifest. Keep the three groups separate:
+     couple photographs never belong in the ceremony grid, and family
+     photographs never belong in the couple gallery.                   */
+
+  const FIXING_PHOTOS = [
+    'fixing-ceremony.jpg',
+    'bride-seated.jpg',
+    'fixing-saree-box.jpg',
+    'fixing-blessing.jpg',
+    'fixing-garland.jpg',
+    'fixing-tray.jpg',
+    'fixing-gathering.jpg',
+    'fixing-families-1.jpg',
+    'fixing-families-2.jpg'
+  ];
+
+  const COUPLE_PHOTOS = [
+    'gallery-selfie.jpg',      /* first selfie   */
+    'gallery-car.jpg',         /* road trip      */
+    'gallery-restaurant.jpg',  /* restaurant     */
+    'gallery-mirror.jpg',      /* mirror         */
+    'gallery-parrot.jpg',      /* parrot         */
+    'gallery-casual.jpg',      /* casual         */
+    'gallery-cafe.jpg',        /* newly uploaded */
+    'gallery-red.jpg',
+    'gallery-friends.jpg',
+    'gallery-dinner.jpg'
+  ];
+
   const VENUES = {
     nikkah:    { name: 'Drizzle Elite Mahal', address: 'Madurai - Courtallam Main Road, Ilanji, Courtallam, Tamil Nadu' },
     reception: { name: 'Arulanandham Mahal',  address: 'Eswari Nagar, Reddipalayam Main Road, Thanjavur, Tamil Nadu' }
   };
 
-  const SHARE_TEXT = 'Dr. M. Thawfeeq Ahamed & Dr. S. Shini Yassmin — 25 October 2026, Courtallam.';
+  const SHARE_TEXT = 'Thawfeeq & Shini Yassmin — 25 October 2026, Courtallam.';
 
   // ==================================
   // 02 · Utilities
@@ -74,8 +107,7 @@
     toastTimer = setTimeout(() => el.classList.remove('is-on'), 3200);
   }
 
-  /* Run fn on scroll, at most once per animation frame, and once now.
-     Shared by the Navigation and Parallax modules. */
+  /* Run fn on scroll, at most once per animation frame, and once now. */
   function onScrollFrame(fn) {
     let ticking = false;
     const run = () => { fn(); ticking = false; };
@@ -87,13 +119,7 @@
     fn();
   }
 
-  /* One behaviour for both full-screen layers - the lightbox and the
-     thank-you modal. Handles the hidden attribute, the is-on class, the
-     body scroll lock, backdrop clicks and Escape.
-       delay        ms to wait before hiding, matching the CSS fade
-       focus()      element to focus on open
-       restoreFocus put focus back where it was on close
-       onClosed()   runs once the layer is hidden */
+  /* One behaviour for both full-screen layers - lightbox and modal. */
   function createOverlay(el, options) {
     const opts = options || {};
     let lastFocus = null;
@@ -108,7 +134,6 @@
       const target = opts.focus && opts.focus();
       if (target) target.focus({ preventScroll: true });
     }
-
     function close() {
       if (!isOpen()) return;
       el.classList.remove('is-on');
@@ -121,83 +146,120 @@
         lastFocus.focus({ preventScroll: true });
       }
     }
-
     on(el, 'click', e => { if (e.target === el) close(); });
     on(document, 'keydown', e => { if (e.key === 'Escape' && isOpen()) close(); });
-
     return { open: open, close: close, isOpen: isOpen };
+  }
+
+  /* Build one masonry tile. Every photograph below the fold is lazy. */
+  function buildTile(file, alt, clickable) {
+    const el = document.createElement(clickable ? 'button' : 'figure');
+    el.className = 'ph reveal';
+    if (clickable) el.type = 'button';
+    const img = document.createElement('img');
+    img.src = 'photos/' + file;
+    img.alt = alt;
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    el.appendChild(img);
+    return el;
   }
 
   // ==================================
   // 03 · Scroll Animation Module
   // ==================================
-  /* Adds .is-in the first time an element enters the viewport, with a
-     small stagger between siblings. Intersection Observer only. */
+  /* Fade up, fade left and fade right - all driven by one observer.
+     No bounce, no scroll-linked layout work. */
 
-  function initReveal() {
-    const items = $$('.reveal, .tl__i');
+  let revealObserver = null;
+
+  function observeReveals(root) {
+    const items = $$('.reveal, .reveal-left, .reveal-right, .tl__i', root || document);
     if (!('IntersectionObserver' in window) || REDUCED) {
       items.forEach(el => el.classList.add('is-in'));
       return;
     }
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const el = entry.target;
-        const peers = el.parentElement ? $$('.reveal, .tl__i', el.parentElement) : [];
-        el.style.setProperty('--d', Math.min(Math.max(0, peers.indexOf(el)), 5) * 80 + 'ms');
-        el.classList.add('is-in');
-        io.unobserve(el);
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    items.forEach(el => io.observe(el));
+    if (!revealObserver) {
+      revealObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          const peers = el.parentElement
+            ? $$('.reveal, .reveal-left, .reveal-right, .tl__i', el.parentElement) : [];
+          el.style.setProperty('--d', Math.min(Math.max(0, peers.indexOf(el)), 5) * 80 + 'ms');
+          el.classList.add('is-in');
+          revealObserver.unobserve(el);
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    }
+    items.forEach(el => revealObserver.observe(el));
   }
+
+  function initReveal() { observeReveals(document); }
 
   // ==================================
   // 04 · Navigation Module
   // ==================================
-  /* The bar fades in once the hero is past, the burger opens the drawer,
-     the progress line tracks scroll depth and the current section is
-     underlined in the menu. */
+  /* The sidebar has exactly one source of truth - the `open` flag - and
+     every control routes through setMenu(). That is what removes the
+     double-click bug: the burger cannot fall out of step with the panel.
+     Closes on the scrim, the close icon, a menu link, or Escape. */
 
   function initNav() {
-    const nav = $('#nav');
-    const burger = $('#navBurger');
-    const menu = $('#navMenu');
-    const scrim = $('#navScrim');
-    const bar = $('#progress');
-    const links = $$('.nav__menu a');
+    const bar = $('#topbar');
+    const burger = $('#burger');
+    const nav = $('#sidenav');
+    const scrim = $('#scrim');
+    const progress = $('#progress');
+    const links = $$('.sidenav__list a');
+    let open = false;
 
-    function closeMenu() {
-      if (!menu || !burger) return;
-      menu.classList.remove('is-open');
-      burger.setAttribute('aria-expanded', 'false');
-      burger.setAttribute('aria-label', 'Open menu');
-      if (scrim) { scrim.classList.remove('is-on'); scrim.hidden = true; }
+    function setMenu(next) {
+      if (next === open) return;
+      open = next;
+      if (nav) {
+        nav.classList.toggle('is-open', open);
+        nav.setAttribute('aria-hidden', open ? 'false' : 'true');
+      }
+      if (burger) {
+        burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      }
+      if (scrim) {
+        if (open) {
+          scrim.hidden = false;
+          requestAnimationFrame(() => scrim.classList.add('is-on'));
+        } else {
+          scrim.classList.remove('is-on');
+          setTimeout(() => { if (!open) scrim.hidden = true; }, 400);
+        }
+      }
+      document.body.classList.toggle('is-locked', open);
     }
-    on(burger, 'click', () => {
-      if (burger.getAttribute('aria-expanded') === 'true') return closeMenu();
-      menu.classList.add('is-open');
-      burger.setAttribute('aria-expanded', 'true');
-      burger.setAttribute('aria-label', 'Close menu');
-      if (scrim) { scrim.hidden = false; requestAnimationFrame(() => scrim.classList.add('is-on')); }
-    });
-    on(scrim, 'click', closeMenu);
-    links.forEach(a => on(a, 'click', closeMenu));
-    on(document, 'keydown', e => { if (e.key === 'Escape') closeMenu(); });
-    on(window, 'resize', () => { if (window.innerWidth > 900) closeMenu(); }, { passive: true });
+
+    on(burger, 'click', () => setMenu(!open));
+    on($('#navClose'), 'click', () => setMenu(false));
+    on(scrim, 'click', () => setMenu(false));
+    on(document, 'keydown', e => { if (e.key === 'Escape') setMenu(false); });
+    /* Let the browser handle the hash jump (smooth scrolling is CSS),
+       then close the panel. */
+    links.forEach(a => on(a, 'click', () => setMenu(false)));
+    on(window, 'resize', () => { if (window.innerWidth > 1100) setMenu(false); }, { passive: true });
 
     onScrollFrame(() => {
       const y = window.scrollY || window.pageYOffset;
-      if (nav) nav.classList.toggle('is-on', y > window.innerHeight * 0.72);
-      if (bar) {
+      if (bar) bar.classList.toggle('is-on', y > window.innerHeight * 0.6);
+      if (progress) {
         const h = document.documentElement.scrollHeight - window.innerHeight;
-        bar.style.width = (h > 0 ? Math.min(100, (y / h) * 100) : 0) + '%';
+        progress.style.width = (h > 0 ? Math.min(100, (y / h) * 100) : 0) + '%';
       }
     });
 
+    /* active section highlight */
     if ('IntersectionObserver' in window) {
-      const map = links.map(a => ({ a: a, el: document.querySelector(a.getAttribute('href')) })).filter(m => m.el);
+      const map = links
+        .map(a => ({ a: a, el: document.querySelector(a.getAttribute('href')) }))
+        .filter(m => m.el);
       const spy = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           if (!entry.isIntersecting) return;
@@ -214,23 +276,31 @@
   // ==================================
   // 05 · Parallax Module
   // ==================================
-  /* A gentle drift on the two full-screen photographs. Skipped entirely
-     when the visitor asks for reduced motion. */
+  /* Slow drift on the two full-screen photographs and the watercolour
+     blobs. Transform only, so it stays on the compositor at 60fps. */
 
   function initParallax() {
     if (REDUCED) return;
     const layers = [
-      { el: $('.hero__img'), speed: 0.16 },
-      { el: $('.closing__img'), speed: 0.10 }
+      { el: $('.hero__img'), speed: 0.14, base: 'scale(1.05)' },
+      { el: $('.closing__img'), speed: 0.09, base: '' }
     ].filter(l => l.el);
-    if (!layers.length) return;
+    const blobs = [
+      { el: $('.blob--a'), speed: 0.05 },
+      { el: $('.blob--b'), speed: -0.04 }
+    ].filter(b => b.el);
+    if (!layers.length && !blobs.length) return;
 
     onScrollFrame(() => {
+      const y = window.scrollY || window.pageYOffset;
       layers.forEach(l => {
         const rect = l.el.parentElement.getBoundingClientRect();
         if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return;
         const shift = (rect.top + rect.height / 2 - window.innerHeight / 2) * -l.speed;
-        l.el.style.transform = 'scale(1.06) translate3d(0,' + shift.toFixed(1) + 'px,0)';
+        l.el.style.transform = l.base + ' translate3d(0,' + shift.toFixed(1) + 'px,0)';
+      });
+      blobs.forEach(b => {
+        b.el.style.transform = 'translate3d(0,' + (y * b.speed).toFixed(1) + 'px,0)';
       });
     });
   }
@@ -238,25 +308,11 @@
   // ==================================
   // 06 · Decoration Module
   // ==================================
-  /* The watercolour corners and the drifting petals. Both are purely
-     ornamental: the corners load only once the page is ready so they
-     never compete with the photographs, and the petals are skipped
-     under reduced motion. */
-
-  function initWashes() {
-    const load = () => $$('.wash img[data-src]').forEach(img => {
-      img.setAttribute('fetchpriority', 'low');
-      img.src = img.dataset.src;
-      img.removeAttribute('data-src');
-    });
-    if (document.readyState === 'complete') load();
-    else on(window, 'load', load);
-  }
 
   function initPetals() {
     const host = $('#petals');
     if (!host || REDUCED) return;
-    const tints = ['rgba(232,201,201,.85)', 'rgba(207,168,168,.7)', 'rgba(199,161,90,.45)', 'rgba(168,184,163,.5)'];
+    const tints = ['rgba(239,216,216,.85)', 'rgba(183,110,121,.42)', 'rgba(200,164,106,.45)', 'rgba(168,180,154,.5)'];
     const count = window.innerWidth < 700 ? 7 : 12;
     for (let i = 0; i < count; i++) {
       const p = document.createElement('span');
@@ -277,10 +333,9 @@
   // 07 · Countdown Module
   // ==================================
   /* Ticks once a second and switches target on its own:
-       before NIKKAH_AT     counts to the Nikah
+       before NIKKAH_AT     counts to the Nikkah
        before RECEPTION_AT  counts to the Reception
-       after  THANKS_FROM   shows the thank-you line and stops
-     No edit is needed on the day. */
+       after  THANKS_FROM   shows the thank-you line and stops       */
 
   function initCountdown() {
     const grid = $('#cdGrid');
@@ -326,8 +381,6 @@
   // ==================================
   // 08 · Maps Module
   // ==================================
-  /* Open Maps on a venue card. Uses the exact pin from the invitation
-     QR code, falling back to a Maps search by name and address. */
 
   function initMaps() {
     $$('[data-maps]').forEach(btn => {
@@ -345,21 +398,29 @@
   // ==================================
   // 09 · Gallery Module
   // ==================================
-  /* Masonry thumbnails open the full-screen viewer. Arrow keys and
-     swipes move between photographs, Escape or a backdrop click closes,
-     and the neighbouring images are fetched ahead of time. */
+  /* Builds the ceremony collage and the couple gallery from the lists in
+     the configuration block, then wires the couple tiles to the viewer.
+     Arrow keys and swipes move between photographs. */
 
   function initGallery() {
-    const thumbs = $$('#masonry .ph');
+    const fixingGrid = $('#fixingGrid');
+    const galleryGrid = $('#galleryGrid');
+
+    if (fixingGrid) {
+      FIXING_PHOTOS.forEach(file => fixingGrid.appendChild(buildTile(file, 'The fixing ceremony', false)));
+      observeReveals(fixingGrid);
+    }
+    if (!galleryGrid) return;
+
+    COUPLE_PHOTOS.forEach(file => galleryGrid.appendChild(buildTile(file, 'Thawfeeq and Shini Yassmin', true)));
+    observeReveals(galleryGrid);
+
     const lb = $('#lightbox');
     const img = $('#lbImg');
     const cap = $('#lbCap');
-    if (!thumbs.length || !lb || !img) return;
+    if (!lb || !img) return;
 
-    const items = thumbs.map(btn => {
-      const i = $('img', btn);
-      return { src: i.getAttribute('src'), alt: i.getAttribute('alt') || 'Photograph' };
-    });
+    const tiles = $$('.ph', galleryGrid);
     let index = 0;
 
     const viewer = createOverlay(lb, {
@@ -370,20 +431,20 @@
     });
 
     const preload = i => {
-      const item = items[(i + items.length) % items.length];
-      if (item) { const im = new Image(); im.decoding = 'async'; im.src = item.src; }
+      const file = COUPLE_PHOTOS[(i + COUPLE_PHOTOS.length) % COUPLE_PHOTOS.length];
+      if (file) { const im = new Image(); im.decoding = 'async'; im.src = 'photos/' + file; }
     };
 
     function show(i) {
-      index = (i + items.length) % items.length;
-      img.src = items[index].src;
-      img.alt = items[index].alt;
-      if (cap) cap.textContent = (index + 1) + ' of ' + items.length;
+      index = (i + COUPLE_PHOTOS.length) % COUPLE_PHOTOS.length;
+      img.src = 'photos/' + COUPLE_PHOTOS[index];
+      img.alt = 'Thawfeeq and Shini Yassmin';
+      if (cap) cap.textContent = (index + 1) + ' of ' + COUPLE_PHOTOS.length;
       preload(index + 1);
       preload(index - 1);
     }
 
-    thumbs.forEach((btn, i) => on(btn, 'click', () => { show(i); viewer.open(); }));
+    tiles.forEach((btn, i) => on(btn, 'click', () => { show(i); viewer.open(); }));
     on($('#lbClose'), 'click', viewer.close);
     on($('#lbPrev'), 'click', () => show(index - 1));
     on($('#lbNext'), 'click', () => show(index + 1));
@@ -402,17 +463,14 @@
       if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1));
       else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) viewer.close();
     }, { passive: true });
-
-    const idle = window.requestIdleCallback || (fn => setTimeout(fn, 2400));
-    idle(() => { [0, 1, 2].forEach(preload); });
   }
 
   // ==================================
   // 10 · RSVP Module
   // ==================================
-  /* Validates, stores the reply in this browser, then shows the
-     thank-you modal. If SCRIPT_URL is set the reply is also posted to
-     the Google Sheet - the local copy is kept either way. */
+  /* Name + guest count only. The stepper animates the number, the reply
+     goes to the Google Sheet when SCRIPT_URL is set, and a copy is always
+     written to this browser so nothing is lost. */
 
   const RSVP_KEY = 'wedding-rsvp-entries';
 
@@ -432,59 +490,52 @@
     if (!form) return;
     const name = $('#rsvpName');
     const guests = $('#rsvpGuests');
-    const message = $('#rsvpMessage');
     const button = $('#rsvpSubmit');
     const note = $('#rsvpNote');
 
-    const thanks = createOverlay($('#thanks'), {
-      delay: 400,
-      focus: () => $('#thanksClose')
-    });
+    const thanks = createOverlay($('#thanks'), { delay: 400, focus: () => $('#thanksClose') });
     on($('#thanksClose'), 'click', thanks.close);
 
-    function setError(input, text) {
-      const slot = $('[data-err-for="' + input.id + '"]');
-      if (slot) slot.textContent = text || '';
-      input.setAttribute('aria-invalid', text ? 'true' : 'false');
-      return !text;
+    /* ---- guest stepper ---- */
+    function setGuests(next) {
+      const value = Math.max(1, Math.min(30, next));
+      if (String(value) === guests.value) return;
+      guests.value = String(value);
+      guests.classList.add('is-bump');
+      setTimeout(() => guests.classList.remove('is-bump'), 280);
     }
-    function validate() {
-      let ok = setError(name, name.value.trim().length < 2 ? 'Please tell us your name.' : '');
-      const n = parseInt(guests.value, 10);
-      ok = setError(guests, (!n || n < 1 || n > 30) ? 'Enter a number between 1 and 30.' : '') && ok;
-      return ok;
-    }
-    [name, guests].forEach(i => on(i, 'input', () => {
-      if (i.getAttribute('aria-invalid') === 'true') validate();
-    }));
+    on($('#guestMinus'), 'click', () => setGuests(parseInt(guests.value, 10) - 1));
+    on($('#guestPlus'), 'click', () => setGuests(parseInt(guests.value, 10) + 1));
+
+    on(name, 'input', () => {
+      if (name.getAttribute('aria-invalid') === 'true' && name.value.trim().length >= 2) {
+        name.setAttribute('aria-invalid', 'false');
+        if (note) note.textContent = '';
+      }
+    });
 
     on(form, 'submit', event => {
       event.preventDefault();
-      if (!validate()) { if (note) note.textContent = 'Please check the highlighted fields.'; return; }
+      if (name.value.trim().length < 2) {
+        name.setAttribute('aria-invalid', 'true');
+        if (note) note.textContent = 'Please tell us your name.';
+        name.focus();
+        return;
+      }
+      name.setAttribute('aria-invalid', 'false');
 
       const entry = {
         name: name.value.trim(),
-        guests: String(parseInt(guests.value, 10)),
-        message: message ? message.value.trim() : '',
-        savedAt: new Date().toISOString()
+        guests: String(parseInt(guests.value, 10) || 1),
+        timestamp: new Date().toISOString()
       };
 
-      const stored = saveRsvp(entry);
+      saveRsvp(entry);
       if (note) note.textContent = '';
       form.reset();
       guests.value = '1';
-      setError(name, '');
-      setError(guests, '');
 
-      const first = entry.name.split(' ')[0];
-      const body = $('#thanksText');
-      if (body) {
-        body.textContent = stored
-          ? 'We have your reply, ' + first + '. We cannot wait to celebrate with you.'
-          : 'We have your reply, ' + first + '.';
-      }
-      if ($('#thanks')) thanks.open();
-      else toast('Thank you — your reply has been saved.');
+      thanks.open();
 
       if (!SCRIPT_URL) return;
       button.classList.add('is-busy');
@@ -623,7 +674,6 @@
   // ==================================
   // 12 · Share Module
   // ==================================
-  /* The two icon buttons on the closing screen. */
 
   function initShare() {
     const url = location.href.split('#')[0];
@@ -655,8 +705,6 @@
   // ==================================
   // 13 · PWA Module
   // ==================================
-  /* Registers the service worker so the invitation opens offline.
-     Skipped on file:// where service workers are not allowed. */
 
   function initPwa() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
@@ -670,14 +718,13 @@
   // ==================================
 
   function boot() {
+    initGallery();     /* build the grids first so they can be observed */
     initReveal();
     initNav();
     initParallax();
-    initWashes();
     initPetals();
     initCountdown();
     initMaps();
-    initGallery();
     initRsvp();
     initMusic();
     initShare();

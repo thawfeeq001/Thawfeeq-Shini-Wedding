@@ -4,6 +4,9 @@ LANDMARK VERSION 1.0
 Project : Thawfeeq & Shini Wedding
 Purpose : Stable editable baseline before redesign
 Do not delete this marker.
+
+VERSION 2.0 - luxury watercolour editorial redesign.
+Built on the landmark baseline; structure and comments preserved.
 =========================================================== -->
 <html lang="en">
 <head>
@@ -13,38 +16,25 @@ Do not delete this marker.
 <!--
 PHOTO ORDER REFERENCE  (developer only)
 
-  01 HERO              photos/hero-couple.jpg        black & white couple portrait
-  03 GROOM             photos/groom-portrait.jpg     grey suit
-  04 BRIDE             photos/bride-portrait.jpg     saree
-  05 GROOM FAMILY      photos/groom-family.jpg       large photograph
-                       photos/groom-sister.jpg       overlapping inset
-  06 BRIDE FAMILY      photos/bride-family.jpg       the bride with her parents
-  07 FIXING CEREMONY   photos/fixing-ceremony.jpg    left  - the seer tray
-                       photos/bride-seated.jpg       right - the bride garlanded
-  08 GALLERY           photos/gallery-restaurant.jpg
-                       photos/gallery-car.jpg
-                       photos/gallery-mirror.jpg
-                       photos/gallery-parrot.jpg
-                       photos/gallery-casual.jpg
-                       photos/gallery-families-1.jpg
-                       photos/gallery-families-2.jpg
-  09 VENUES            venues/engagement.jpg         Engagement card
-                       venues/nikkah.jpg             Nikah card
-                       venues/reception.jpg          Reception card
-  12 CLOSING           photos/closing-couple.jpg     full-screen portrait
+  01 HERO            photos/hero-couple.jpg         coloured studio portrait
+  03 GROOM           photos/groom-portrait.jpg
+  05 BRIDE           photos/bride-portrait.jpg
+  07 GROOM FAMILY    photos/groom-family.jpg  + photos/groom-sister.jpg
+  08 BRIDE FAMILY    photos/bride-family.jpg
+  10 FIXING          photos/fixing-*.jpg + photos/bride-seated.jpg   (9 images)
+  11 COUPLE GALLERY  photos/gallery-*.jpg                            (10 images)
+  16 CLOSING         photos/closing-couple.jpg      black & white portrait
 
-  MONOGRAM             assets/logo-gold.png          navigation, on ivory paper
-                       assets/logo-ivory.png         hero and closing, over photographs
-
-  Replace a photograph by overwriting the file of the same name, then update the
-  width and height attributes on its <img> so the page does not shift while it loads.
+  The fixing and gallery sections are rendered from the FIXING_PHOTOS and
+  COUPLE_PHOTOS lists at the top of script.js - add a filename there and the
+  grid grows on its own. Family photographs never appear in the couple gallery.
 -->
 
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Thawfeeq Ahamed &amp; Shini Yassmin</title>
-<meta name="description" content="Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin. 25 October 2026, Courtallam.">
+<title>Thawfeeq &amp; Shini Yassmin</title>
+<meta name="description" content="Thawfeeq and Shini Yassmin. 25 October 2026, Courtallam.">
 <link rel="canonical" href="https://thawfeeq001.github.io/Thawfeeq-Shini-Wedding/">
-<meta name="theme-color" content="#FAF7F2">
+<meta name="theme-color" content="#FDF9F5">
 <meta name="color-scheme" content="light">
 <meta name="format-detection" content="telephone=no">
 
@@ -58,8 +48,8 @@ PHOTO ORDER REFERENCE  (developer only)
 <link rel="manifest" href="manifest.json">
 
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Thawfeeq Ahamed &amp; Shini Yassmin">
-<meta property="og:title" content="Thawfeeq Ahamed &amp; Shini Yassmin">
+<meta property="og:site_name" content="Thawfeeq &amp; Shini Yassmin">
+<meta property="og:title" content="Thawfeeq &amp; Shini Yassmin">
 <meta property="og:description" content="25 October 2026 · Courtallam. 1 November 2026 · Thanjavur.">
 <meta property="og:url" content="https://thawfeeq001.github.io/Thawfeeq-Shini-Wedding/">
 <meta property="og:image" content="https://thawfeeq001.github.io/Thawfeeq-Shini-Wedding/assets/og-image.jpg">
@@ -67,17 +57,18 @@ PHOTO ORDER REFERENCE  (developer only)
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="en_IN">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Thawfeeq Ahamed &amp; Shini Yassmin">
+<meta name="twitter:title" content="Thawfeeq &amp; Shini Yassmin">
 <meta name="twitter:description" content="25 October 2026 · Courtallam. 1 November 2026 · Thanjavur.">
 <meta name="twitter:image" content="https://thawfeeq001.github.io/Thawfeeq-Shini-Wedding/assets/og-image.jpg">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap"></noscript>
-
+<!-- Hero image is the only preload; every other photograph is lazy. -->
 <link rel="preload" as="image" href="photos/hero-couple.jpg" fetchpriority="high">
 <link rel="stylesheet" href="style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Great+Vibes&family=Inter:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Great+Vibes&family=Inter:wght@300;400;500&display=swap"></noscript>
 
 <script type="application/ld+json">
 {
@@ -85,7 +76,7 @@ PHOTO ORDER REFERENCE  (developer only)
   "@graph": [
     {
       "@type": "Event",
-      "name": "Engagement of Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin",
+      "name": "Engagement of Thawfeeq and Shini Yassmin",
       "startDate": "2026-10-24T19:00:00+05:30",
       "eventStatus": "https://schema.org/EventScheduled",
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
@@ -95,7 +86,7 @@ PHOTO ORDER REFERENCE  (developer only)
     },
     {
       "@type": "Event",
-      "name": "Nikah of Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin",
+      "name": "Nikkah of Thawfeeq and Shini Yassmin",
       "startDate": "2026-10-25T11:00:00+05:30",
       "eventStatus": "https://schema.org/EventScheduled",
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
@@ -106,7 +97,7 @@ PHOTO ORDER REFERENCE  (developer only)
     },
     {
       "@type": "Event",
-      "name": "Reception of Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin",
+      "name": "Reception of Thawfeeq and Shini Yassmin",
       "startDate": "2026-11-01T12:00:00+05:30",
       "eventStatus": "https://schema.org/EventScheduled",
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
@@ -120,250 +111,254 @@ PHOTO ORDER REFERENCE  (developer only)
 </script>
 </head>
 <body>
-<!-- ===== CHROME. SKIP LINK, SCROLL PROGRESS, DECORATION, NAVIGATION ===== -->
+<!-- ===== CHROME. SKIP LINK, PROGRESS, DECORATION ===== -->
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="progress" id="progress" aria-hidden="true"></div>
 <div class="petals" id="petals" aria-hidden="true"></div>
-<div class="wash wash--tl" aria-hidden="true"><img data-src="assets/watercolor-left.png" alt="" width="560" height="880" decoding="async"></div>
-<div class="wash wash--br" aria-hidden="true"><img data-src="assets/watercolor-right.png" alt="" width="560" height="880" decoding="async"></div>
+<div class="blob blob--a" aria-hidden="true"></div>
+<div class="blob blob--b" aria-hidden="true"></div>
 
-<header class="nav" id="nav">
-  <div class="nav__bar">
-    <a class="nav__brand" href="#hero" aria-label="Thawfeeq and Shini — back to top">
-      <img src="assets/logo-gold.png" alt="" width="260" height="260" decoding="async">
-    </a>
-    <button class="nav__burger" id="navBurger" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </button>
-    <nav class="nav__menu" id="navMenu" aria-label="Primary">
-      <a href="#groom">Groom</a>
-      <a href="#bride">Bride</a>
-      <a href="#blessings">Blessings</a>
-      <a href="#gallery">Gallery</a>
-      <a href="#venues">Venues</a>
-      <a href="#timeline">Timeline</a>
-      <a href="#rsvp">RSVP</a>
-    </nav>
-  </div>
+<!-- ===== CHROME. SIDEBAR NAVIGATION =====
+     Slides in from the left over a dark scrim. One state flag, so a
+     single tap always toggles cleanly - see the Navigation Module. -->
+<header class="topbar" id="topbar">
+  <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="sidenav" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+  <a class="topbar__mark" href="#hero" aria-label="Thawfeeq and Shini — back to top">
+    <img src="assets/logo-gold.png" alt="" width="260" height="260" decoding="async">
+  </a>
 </header>
-<div class="nav__scrim" id="navScrim" hidden></div>
 
-<!-- ===== PAGE SECTIONS 01-12 ===== -->
+<div class="scrim" id="scrim" hidden></div>
+
+<nav class="sidenav" id="sidenav" aria-label="Primary" aria-hidden="true">
+  <button class="sidenav__close" id="navClose" type="button" aria-label="Close menu">&times;</button>
+  <img class="sidenav__mark" src="assets/logo-gold.png" alt="" width="260" height="260" loading="lazy" decoding="async">
+  <ul class="sidenav__list">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#story">Our Story</a></li>
+    <li><a href="#groom">Groom</a></li>
+    <li><a href="#bride">Bride</a></li>
+    <li><a href="#groom-family">Families</a></li>
+    <li><a href="#fixing">Fixing</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#events">Events</a></li>
+    <li><a href="#rsvp">RSVP</a></li>
+  </ul>
+</nav>
+
+<!-- ===== PAGE SECTIONS ===== -->
 <main id="main">
 
-<!-- ===== 01. HERO ===== -->
-<!-- Full-screen black & white portrait. Monogram, names, date and place sit over it. -->
+<!-- ===== 01. HERO =====
+     Coloured couple portrait, full screen, with a watercolour overlay.
+     No buttons: the site opens straight into this. -->
 <section class="hero" id="hero">
-  <img class="hero__img" src="photos/hero-couple.jpg" alt="Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin" width="1080" height="1370" fetchpriority="high" decoding="async">
-  <div class="hero__veil" aria-hidden="true"></div>
+  <img class="hero__img" src="photos/hero-couple.jpg" alt="Thawfeeq and Shini Yassmin" width="1080" height="1370" fetchpriority="high" decoding="async">
+  <div class="hero__wash" aria-hidden="true"></div>
   <div class="hero__inner">
-    <img class="hero__mark" src="assets/logo-ivory.png" alt="" width="260" height="260" fetchpriority="low" decoding="async">
+    <img class="hero__mark" src="assets/logo-ivory.png" alt="" width="260" height="260" fetchpriority="high" decoding="async">
+    <p class="hero__eyebrow">Together with our families</p>
     <h1 class="hero__names">
-      <span>Dr. M. Thawfeeq Ahamed</span>
+      <span>Thawfeeq</span>
       <em>&amp;</em>
-      <span>Dr. S. Shini Yassmin</span>
+      <span>Shini Yassmin</span>
     </h1>
     <p class="hero__meta"><b>25 October 2026</b><i>Courtallam</i></p>
   </div>
 </section>
 
-<!-- ===== 02. COUNTDOWN ===== -->
-<!-- Glass card overlapping the foot of the hero. Counts to the Nikah, then the Reception, then thanks guests. Driven by the Countdown Module in script.js. -->
+<!-- ===== 02. COUNTDOWN =====
+     Horizontal ivory card over a watercolour mosque silhouette.
+     Ticks every second - see the Countdown Module. -->
 <section class="cd-wrap" id="countdown">
-  <div class="cd glass" id="cdGrid" role="timer" aria-live="off">
+  <div class="cd" id="cdGrid" role="timer" aria-live="off">
     <div class="cd__u"><span class="cd__n" id="cdDays">000</span><span class="cd__l">Days</span></div>
     <div class="cd__u"><span class="cd__n" id="cdHours">00</span><span class="cd__l">Hours</span></div>
     <div class="cd__u"><span class="cd__n" id="cdMins">00</span><span class="cd__l">Minutes</span></div>
     <div class="cd__u"><span class="cd__n" id="cdSecs">00</span><span class="cd__l">Seconds</span></div>
   </div>
-  <p class="cd__done glass" id="cdDone" hidden>Thank you for celebrating with us</p>
+  <p class="cd__done" id="cdDone" hidden>Thank you for celebrating with us</p>
 </section>
 
-<!-- ===== 03. GROOM ===== -->
-<!-- Heading and one arched portrait. No body copy by design. -->
+<!-- ===== 03. TRANSITION ===== -->
+<section class="quote" id="story">
+  <p class="quote__line reveal">Two hearts. One beautiful journey.</p>
+</section>
+
+<!-- ===== 04. MEET THE GROOM ===== -->
 <section class="person" id="groom">
   <p class="kicker reveal">Meet the Groom</p>
-  <h2 class="display reveal">Dr. M. Thawfeeq Ahamed</h2>
-  <figure class="frame frame--arch person__solo reveal">
-    <img src="photos/groom-portrait.jpg" alt="Dr. M. Thawfeeq Ahamed" width="1000" height="1270" loading="lazy" decoding="async">
+  <h2 class="name reveal">Thawfeeq</h2>
+  <figure class="frame frame--arch person__photo reveal-right">
+    <img src="photos/groom-portrait.jpg" alt="Thawfeeq" width="1000" height="1270" loading="lazy" decoding="async">
   </figure>
+  <!-- one short sentence - edit freely -->
+  <p class="person__line reveal">A surgeon by training, and the calmest person in any room.</p>
 </section>
 
-<!-- ===== 04. BRIDE ===== -->
-<!-- Mirrors the groom section. -->
+<!-- ===== 05. TRANSITION ===== -->
+<section class="quote">
+  <p class="quote__line reveal">The man whose kindness became home.</p>
+</section>
+
+<!-- ===== 06. MEET THE BRIDE ===== -->
 <section class="person person--alt" id="bride">
   <p class="kicker reveal">Meet the Bride</p>
-  <h2 class="display reveal">Dr. S. Shini Yassmin</h2>
-  <figure class="frame frame--arch person__solo reveal">
-    <img src="photos/bride-portrait.jpg" alt="Dr. S. Shini Yassmin" width="1000" height="1270" loading="lazy" decoding="async">
+  <h2 class="name reveal">Shini Yassmin</h2>
+  <figure class="frame frame--arch person__photo reveal-left">
+    <img src="photos/bride-portrait.jpg" alt="Shini Yassmin" width="1000" height="1270" loading="lazy" decoding="async">
   </figure>
+  <!-- one short sentence - edit freely -->
+  <p class="person__line reveal">A physician with a quiet strength and an easy laugh.</p>
 </section>
 
-<!-- ===== 05. GROOM FAMILY ===== -->
-<!-- The family photograph with the groom and his sister as an overlapping inset. -->
+<!-- ===== 07. TRANSITION ===== -->
+<section class="quote">
+  <p class="quote__line reveal">Behind every love story stand the families who shaped it.</p>
+</section>
+
+<!-- ===== 08. GROOM FAMILY =====
+     Groom-side photographs only. No couple images here. -->
 <section class="fam" id="groom-family">
-  <h2 class="display display--center reveal">Groom Family</h2>
+  <h2 class="title reveal">Groom Family</h2>
   <div class="fam__stage">
     <figure class="frame frame--wide reveal">
       <img src="photos/groom-family.jpg" alt="The groom's family" width="1360" height="950" loading="lazy" decoding="async">
     </figure>
-    <figure class="frame frame--soft fam__inset fam__inset--a reveal">
-      <img src="photos/groom-sister.jpg" alt="The groom with his sister" width="880" height="1100" loading="lazy" decoding="async">
+    <figure class="frame frame--soft fam__inset reveal-right">
+      <img src="photos/groom-sister.jpg" alt="Thawfeeq with his sister" width="880" height="1100" loading="lazy" decoding="async">
     </figure>
   </div>
 </section>
 
-<!-- ===== 06. BRIDE FAMILY ===== -->
-<!-- The bride with her parents, in a portrait frame. -->
+<!-- ===== 09. BRIDE FAMILY =====
+     Bride-side photographs only. -->
 <section class="fam fam--alt" id="bride-family">
-  <h2 class="display display--center reveal">Bride Family</h2>
+  <h2 class="title reveal">Bride Family</h2>
   <div class="fam__stage fam__stage--tall">
     <figure class="frame frame--arch reveal">
-      <img src="photos/bride-family.jpg" alt="The bride with her parents" width="880" height="1100" loading="lazy" decoding="async">
+      <img src="photos/bride-family.jpg" alt="Shini Yassmin with her parents" width="880" height="1100" loading="lazy" decoding="async">
     </figure>
   </div>
 </section>
 
-<!-- ===== 07. FIXING CEREMONY ===== -->
-<!-- Two photographs from the day the match was fixed - the seer tray and the bride garlanded. -->
-<section class="bless" id="blessings">
-  <h2 class="display display--center reveal">Blessings Begin</h2>
+<!-- ===== 10. TRANSITION ===== -->
+<section class="quote">
+  <p class="quote__line reveal">A day where two families became one.</p>
+</section>
+
+<!-- ===== 11. FIXING CEREMONY =====
+     Masonry collage, no captions. Rendered from FIXING_PHOTOS in script.js. -->
+<section class="fixing" id="fixing">
+  <h2 class="title reveal">Fixing Ceremony</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <div class="bless__pair">
-    <figure class="frame frame--wide bless__a reveal">
-      <img src="photos/fixing-ceremony.jpg" alt="The fixing ceremony" width="1360" height="950" loading="lazy" decoding="async">
-    </figure>
-    <figure class="frame frame--arch bless__b reveal">
-      <img src="photos/bride-seated.jpg" alt="The bride on the day of the fixing ceremony" width="900" height="1125" loading="lazy" decoding="async">
-    </figure>
-  </div>
+  <div class="masonry" id="fixingGrid"></div>
 </section>
 
-<!-- ===== 08. GALLERY ===== -->
-<!-- Masonry columns. Every thumbnail opens the ivory lightbox handled by the Gallery Module. -->
+<!-- ===== 12. COUPLE GALLERY =====
+     Couple photographs only - never family or ceremony images.
+     Rendered from COUPLE_PHOTOS in script.js; opens the lightbox. -->
 <section class="gal" id="gallery">
-  <h2 class="display display--center reveal">Together</h2>
+  <h2 class="title reveal">Together</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <div class="masonry" id="masonry">
-    <button class="ph reveal" type="button"><img src="photos/gallery-restaurant.jpg" alt="The couple" width="900" height="720" loading="lazy" decoding="async"></button>
-    <button class="ph reveal" type="button"><img src="photos/gallery-car.jpg" alt="The couple" width="900" height="1125" loading="lazy" decoding="async"></button>
-    <button class="ph reveal" type="button"><img src="photos/gallery-mirror.jpg" alt="The couple" width="900" height="1125" loading="lazy" decoding="async"></button>
-    <button class="ph reveal" type="button"><img src="photos/gallery-parrot.jpg" alt="The couple" width="900" height="1125" loading="lazy" decoding="async"></button>
-    <button class="ph reveal" type="button"><img src="photos/gallery-casual.jpg" alt="The couple" width="900" height="1125" loading="lazy" decoding="async"></button>
-    <button class="ph reveal" type="button"><img src="photos/gallery-families-1.jpg" alt="Both families together" width="900" height="720" loading="lazy" decoding="async"></button>
-    <button class="ph reveal" type="button"><img src="photos/gallery-families-2.jpg" alt="Both families together" width="900" height="720" loading="lazy" decoding="async"></button>
-  </div>
+  <div class="masonry" id="galleryGrid"></div>
 </section>
 
-<!-- ===== 09. VENUES ===== -->
-<!-- The three events - Engagement, Nikah and Reception - as watercolour cards. The Nikah and Reception carry a QR code and an Open Maps button wired up by the Maps Module. -->
-<section class="ven" id="venues">
-  <h2 class="display display--center reveal">Wedding Venues</h2>
+<!-- ===== 13. TRANSITION ===== -->
+<section class="quote">
+  <p class="quote__line reveal">And now, we joyfully invite you to celebrate with us.</p>
+</section>
+
+<!-- ===== 14. EVENTS =====
+     Three watercolour cards. Map buttons are wired by the Maps Module. -->
+<section class="ev" id="events">
+  <h2 class="title reveal">Events</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <div class="ven__grid">
+  <div class="ev__grid">
 
-    <article class="vcard reveal">
-      <div class="vcard__art">
-        <img src="venues/engagement.jpg" alt="" width="1600" height="1000" loading="lazy" decoding="async">
-      </div>
-      <div class="vcard__body">
-        <span class="vcard__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 32"><circle cx="18" cy="18" r="11"/><circle cx="30" cy="18" r="11"/><path d="M18 7l-3-5h6z"/></svg>
-        </span>
-        <h3 class="vcard__title">Engagement</h3>
-        <p class="vcard__date">24 October 2026</p>
-        <p class="vcard__time">7:00 PM</p>
-      </div>
+    <article class="ecard reveal-right">
+      <span class="ecard__icon" aria-hidden="true">
+        <svg viewBox="0 0 48 32"><circle cx="18" cy="18" r="11"/><circle cx="30" cy="18" r="11"/><path d="M18 7l-3-5h6z"/></svg>
+      </span>
+      <h3 class="ecard__title">Engagement</h3>
+      <p class="ecard__date">24 October 2026</p>
+      <p class="ecard__time">7:00 PM</p>
     </article>
 
-    <article class="vcard reveal">
-      <div class="vcard__art">
-        <img src="venues/nikkah.jpg" alt="Drizzle Elite Mahal" width="1600" height="1000" loading="lazy" decoding="async">
-      </div>
-      <div class="vcard__body">
-        <span class="vcard__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 32"><path d="M24 4c7 4 11 9 11 15v11H13V19c0-6 4-11 11-15z"/><path d="M8 30V17M40 30V17"/><circle cx="24" cy="2" r="1.6"/></svg>
-        </span>
-        <h3 class="vcard__title">Nikah</h3>
-        <p class="vcard__date">25 October 2026</p>
-        <p class="vcard__time">11:00 AM</p>
-        <p class="vcard__place">Drizzle Elite Mahal<i>Courtallam</i></p>
-        <div class="vcard__foot">
-          <img class="vcard__qr" src="assets/qr-nikkah.png" alt="QR code for Drizzle Elite Mahal on Google Maps" width="630" height="630" loading="lazy" decoding="async">
-          <button class="pill" type="button" data-maps="nikkah">Open Maps</button>
-        </div>
-      </div>
+    <article class="ecard reveal">
+      <span class="ecard__icon" aria-hidden="true">
+        <svg viewBox="0 0 48 32"><path d="M24 4c7 4 11 9 11 15v11H13V19c0-6 4-11 11-15z"/><path d="M8 30V17M40 30V17"/><circle cx="24" cy="2" r="1.6"/></svg>
+      </span>
+      <h3 class="ecard__title">Nikkah</h3>
+      <p class="ecard__date">25 October 2026</p>
+      <p class="ecard__time">11:00 AM</p>
+      <p class="ecard__place">Drizzle Elite Mahal<i>Courtallam</i></p>
+      <button class="pill" type="button" data-maps="nikkah">Open Maps</button>
     </article>
 
-    <article class="vcard reveal">
-      <div class="vcard__art">
-        <img src="venues/reception.jpg" alt="Arulanandham Mahal" width="1600" height="1000" loading="lazy" decoding="async">
-      </div>
-      <div class="vcard__body">
-        <span class="vcard__icon" aria-hidden="true">
-          <svg viewBox="0 0 48 32"><path d="M16 3h16l-2 11a6 6 0 01-12 0z"/><path d="M24 20v9M18 29h12"/></svg>
-        </span>
-        <h3 class="vcard__title">Reception</h3>
-        <p class="vcard__date">1 November 2026</p>
-        <p class="vcard__time">12:00 PM</p>
-        <p class="vcard__place">Arulanandham Mahal<i>Thanjavur</i></p>
-        <div class="vcard__foot">
-          <img class="vcard__qr" src="assets/qr-reception.png" alt="QR code for Arulanandham Mahal on Google Maps" width="630" height="630" loading="lazy" decoding="async">
-          <button class="pill" type="button" data-maps="reception">Open Maps</button>
-        </div>
-      </div>
+    <article class="ecard reveal-left">
+      <span class="ecard__icon" aria-hidden="true">
+        <svg viewBox="0 0 48 32"><path d="M16 3h16l-2 11a6 6 0 01-12 0z"/><path d="M24 20v9M18 29h12"/></svg>
+      </span>
+      <h3 class="ecard__title">Reception</h3>
+      <p class="ecard__date">1 November 2026</p>
+      <p class="ecard__time">12:00 PM</p>
+      <p class="ecard__place">Arulanandham Mahal<i>Thanjavur</i></p>
+      <button class="pill" type="button" data-maps="reception">Open Maps</button>
     </article>
 
   </div>
 </section>
 
-<!-- ===== 10. TIMELINE ===== -->
-<!-- Four dates on a gold vine connector. -->
+<!-- ===== 15. TIMELINE =====
+     Four dates on a gold vine connector. -->
 <section class="tl-sec" id="timeline">
-  <h2 class="display display--center reveal">Celebration Timeline</h2>
+  <h2 class="title reveal">Timeline</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
   <ol class="tl">
     <li class="tl__i reveal"><span class="tl__d">23 Oct</span><span class="tl__t">Guests Arrive</span></li>
     <li class="tl__i reveal"><span class="tl__d">24 Oct</span><span class="tl__t">Engagement</span></li>
-    <li class="tl__i reveal"><span class="tl__d">25 Oct</span><span class="tl__t">Nikah</span></li>
+    <li class="tl__i reveal"><span class="tl__d">25 Oct</span><span class="tl__t">Nikkah</span></li>
     <li class="tl__i reveal"><span class="tl__d">1 Nov</span><span class="tl__t">Reception</span></li>
   </ol>
 </section>
 
-<!-- ===== 11. RSVP ===== -->
-<!-- Glass form. Replies are stored in the guest browser and, if SCRIPT_URL is set in script.js, posted to a Google Sheet as well. -->
+<!-- ===== 16. RSVP =====
+     Single row: name, guest stepper, send. Writes to the Google Sheet
+     when SCRIPT_URL is set, and always keeps a copy in this browser. -->
 <section class="rsvp" id="rsvp">
-  <h2 class="display display--center reveal">RSVP</h2>
-  <form class="rsvp__card glass reveal" id="rsvpForm" novalidate>
-    <div class="field">
+  <h2 class="title reveal">RSVP</h2>
+  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
+  <form class="rsvp__row reveal" id="rsvpForm" novalidate>
+    <div class="rsvp__field">
       <label for="rsvpName">Name</label>
-      <input type="text" id="rsvpName" name="name" autocomplete="name" required maxlength="80">
-      <span class="field__e" data-err-for="rsvpName"></span>
+      <input type="text" id="rsvpName" name="name" autocomplete="name" required maxlength="80" placeholder="Your name">
     </div>
-    <div class="field">
-      <label for="rsvpGuests">Number of Guests</label>
-      <input type="number" id="rsvpGuests" name="guests" inputmode="numeric" min="1" max="30" step="1" value="1" required>
-      <span class="field__e" data-err-for="rsvpGuests"></span>
+    <div class="rsvp__field rsvp__field--count">
+      <label for="rsvpGuests">Guests</label>
+      <div class="stepper">
+        <button class="stepper__btn" type="button" id="guestMinus" aria-label="One guest fewer">&minus;</button>
+        <input type="number" id="rsvpGuests" name="guests" inputmode="numeric" min="1" max="30" step="1" value="1" required readonly aria-live="polite">
+        <button class="stepper__btn" type="button" id="guestPlus" aria-label="One guest more">+</button>
+      </div>
     </div>
-    <div class="field">
-      <label for="rsvpMessage">Message</label>
-      <textarea id="rsvpMessage" name="message" rows="3" maxlength="400"></textarea>
-    </div>
-    <button class="pill pill--gold pill--block" type="submit" id="rsvpSubmit">
+    <button class="pill pill--gold rsvp__send" type="submit" id="rsvpSubmit">
       <span class="pill__label">Send</span><span class="pill__spin" aria-hidden="true"></span>
     </button>
-    <p class="rsvp__note" id="rsvpNote" role="status" aria-live="polite"></p>
   </form>
+  <p class="rsvp__note" id="rsvpNote" role="status" aria-live="polite"></p>
 </section>
 
-<!-- ===== 12. CLOSING ===== -->
-<!-- Full-screen colour portrait, the closing line, and the two share buttons. This section stands in for a footer - there is no separate footer by design. -->
+<!-- ===== 17. CLOSING =====
+     Black & white portrait, full screen, overlay text only. -->
 <section class="closing" id="closing">
-  <img class="closing__img" src="photos/closing-couple.jpg" alt="Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">
+  <img class="closing__img" src="photos/closing-couple.jpg" alt="Thawfeeq and Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">
   <div class="closing__veil" aria-hidden="true"></div>
   <div class="closing__inner">
-    <img class="closing__mark" src="assets/logo-ivory.png" alt="" width="260" height="260" loading="lazy" decoding="async">
-    <p class="closing__line">We look forward to celebrating with you.</p>
+    <p class="closing__line">And so our forever begins.</p>
+    <p class="closing__names">Thawfeeq <span aria-hidden="true">&#9829;</span><span class="sr-only">and</span> Shini</p>
     <div class="closing__acts">
       <button class="icon-btn" type="button" id="shareWhatsApp" aria-label="Share on WhatsApp">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 01-11.9 6.9L4 20l1.2-3.9A8 8 0 1120 12z"/><path d="M9.2 9.4c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .6.5l.6 1.4c.1.2 0 .4-.1.5l-.4.5c-.1.2-.2.3 0 .6a6 6 0 002.6 2.2c.3.1.4 0 .6-.1l.5-.5c.2-.2.3-.2.5-.1l1.4.7c.2.1.3.2.3.4s-.1.9-.4 1.2c-.3.3-1 .6-1.6.5-1.5-.2-3.2-1.1-4.4-2.3a8 8 0 01-1.8-3c-.2-.7 0-1.4.5-1.9z"/></svg>
@@ -378,7 +373,6 @@ PHOTO ORDER REFERENCE  (developer only)
 </main>
 
 <!-- ===== OVERLAY. LIGHTBOX ===== -->
-<!-- Full-screen photo viewer for section 08. Ivory, never dark. -->
 <div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" hidden>
   <button class="lb__x" id="lbClose" type="button" aria-label="Close viewer">&times;</button>
   <button class="lb__nav lb__nav--p" id="lbPrev" type="button" aria-label="Previous photo">&#8249;</button>
@@ -387,14 +381,13 @@ PHOTO ORDER REFERENCE  (developer only)
 </div>
 
 <!-- ===== OVERLAY. THANK-YOU MODAL ===== -->
-<!-- Shown after an RSVP is saved. -->
 <div class="modal" id="thanks" role="dialog" aria-modal="true" aria-labelledby="thanksTitle" hidden>
-  <div class="modal__card glass">
+  <div class="modal__card">
     <span class="modal__mark" aria-hidden="true">
       <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="21"/><path d="M15 24.5l6.5 6.5L33 19"/></svg>
     </span>
-    <h3 class="modal__title" id="thanksTitle">Thank you</h3>
-    <p class="modal__text" id="thanksText">Your reply has been saved.</p>
+    <h3 class="modal__title" id="thanksTitle">Thank you!</h3>
+    <p class="modal__text" id="thanksText">We can't wait to celebrate with you.</p>
     <button class="pill pill--gold" type="button" id="thanksClose">Close</button>
   </div>
 </div>

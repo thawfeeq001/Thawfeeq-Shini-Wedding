@@ -22,20 +22,26 @@ out of their way.
 
 ---
 
-## Page order
+## Page order (version 2.0)
 
-1. **Hero** — full-screen black &amp; white portrait, names, date, place
-2. **Countdown** — glassmorphism card, updates every second
-3. **Meet the Groom**
-4. **Meet the Bride**
-5. **Groom Family**
-6. **Bride Family**
-7. **Blessings Begin** — overlapping collage of the fixing ceremony
-8. **Together** — Pinterest masonry gallery with a full-screen lightbox
-9. **Wedding Venues** — three watercolour cards
-10. **Celebration Timeline** — gold vine connector
-11. **RSVP** — saved in the guest's browser
-12. **Closing** — full-screen colour portrait
+1. **Hero** — coloured couple portrait, monogram, names, date
+2. **Countdown** — horizontal ivory card over a watercolour mosque
+3. *"Two hearts. One beautiful journey."*
+4. **Meet the Groom**
+5. *"The man whose kindness became home."*
+6. **Meet the Bride**
+7. *"Behind every love story stand the families who shaped it."*
+8. **Groom Family** · 9. **Bride Family**
+10. *"A day where two families became one."*
+11. **Fixing Ceremony** — masonry collage
+12. **Couple Gallery** — masonry with lightbox
+13. *"And now, we joyfully invite you to celebrate with us."*
+14. **Events** · 15. **Timeline** · 16. **RSVP**
+17. **Closing** — black &amp; white portrait, *"And so our forever begins."*
+
+**Palette** Background `#FDF9F5` · Paper `#F8F2EC` · Blush `#EFD8D8` ·
+Rose `#B76E79` · Sage `#A8B49A` · Gold `#C8A46A` · Text `#463636`
+**Type** Playfair Display (headings) · Great Vibes (names) · Inter (body)
 
 ---
 
@@ -87,37 +93,36 @@ git checkout -b redesign-v2 landmark-v1.0
 
 ## Which photo goes where
 
-Every photograph is a real one, named for the place it appears. Replacing a
-photo means dropping in a new file with the same name.
-
 | File | Where it appears |
 | --- | --- |
-| `photos/hero-couple.jpg` | Hero — the black &amp; white couple portrait |
+| `photos/hero-couple.jpg` | Hero — the coloured studio portrait |
 | `photos/groom-portrait.jpg` | Meet the Groom |
 | `photos/bride-portrait.jpg` | Meet the Bride |
-| `photos/groom-family.jpg` | Groom Family — the large photograph |
-| `photos/groom-sister.jpg` | Groom Family — the small overlapping inset |
-| `photos/bride-family.jpg` | Bride Family — the bride with her parents |
-| `photos/fixing-ceremony.jpg` | Blessings Begin — left |
-| `photos/bride-seated.jpg` | Blessings Begin — right |
-| `photos/gallery-restaurant.jpg` | Gallery |
-| `photos/gallery-car.jpg` | Gallery |
-| `photos/gallery-mirror.jpg` | Gallery |
-| `photos/gallery-parrot.jpg` | Gallery |
-| `photos/gallery-casual.jpg` | Gallery |
-| `photos/gallery-families-1.jpg` | Gallery — both families |
-| `photos/gallery-families-2.jpg` | Gallery — both families |
-| `photos/closing-couple.jpg` | Closing — the full-screen portrait |
-| `venues/engagement.jpg`, `venues/nikkah.jpg`, `venues/reception.jpg` | The three venue cards (still placeholders) |
+| `photos/groom-family.jpg` + `photos/groom-sister.jpg` | Groom Family |
+| `photos/bride-family.jpg` | Bride Family |
+| `photos/fixing-*.jpg`, `photos/bride-seated.jpg` | Fixing Ceremony collage (9) |
+| `photos/gallery-*.jpg` | Couple Gallery (10) |
+| `photos/closing-couple.jpg` | Closing — the black &amp; white portrait |
+| `venues/*.jpg` | not used by version 2.0 |
 
-Each photograph is cropped to the aspect ratio its slot needs and compressed to
-between 85 and 230 KB. If you replace one, keep it roughly the same shape —
-portraits at 4:5, family and ceremony photographs at about 10:7 — and update the
-`width` and `height` attributes on that `<img>` in `index.html` so the page does
-not shift while it loads.
+### Adding or removing photographs
 
-The hero renders through `filter: grayscale(1)`, so a colour photograph placed
-there still appears black &amp; white.
+The two grids are built in JavaScript from lists at the top of `script.js`, so
+no count is written into the HTML — add a filename and the grid grows:
+
+```js
+const FIXING_PHOTOS = [ 'fixing-ceremony.jpg', … ];
+const COUPLE_PHOTOS = [ 'gallery-selfie.jpg', … ];
+```
+
+Keep the three groups apart: family photographs never go in `COUPLE_PHOTOS`,
+and couple photographs never go in `FIXING_PHOTOS`.
+
+> A page served from GitHub Pages cannot read its own folder — there is no
+> server to ask for a directory listing — so these lists are the manifest.
+> Drop the file into `photos/` and add its name here; that is the whole step.
+
+---
 
 ## The monogram
 
