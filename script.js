@@ -78,7 +78,9 @@
     'gallery-cafe.jpg',        /* newly uploaded */
     'gallery-red.jpg',
     'gallery-friends.jpg',
-    'gallery-dinner.jpg'
+    'gallery-dinner.jpg',
+    'gallery-boat-1.jpg',
+    'gallery-boat-2.jpg'
   ];
 
   const VENUES = {

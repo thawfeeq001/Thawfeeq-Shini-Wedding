@@ -101,7 +101,7 @@ git checkout -b redesign-v2 landmark-v1.0
 | `photos/groom-family.jpg` + `photos/groom-sister.jpg` | Groom Family |
 | `photos/bride-family.jpg` | Bride Family |
 | `photos/fixing-*.jpg`, `photos/bride-seated.jpg` | Fixing Ceremony collage (9) |
-| `photos/gallery-*.jpg` | Couple Gallery (10) |
+| `photos/gallery-*.jpg` | Couple Gallery (12) |
 | `photos/closing-couple.jpg` | Closing — the black &amp; white portrait |
 | `venues/*.jpg` | not used by version 2.0 |
 
