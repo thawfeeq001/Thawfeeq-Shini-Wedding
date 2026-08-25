@@ -1,7 +1,45 @@
 <!DOCTYPE html>
+<!-- ==========================================================
+LANDMARK VERSION 1.0
+Project : Thawfeeq & Shini Wedding
+Purpose : Stable editable baseline before redesign
+Do not delete this marker.
+=========================================================== -->
 <html lang="en">
 <head>
+<!-- ===== HEAD. META, ICONS, FONTS, STRUCTURED DATA ===== -->
 <meta charset="utf-8">
+
+<!--
+PHOTO ORDER REFERENCE  (developer only)
+
+  01 HERO              photos/hero-couple.jpg        black & white couple portrait
+  03 GROOM             photos/groom-portrait.jpg     grey suit
+  04 BRIDE             photos/bride-portrait.jpg     saree
+  05 GROOM FAMILY      photos/groom-family.jpg       large photograph
+                       photos/groom-sister.jpg       overlapping inset
+  06 BRIDE FAMILY      photos/bride-family.jpg       the bride with her parents
+  07 FIXING CEREMONY   photos/fixing-ceremony.jpg    left  - the seer tray
+                       photos/bride-seated.jpg       right - the bride garlanded
+  08 GALLERY           photos/gallery-restaurant.jpg
+                       photos/gallery-car.jpg
+                       photos/gallery-mirror.jpg
+                       photos/gallery-parrot.jpg
+                       photos/gallery-casual.jpg
+                       photos/gallery-families-1.jpg
+                       photos/gallery-families-2.jpg
+  09 VENUES            venues/engagement.jpg         Engagement card
+                       venues/nikkah.jpg             Nikah card
+                       venues/reception.jpg          Reception card
+  12 CLOSING           photos/closing-couple.jpg     full-screen portrait
+
+  MONOGRAM             assets/logo-gold.png          navigation, on ivory paper
+                       assets/logo-ivory.png         hero and closing, over photographs
+
+  Replace a photograph by overwriting the file of the same name, then update the
+  width and height attributes on its <img> so the page does not shift while it loads.
+-->
+
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thawfeeq Ahamed &amp; Shini Yassmin</title>
 <meta name="description" content="Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin. 25 October 2026, Courtallam.">
@@ -82,6 +120,7 @@
 </script>
 </head>
 <body>
+<!-- ===== CHROME. SKIP LINK, SCROLL PROGRESS, DECORATION, NAVIGATION ===== -->
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="progress" id="progress" aria-hidden="true"></div>
 <div class="petals" id="petals" aria-hidden="true"></div>
@@ -109,9 +148,11 @@
 </header>
 <div class="nav__scrim" id="navScrim" hidden></div>
 
+<!-- ===== PAGE SECTIONS 01-12 ===== -->
 <main id="main">
 
-<!-- 1 · HERO -->
+<!-- ===== 01. HERO ===== -->
+<!-- Full-screen black & white portrait. Monogram, names, date and place sit over it. -->
 <section class="hero" id="hero">
   <img class="hero__img" src="photos/hero-couple.jpg" alt="Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin" width="1080" height="1370" fetchpriority="high" decoding="async">
   <div class="hero__veil" aria-hidden="true"></div>
@@ -126,7 +167,8 @@
   </div>
 </section>
 
-<!-- countdown -->
+<!-- ===== 02. COUNTDOWN ===== -->
+<!-- Glass card overlapping the foot of the hero. Counts to the Nikah, then the Reception, then thanks guests. Driven by the Countdown Module in script.js. -->
 <section class="cd-wrap" id="countdown">
   <div class="cd glass" id="cdGrid" role="timer" aria-live="off">
     <div class="cd__u"><span class="cd__n" id="cdDays">000</span><span class="cd__l">Days</span></div>
@@ -137,7 +179,8 @@
   <p class="cd__done glass" id="cdDone" hidden>Thank you for celebrating with us</p>
 </section>
 
-<!-- 2 · MEET THE GROOM -->
+<!-- ===== 03. GROOM ===== -->
+<!-- Heading and one arched portrait. No body copy by design. -->
 <section class="person" id="groom">
   <p class="kicker reveal">Meet the Groom</p>
   <h2 class="display reveal">Dr. M. Thawfeeq Ahamed</h2>
@@ -146,7 +189,8 @@
   </figure>
 </section>
 
-<!-- 3 · MEET THE BRIDE -->
+<!-- ===== 04. BRIDE ===== -->
+<!-- Mirrors the groom section. -->
 <section class="person person--alt" id="bride">
   <p class="kicker reveal">Meet the Bride</p>
   <h2 class="display reveal">Dr. S. Shini Yassmin</h2>
@@ -155,7 +199,8 @@
   </figure>
 </section>
 
-<!-- 4 · GROOM FAMILY -->
+<!-- ===== 05. GROOM FAMILY ===== -->
+<!-- The family photograph with the groom and his sister as an overlapping inset. -->
 <section class="fam" id="groom-family">
   <h2 class="display display--center reveal">Groom Family</h2>
   <div class="fam__stage">
@@ -168,7 +213,8 @@
   </div>
 </section>
 
-<!-- 5 · BRIDE FAMILY -->
+<!-- ===== 06. BRIDE FAMILY ===== -->
+<!-- The bride with her parents, in a portrait frame. -->
 <section class="fam fam--alt" id="bride-family">
   <h2 class="display display--center reveal">Bride Family</h2>
   <div class="fam__stage fam__stage--tall">
@@ -178,7 +224,8 @@
   </div>
 </section>
 
-<!-- 6 · BLESSINGS BEGIN -->
+<!-- ===== 07. FIXING CEREMONY ===== -->
+<!-- Two photographs from the day the match was fixed - the seer tray and the bride garlanded. -->
 <section class="bless" id="blessings">
   <h2 class="display display--center reveal">Blessings Begin</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
@@ -192,7 +239,8 @@
   </div>
 </section>
 
-<!-- 7 · COUPLE GALLERY -->
+<!-- ===== 08. GALLERY ===== -->
+<!-- Masonry columns. Every thumbnail opens the ivory lightbox handled by the Gallery Module. -->
 <section class="gal" id="gallery">
   <h2 class="display display--center reveal">Together</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
@@ -207,7 +255,8 @@
   </div>
 </section>
 
-<!-- 8 · WEDDING VENUES -->
+<!-- ===== 09. VENUES ===== -->
+<!-- The three events - Engagement, Nikah and Reception - as watercolour cards. The Nikah and Reception carry a QR code and an Open Maps button wired up by the Maps Module. -->
 <section class="ven" id="venues">
   <h2 class="display display--center reveal">Wedding Venues</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
@@ -268,7 +317,8 @@
   </div>
 </section>
 
-<!-- 9 · CELEBRATION TIMELINE -->
+<!-- ===== 10. TIMELINE ===== -->
+<!-- Four dates on a gold vine connector. -->
 <section class="tl-sec" id="timeline">
   <h2 class="display display--center reveal">Celebration Timeline</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
@@ -280,7 +330,8 @@
   </ol>
 </section>
 
-<!-- RSVP -->
+<!-- ===== 11. RSVP ===== -->
+<!-- Glass form. Replies are stored in the guest browser and, if SCRIPT_URL is set in script.js, posted to a Google Sheet as well. -->
 <section class="rsvp" id="rsvp">
   <h2 class="display display--center reveal">RSVP</h2>
   <form class="rsvp__card glass reveal" id="rsvpForm" novalidate>
@@ -305,7 +356,8 @@
   </form>
 </section>
 
-<!-- 10 · CLOSING -->
+<!-- ===== 12. CLOSING ===== -->
+<!-- Full-screen colour portrait, the closing line, and the two share buttons. This section stands in for a footer - there is no separate footer by design. -->
 <section class="closing" id="closing">
   <img class="closing__img" src="photos/closing-couple.jpg" alt="Dr. M. Thawfeeq Ahamed and Dr. S. Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">
   <div class="closing__veil" aria-hidden="true"></div>
@@ -325,7 +377,8 @@
 
 </main>
 
-<!-- lightbox -->
+<!-- ===== OVERLAY. LIGHTBOX ===== -->
+<!-- Full-screen photo viewer for section 08. Ivory, never dark. -->
 <div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" hidden>
   <button class="lb__x" id="lbClose" type="button" aria-label="Close viewer">&times;</button>
   <button class="lb__nav lb__nav--p" id="lbPrev" type="button" aria-label="Previous photo">&#8249;</button>
@@ -333,7 +386,8 @@
   <button class="lb__nav lb__nav--n" id="lbNext" type="button" aria-label="Next photo">&#8250;</button>
 </div>
 
-<!-- thank-you modal -->
+<!-- ===== OVERLAY. THANK-YOU MODAL ===== -->
+<!-- Shown after an RSVP is saved. -->
 <div class="modal" id="thanks" role="dialog" aria-modal="true" aria-labelledby="thanksTitle" hidden>
   <div class="modal__card glass">
     <span class="modal__mark" aria-hidden="true">
@@ -345,6 +399,7 @@
   </div>
 </div>
 
+<!-- ===== CHROME. MUSIC TOGGLE (off by default) AND TOAST ===== -->
 <button class="music" type="button" id="music" aria-pressed="false" aria-label="Toggle background music">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path class="m-n" d="M9 18V6l10-2v12"/><circle class="m-n" cx="7" cy="18" r="2"/><circle class="m-n" cx="17" cy="16" r="2"/><path class="m-s" d="M4 4l16 16"/></svg>
 </button>

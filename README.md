@@ -1,3 +1,10 @@
+<!-- ==========================================================
+LANDMARK VERSION 1.0
+Project : Thawfeeq & Shini Wedding
+Purpose : Stable editable baseline before redesign
+Do not delete this marker.
+=========================================================== -->
+
 # Thawfeeq Ahamed &amp; Shini Yassmin — Wedding Website
 
 A luxury editorial wedding website. Photographs carry the story; the type stays

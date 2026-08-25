@@ -1,3 +1,10 @@
+/* ==========================================================
+   LANDMARK VERSION 1.0
+   Project : Thawfeeq & Shini Wedding
+   Purpose : Stable editable baseline before redesign
+   Do not delete this marker.
+   ========================================================== */
+
 /* =============================================================
    Service worker — offline support for the wedding invitation.
    Bump CACHE_VERSION whenever you change site files so returning

@@ -1,11 +1,36 @@
-/* =============================================================
-   Thawfeeq Ahamed & Shini Yassmin — V2
-   Everything you normally edit lives in the CONFIG block below.
-   ============================================================= */
+/* ==========================================================
+   LANDMARK VERSION 1.0
+   Project : Thawfeeq & Shini Wedding
+   Purpose : Stable editable baseline before redesign
+   Do not delete this marker.
+   ========================================================== */
+
+/* ==========================================================
+   CONTENTS
+     01  Configuration        the only block you normally edit
+     02  Utilities            selectors, events, toast, overlays
+     03  Scroll Animation Module
+     04  Navigation Module
+     05  Parallax Module
+     06  Decoration Module    watercolour corners and petals
+     07  Countdown Module
+     08  Maps Module
+     09  Gallery Module
+     10  RSVP Module
+     11  Music Module
+     12  Share Module
+     13  PWA Module
+     14  Boot
+
+   Every module is a single init function with no side effects until
+   Boot calls it, so a module can be removed by deleting its call.
+   ========================================================== */
 (function () {
   'use strict';
 
-  /* ================= CONFIG ================= */
+  // ==================================
+  // 01 · Configuration
+  // ==================================
 
   /* Exact venue pins, read from the printed invitation QR codes. */
   const NIKKAH_MAP    = "https://maps.app.goo.gl/wXZqhk89NidwfUpZ6";
@@ -30,7 +55,9 @@
 
   const SHARE_TEXT = 'Dr. M. Thawfeeq Ahamed & Dr. S. Shini Yassmin — 25 October 2026, Courtallam.';
 
-  /* ================= helpers ================= */
+  // ==================================
+  // 02 · Utilities
+  // ==================================
 
   const $  = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
@@ -47,7 +74,65 @@
     toastTimer = setTimeout(() => el.classList.remove('is-on'), 3200);
   }
 
-  /* ================= reveal on scroll ================= */
+  /* Run fn on scroll, at most once per animation frame, and once now.
+     Shared by the Navigation and Parallax modules. */
+  function onScrollFrame(fn) {
+    let ticking = false;
+    const run = () => { fn(); ticking = false; };
+    on(window, 'scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(run);
+    }, { passive: true });
+    fn();
+  }
+
+  /* One behaviour for both full-screen layers - the lightbox and the
+     thank-you modal. Handles the hidden attribute, the is-on class, the
+     body scroll lock, backdrop clicks and Escape.
+       delay        ms to wait before hiding, matching the CSS fade
+       focus()      element to focus on open
+       restoreFocus put focus back where it was on close
+       onClosed()   runs once the layer is hidden */
+  function createOverlay(el, options) {
+    const opts = options || {};
+    let lastFocus = null;
+    const isOpen = () => !!el && !el.hidden;
+
+    function open() {
+      if (!el || isOpen()) return;
+      lastFocus = document.activeElement;
+      el.hidden = false;
+      document.body.classList.add('is-locked');
+      requestAnimationFrame(() => el.classList.add('is-on'));
+      const target = opts.focus && opts.focus();
+      if (target) target.focus({ preventScroll: true });
+    }
+
+    function close() {
+      if (!isOpen()) return;
+      el.classList.remove('is-on');
+      document.body.classList.remove('is-locked');
+      setTimeout(() => {
+        el.hidden = true;
+        if (opts.onClosed) opts.onClosed();
+      }, opts.delay || 400);
+      if (opts.restoreFocus && lastFocus && lastFocus.focus) {
+        lastFocus.focus({ preventScroll: true });
+      }
+    }
+
+    on(el, 'click', e => { if (e.target === el) close(); });
+    on(document, 'keydown', e => { if (e.key === 'Escape' && isOpen()) close(); });
+
+    return { open: open, close: close, isOpen: isOpen };
+  }
+
+  // ==================================
+  // 03 · Scroll Animation Module
+  // ==================================
+  /* Adds .is-in the first time an element enters the viewport, with a
+     small stagger between siblings. Intersection Observer only. */
 
   function initReveal() {
     const items = $$('.reveal, .tl__i');
@@ -68,7 +153,12 @@
     items.forEach(el => io.observe(el));
   }
 
-  /* ================= navigation & scroll progress ================= */
+  // ==================================
+  // 04 · Navigation Module
+  // ==================================
+  /* The bar fades in once the hero is past, the burger opens the drawer,
+     the progress line tracks scroll depth and the current section is
+     underlined in the menu. */
 
   function initNav() {
     const nav = $('#nav');
@@ -97,22 +187,14 @@
     on(document, 'keydown', e => { if (e.key === 'Escape') closeMenu(); });
     on(window, 'resize', () => { if (window.innerWidth > 900) closeMenu(); }, { passive: true });
 
-    let ticking = false;
-    function paint() {
+    onScrollFrame(() => {
       const y = window.scrollY || window.pageYOffset;
       if (nav) nav.classList.toggle('is-on', y > window.innerHeight * 0.72);
       if (bar) {
         const h = document.documentElement.scrollHeight - window.innerHeight;
         bar.style.width = (h > 0 ? Math.min(100, (y / h) * 100) : 0) + '%';
       }
-      ticking = false;
-    }
-    on(window, 'scroll', () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(paint);
-    }, { passive: true });
-    paint();
+    });
 
     if ('IntersectionObserver' in window) {
       const map = links.map(a => ({ a: a, el: document.querySelector(a.getAttribute('href')) })).filter(m => m.el);
@@ -129,7 +211,11 @@
     }
   }
 
-  /* ================= soft parallax on the two full-screen photographs ================= */
+  // ==================================
+  // 05 · Parallax Module
+  // ==================================
+  /* A gentle drift on the two full-screen photographs. Skipped entirely
+     when the visitor asks for reduced motion. */
 
   function initParallax() {
     if (REDUCED) return;
@@ -139,27 +225,23 @@
     ].filter(l => l.el);
     if (!layers.length) return;
 
-    let ticking = false;
-    function apply() {
+    onScrollFrame(() => {
       layers.forEach(l => {
         const rect = l.el.parentElement.getBoundingClientRect();
         if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return;
         const shift = (rect.top + rect.height / 2 - window.innerHeight / 2) * -l.speed;
         l.el.style.transform = 'scale(1.06) translate3d(0,' + shift.toFixed(1) + 'px,0)';
       });
-      ticking = false;
-    }
-    on(window, 'scroll', () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(apply);
-    }, { passive: true });
-    apply();
+    });
   }
 
-  /* ================= decorative washes =================
-     Purely ornamental, so they load only once the page itself is
-     ready and never compete with the photographs. */
+  // ==================================
+  // 06 · Decoration Module
+  // ==================================
+  /* The watercolour corners and the drifting petals. Both are purely
+     ornamental: the corners load only once the page is ready so they
+     never compete with the photographs, and the petals are skipped
+     under reduced motion. */
 
   function initWashes() {
     const load = () => $$('.wash img[data-src]').forEach(img => {
@@ -170,8 +252,6 @@
     if (document.readyState === 'complete') load();
     else on(window, 'load', load);
   }
-
-  /* ================= drifting petals ================= */
 
   function initPetals() {
     const host = $('#petals');
@@ -193,7 +273,14 @@
     }
   }
 
-  /* ================= countdown ================= */
+  // ==================================
+  // 07 · Countdown Module
+  // ==================================
+  /* Ticks once a second and switches target on its own:
+       before NIKKAH_AT     counts to the Nikah
+       before RECEPTION_AT  counts to the Reception
+       after  THANKS_FROM   shows the thank-you line and stops
+     No edit is needed on the day. */
 
   function initCountdown() {
     const grid = $('#cdGrid');
@@ -236,7 +323,11 @@
     }
   }
 
-  /* ================= venue maps ================= */
+  // ==================================
+  // 08 · Maps Module
+  // ==================================
+  /* Open Maps on a venue card. Uses the exact pin from the invitation
+     QR code, falling back to a Maps search by name and address. */
 
   function initMaps() {
     $$('[data-maps]').forEach(btn => {
@@ -251,7 +342,12 @@
     });
   }
 
-  /* ================= gallery lightbox ================= */
+  // ==================================
+  // 09 · Gallery Module
+  // ==================================
+  /* Masonry thumbnails open the full-screen viewer. Arrow keys and
+     swipes move between photographs, Escape or a backdrop click closes,
+     and the neighbouring images are fetched ahead of time. */
 
   function initGallery() {
     const thumbs = $$('#masonry .ph');
@@ -264,7 +360,14 @@
       const i = $('img', btn);
       return { src: i.getAttribute('src'), alt: i.getAttribute('alt') || 'Photograph' };
     });
-    let index = 0, lastFocus = null;
+    let index = 0;
+
+    const viewer = createOverlay(lb, {
+      delay: 380,
+      restoreFocus: true,
+      focus: () => $('#lbClose'),
+      onClosed: () => { img.src = ''; }
+    });
 
     const preload = i => {
       const item = items[(i + items.length) % items.length];
@@ -279,31 +382,14 @@
       preload(index + 1);
       preload(index - 1);
     }
-    function open(i) {
-      lastFocus = document.activeElement;
-      show(i);
-      lb.hidden = false;
-      document.body.classList.add('is-locked');
-      requestAnimationFrame(() => lb.classList.add('is-on'));
-      const x = $('#lbClose');
-      if (x) x.focus({ preventScroll: true });
-    }
-    function close() {
-      lb.classList.remove('is-on');
-      document.body.classList.remove('is-locked');
-      setTimeout(() => { lb.hidden = true; img.src = ''; }, 380);
-      if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
-    }
 
-    thumbs.forEach((btn, i) => on(btn, 'click', () => open(i)));
-    on($('#lbClose'), 'click', close);
+    thumbs.forEach((btn, i) => on(btn, 'click', () => { show(i); viewer.open(); }));
+    on($('#lbClose'), 'click', viewer.close);
     on($('#lbPrev'), 'click', () => show(index - 1));
     on($('#lbNext'), 'click', () => show(index + 1));
-    on(lb, 'click', e => { if (e.target === lb) close(); });
     on(document, 'keydown', e => {
-      if (lb.hidden) return;
-      if (e.key === 'Escape') close();
-      else if (e.key === 'ArrowLeft') show(index - 1);
+      if (!viewer.isOpen()) return;
+      if (e.key === 'ArrowLeft') show(index - 1);
       else if (e.key === 'ArrowRight') show(index + 1);
     });
 
@@ -314,14 +400,19 @@
       swiping = false;
       const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
       if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1));
-      else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) close();
+      else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) viewer.close();
     }, { passive: true });
 
     const idle = window.requestIdleCallback || (fn => setTimeout(fn, 2400));
     idle(() => { [0, 1, 2].forEach(preload); });
   }
 
-  /* ================= RSVP ================= */
+  // ==================================
+  // 10 · RSVP Module
+  // ==================================
+  /* Validates, stores the reply in this browser, then shows the
+     thank-you modal. If SCRIPT_URL is set the reply is also posted to
+     the Google Sheet - the local copy is kept either way. */
 
   const RSVP_KEY = 'wedding-rsvp-entries';
 
@@ -344,7 +435,12 @@
     const message = $('#rsvpMessage');
     const button = $('#rsvpSubmit');
     const note = $('#rsvpNote');
-    const modal = $('#thanks');
+
+    const thanks = createOverlay($('#thanks'), {
+      delay: 400,
+      focus: () => $('#thanksClose')
+    });
+    on($('#thanksClose'), 'click', thanks.close);
 
     function setError(input, text) {
       const slot = $('[data-err-for="' + input.id + '"]');
@@ -361,26 +457,6 @@
     [name, guests].forEach(i => on(i, 'input', () => {
       if (i.getAttribute('aria-invalid') === 'true') validate();
     }));
-
-    function openModal(text) {
-      if (!modal) return toast('Thank you — your reply has been saved.');
-      const body = $('#thanksText');
-      if (body) body.textContent = text;
-      modal.hidden = false;
-      document.body.classList.add('is-locked');
-      requestAnimationFrame(() => modal.classList.add('is-on'));
-      const close = $('#thanksClose');
-      if (close) close.focus({ preventScroll: true });
-    }
-    function closeModal() {
-      if (!modal) return;
-      modal.classList.remove('is-on');
-      document.body.classList.remove('is-locked');
-      setTimeout(() => { modal.hidden = true; }, 400);
-    }
-    on($('#thanksClose'), 'click', closeModal);
-    on(modal, 'click', e => { if (e.target === modal) closeModal(); });
-    on(document, 'keydown', e => { if (modal && !modal.hidden && e.key === 'Escape') closeModal(); });
 
     on(form, 'submit', event => {
       event.preventDefault();
@@ -401,9 +477,14 @@
       setError(guests, '');
 
       const first = entry.name.split(' ')[0];
-      openModal(stored
-        ? 'We have your reply, ' + first + '. We cannot wait to celebrate with you.'
-        : 'We have your reply, ' + first + '.');
+      const body = $('#thanksText');
+      if (body) {
+        body.textContent = stored
+          ? 'We have your reply, ' + first + '. We cannot wait to celebrate with you.'
+          : 'We have your reply, ' + first + '.';
+      }
+      if ($('#thanks')) thanks.open();
+      else toast('Thank you — your reply has been saved.');
 
       if (!SCRIPT_URL) return;
       button.classList.add('is-busy');
@@ -417,7 +498,11 @@
     });
   }
 
-  /* ================= music (default off) ================= */
+  // ==================================
+  // 11 · Music Module
+  // ==================================
+  /* Off by default. With no MUSIC_URL the melody is generated in the
+     browser with the Web Audio API, so there is no file to ship. */
 
   const Music = (function () {
     let ctx = null, master = null, timer = null, el = null, playing = false, step = 0;
@@ -535,7 +620,10 @@
     });
   }
 
-  /* ================= sharing ================= */
+  // ==================================
+  // 12 · Share Module
+  // ==================================
+  /* The two icon buttons on the closing screen. */
 
   function initShare() {
     const url = location.href.split('#')[0];
@@ -564,7 +652,11 @@
     });
   }
 
-  /* ================= service worker ================= */
+  // ==================================
+  // 13 · PWA Module
+  // ==================================
+  /* Registers the service worker so the invitation opens offline.
+     Skipped on file:// where service workers are not allowed. */
 
   function initPwa() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
@@ -573,7 +665,9 @@
     });
   }
 
-  /* ================= boot ================= */
+  // ==================================
+  // 14 · Boot
+  // ==================================
 
   function boot() {
     initReveal();
