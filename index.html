@@ -575,7 +575,8 @@ PHOTO ORDER REFERENCE  (developer only)
   <div class="lb__stage" id="lbStage">
     <button class="lb__nav lb__nav--p" id="lbPrev" type="button" aria-label="Previous photo">&#8249;</button>
     <figure class="lb__fig">
-      <img id="lbImg" src="" alt="">
+      <!-- no src attribute: an empty one re-requests the page itself -->
+      <img id="lbImg" alt="">
     </figure>
     <button class="lb__nav lb__nav--n" id="lbNext" type="button" aria-label="Next photo">&#8250;</button>
   </div>
