@@ -162,9 +162,14 @@
 
     function open() {
       if (!el) return;
+      const wasOpen = !el.hidden && !closeTimer;
       if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
-      else if (!el.hidden) return;         /* already fully open */
-      else lockScroll();
+      if (wasOpen) return;
+      /* Every open that actually opens takes a lock, and every close gives
+         one back. Reopening mid-fade counts as a real open, because close()
+         has already released its lock - miss that and the page scrolls
+         freely behind the second photograph onwards. */
+      lockScroll();
       lastFocus = lastFocus || document.activeElement;
       el.hidden = false;
       requestAnimationFrame(() => el.classList.add('is-on'));

@@ -83,11 +83,14 @@
 }
 
 /* THE SPLIT-SCREEN SWITCH
-   Everything below @media (min-width:860px) OR any landscape viewport
-   at least 700px wide moves to the two-column layout. A phone held
-   upright never matches either, so the portrait design is untouched;
-   rotating the same phone matches the second query immediately, which
-   is what makes the change automatic on rotation. */
+   The two-column layout is behind @media (min-width:720px), which every
+   tablet clears in either orientation - an iPad mini is 744px upright,
+   a 10.9-inch iPad 820px - while the widest phone held upright is about
+   430px, so a portrait phone keeps the stacked design untouched.
+   Rotating that phone matches the second query, landscape at 700px or
+   more, so the layout changes on rotation with no reload.
+   The three event cards need more room than two panels do and stay on
+   their own 860px breakpoint. */
 @supports (height:100svh){ :root{ --screen:100svh } }
 @supports (height:100dvh){ :root{ --screen:100dvh } }
 
@@ -416,7 +419,7 @@ section{position:relative;z-index:1}
 .fam__inset{position:absolute;width:clamp(116px,15vw,186px);aspect-ratio:4/5;z-index:2;right:3%;bottom:-9%}
 
 /* the divider only exists once there are two columns to divide */
-@media (min-width:860px), (orientation:landscape) and (min-width:700px){
+@media (min-width:720px), (orientation:landscape) and (min-width:700px){
   .duo__grid{
     grid-template-columns:minmax(0,1fr) minmax(0,1fr);
     grid-template-rows:auto auto auto auto;
@@ -938,7 +941,7 @@ html.js-reveal .reveal-right.is-in{
    clock read as one opening screen rather than as two stacked blocks.
    The hero gains the same amount of bottom padding, which keeps the names
    optically centred instead of shunting them upwards. */
-@media (min-width:860px), (orientation:landscape) and (min-width:700px){
+@media (min-width:720px), (orientation:landscape) and (min-width:700px){
   .cd-wrap{margin-top:calc(-1 * clamp(112px,15vh,168px));width:min(100% - 2.6rem,760px)}
   .hero{padding-bottom:calc(var(--sa-b) + clamp(7rem,17vh,10.5rem))}
   .cd{background:rgba(255,255,255,.52);border-color:rgba(255,255,255,.62)}
