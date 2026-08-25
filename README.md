@@ -39,6 +39,52 @@ out of their way.
 
 ---
 
+## Landmark v1.0 — the restore point
+
+`landmark-v1.0` is a branch on GitHub pinned to the clean, structured baseline.
+It never moves. Whatever happens on `main` afterwards, this is the state you can
+always come back to: the site exactly as it looks today, with the documented
+structure and every photograph in place.
+
+Every editable file carries a `LANDMARK VERSION 1.0` banner at the top. If you
+open a file and the banner is there, you are on or descended from this baseline.
+
+**Look at it without touching your work**
+
+```bash
+git fetch origin
+git checkout landmark-v1.0      # detached — browse, run, copy from it
+git checkout main               # back to where you were
+```
+
+**Recover one file** — the usual case, when a single file gets into a mess:
+
+```bash
+git checkout landmark-v1.0 -- style.css     # or index.html, script.js …
+```
+
+**Roll everything back to the landmark**, keeping the history intact:
+
+```bash
+git checkout main
+git revert --no-commit landmark-v1.0..HEAD
+git commit -m "revert: return to landmark v1.0"
+git push origin main
+```
+
+**Start a fresh line of work from it**, leaving `main` untouched:
+
+```bash
+git checkout -b redesign-v2 landmark-v1.0
+```
+
+> The branch is the marker because this project's git proxy refuses tag pushes.
+> A branch does the same job. Do not commit to `landmark-v1.0` — if you want to
+> move the marker later, make a new one (`landmark-v1.1`) rather than editing
+> this one, so older references keep working.
+
+---
+
 ## Which photo goes where
 
 Every photograph is a real one, named for the place it appears. Replacing a
