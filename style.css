@@ -4,7 +4,7 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.6 - lighter reveals, names in Playfair, gallery reordered.
+   VERSION 2.7 - only-light colour scheme, blended reveals, bigger names.
    Portrait phones keep the stacked layout untouched; every landscape
    viewport switches to the split screens instead.
    ========================================================== */
@@ -31,14 +31,12 @@
 
    Palette  Background #FDF9F5 · Paper #F8F2EC · Blush #EFD8D8
             Rose #B76E79 · Sage #A8B49A · Gold #C8A46A · Text #463636
-   Type     Playfair Display (headings and names) · Inter (body)
-            Great Vibes is still defined as --script and is used for the
-            ampersand only. The names were set in it until V2.6, but its
-            swash capitals - A and Y above all - read as lowercase, so
-            'Ahamed' and 'Yassmin' looked uncapitalised. Names are set in
-            Playfair italic now, where a capital is unmistakably a
-            capital. To go back, set .name and .hero__names to
-            var(--script).
+   Type     Cormorant Garamond 600 (names) · Playfair Display (headings)
+            Inter (body) · Great Vibes (the ampersand only)
+            Great Vibes drew the names until V2.6, but its swash capitals
+            - A and Y above all - read as lowercase, so 'Ahamed' and
+            'Yassmin' looked uncapitalised. It now draws the ampersand
+            only, which has no capital to misread.
    No dark theme anywhere; the only dark pixels are the scrims that keep
    white type legible over the two full-screen photographs.
    =================================== */
@@ -48,6 +46,17 @@
    01 ROOT VARIABLES
    ========================================================= */
 :root{
+  /* THE PAGE IS LIGHT, AND ONLY LIGHT.
+     Chrome on Android will auto-darken a page it thinks is light-only
+     unless it is told otherwise, and its inversion is partial: the
+     photographs stay as they are, the type flips to pale grey, and every
+     faint decorative tint turns into a visible grey rectangle. That is
+     what the reported 'translucent boxes making the text disappear'
+     actually were - not boxes in the design, but the browser repainting
+     it. 'only light' is the strong form of this declaration and is what
+     switches that behaviour off; the meta tag alone does not. */
+  color-scheme:only light;
+
   --bg:#FDF9F5;
   --paper:#F8F2EC;
   --blush:#EFD8D8;
@@ -66,15 +75,20 @@
   --shadow:0 30px 70px -40px rgba(70,54,54,.42);
 
   --serif:'Playfair Display','Iowan Old Style',Georgia,serif;
+  /* The names get their own face. Cormorant Garamond is cut for display
+     sizes - high contrast, long elegant serifs, and capitals that are
+     unmistakably capitals, which is what Great Vibes could not give.
+     At 600 it carries real weight without turning heavy. */
+  --display:'Cormorant Garamond','Playfair Display',Georgia,serif;
   --script:'Great Vibes','Snell Roundhand',cursive;
   --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
 
   --wrap:1240px;
   --ease:cubic-bezier(.22,.61,.36,1);
-  /* Arrival curve. Almost all of the distance is covered in the first
-     third, then it glides to a stop - which is what makes a long travel
-     read as cinematic instead of slow. */
-  --ease-in:cubic-bezier(.16,1,.3,1);
+  /* Arrival curve, the one iOS uses for a sheet coming to rest: quick to
+     get going, then decelerating into place with no bounce at the end.
+     This is what makes the movement feel native rather than scripted. */
+  --ease-in:cubic-bezier(.32,.72,0,1);
   --sa-t:env(safe-area-inset-top,0px);
   --sa-b:env(safe-area-inset-bottom,0px);
   --sa-l:env(safe-area-inset-left,0px);
@@ -123,6 +137,7 @@ body{
     radial-gradient(110% 60% at 8% 0%, rgba(239,216,216,.34) 0%, rgba(239,216,216,0) 58%),
     radial-gradient(90% 55% at 96% 18%, rgba(200,164,106,.16) 0%, rgba(200,164,106,0) 55%),
     radial-gradient(120% 70% at 50% 104%, rgba(168,180,154,.20) 0%, rgba(168,180,154,0) 60%);
+  background-color:var(--bg);          /* stated outright, never inferred */
   overflow-x:hidden;-webkit-font-smoothing:antialiased;
   -webkit-overflow-scrolling:touch;   /* momentum scrolling on iOS */
   padding-left:var(--sa-l);padding-right:var(--sa-r);
@@ -162,9 +177,9 @@ ol,ul{list-style:none;padding:0}
   text-align:center;
 }
 .name{
-  font-family:var(--serif);font-style:italic;font-weight:400;
-  font-size:clamp(2.1rem,5.2vw,3.4rem);line-height:1.18;letter-spacing:.005em;
-  text-align:center;margin-top:.5rem;color:var(--text);
+  font-family:var(--display);font-weight:600;
+  font-size:clamp(2.6rem,6.6vw,4.4rem);line-height:1.1;letter-spacing:.008em;
+  text-align:center;margin-top:.45rem;color:var(--text);
 }
 .rule{display:block;width:min(300px,58%);margin:1.3rem auto 0;opacity:.9}
 
@@ -180,16 +195,19 @@ section{position:relative;z-index:1}
 }
 .duo,.gal,.ev,.tl-sec,.rsvp{
   width:min(100% - 2.6rem,var(--wrap));margin-inline:auto;
-  padding:clamp(4.5rem,10vw,8rem) 0;
+  /* Was 4.5-8rem. Nearly half of a phone screen could be empty between
+     one chapter and the next, which is what made each one feel like its
+     own page rather than part of a single scroll. */
+  padding:clamp(2.6rem,6vw,5rem) 0;
 }
 /* continuous canvas: chapters overlap and blend, no harsh edges */
-.duo,.gal,.ev,.tl-sec{margin-top:-100px;padding-top:calc(clamp(4.5rem,10vw,8rem) + 100px)}
-.quote{margin-block:-60px;padding-block:calc(clamp(3rem,7vw,5.5rem) + 60px)}
-.duo::before,.gal::before,.ev::before,.tl-sec::before{
-  content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);
-  width:100vw;height:180px;pointer-events:none;z-index:-1;
-  background:linear-gradient(180deg, rgba(248,242,236,.55) 0%, rgba(248,242,236,0) 100%);
-}
+.duo,.gal,.ev,.tl-sec{margin-top:-70px;padding-top:calc(clamp(2.6rem,6vw,5rem) + 70px)}
+.quote{margin-block:-44px;padding-block:calc(clamp(1.9rem,4.4vw,3.4rem) + 44px)}
+/* The 180px paper-tinted band that used to sit at the top of each
+   chapter is gone. On the intended background it was all but invisible,
+   and it was the first thing a forced-dark repaint turned into a grey
+   rectangle across the page. The chapters blend through their spacing
+   and their overlap instead, which needs no extra paint. */
 .frame{position:relative;overflow:hidden;background:var(--paper);box-shadow:var(--shadow)}
 .frame img{width:100%;height:100%;object-fit:cover;transition:transform 1.4s var(--ease)}
 .frame:hover img{transform:scale(1.04)}
@@ -256,11 +274,12 @@ section{position:relative;z-index:1}
   color:rgba(255,255,255,.86);margin-bottom:.9rem;
 }
 .hero__names{
-  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-family:var(--display);font-weight:600;
   display:flex;flex-direction:column;align-items:center;gap:.02em;
-  /* Playfair is wider than the script face it replaced, so this is
-     sized to hold 'Thawfeeq Ahamed' on one line down to a 320px phone. */
-  font-size:clamp(1.85rem,6.4vw,4.2rem);line-height:1.16;letter-spacing:.01em;
+  /* Cormorant is narrower than Playfair at the same size, so the names
+     can be set considerably larger and still hold one line on a 320px
+     phone - which is the whole reason for the change of face. */
+  font-size:clamp(2.5rem,9.4vw,6.4rem);line-height:1.08;letter-spacing:.012em;
   text-shadow:0 2px 30px rgba(0,0,0,.45);
 }
 .hero__names span{white-space:nowrap}
@@ -800,7 +819,7 @@ section{position:relative;z-index:1}
   max-width:18ch;margin-inline:auto;
 }
 .closing__names{
-  margin-top:1.1rem;font-family:var(--serif);font-style:italic;font-size:clamp(1.5rem,3.8vw,2.3rem);
+  margin-top:1.1rem;font-family:var(--display);font-weight:600;font-size:clamp(1.8rem,4.4vw,2.9rem);
   line-height:1.2;text-shadow:0 2px 26px rgba(0,0,0,.45);
 }
 .closing__names span{color:var(--blush);font-size:.62em;padding:0 .18em;vertical-align:middle}
@@ -925,26 +944,32 @@ html.js-reveal .reveal,
 html.js-reveal .reveal-left,
 html.js-reveal .reveal-right{
   opacity:0;
-  transition:opacity .45s var(--ease),transform .45s var(--ease);
+  transition:opacity .4s var(--ease),transform .4s var(--ease);
   will-change:opacity,transform;
 }
-html.js-reveal .reveal{transform:translate3d(0,34px,0) scale(.988)}
-html.js-reveal .reveal-left{transform:translate3d(-44px,0,0)}
-html.js-reveal .reveal-right{transform:translate3d(44px,0,0)}
+/* Short travel on purpose. The distance is what the eye reads as
+   'something is moving into place'; keep it small and the arrival reads
+   as the page settling instead of as a slide transition. */
+html.js-reveal .reveal{transform:translate3d(0,20px,0)}
+html.js-reveal .reveal-left{transform:translate3d(-26px,0,0)}
+html.js-reveal .reveal-right{transform:translate3d(26px,0,0)}
 
-/* a photograph lifts a little further and starts a little smaller - just
-   enough to feel like it settles into the page */
+/* a photograph gets a touch more, and the faintest scale, so it settles
+   rather than snaps - no rotation, nothing that draws attention to the
+   animation itself */
 html.js-reveal :is(.ph,.frame,.ecard):is(.reveal,.reveal-left,.reveal-right){
-  transform:translate3d(0,44px,0) scale(.972);
+  transform:translate3d(0,26px,0) scale(.985);
 }
-html.js-reveal :is(.ph,.frame,.ecard).reveal-left{transform:translate3d(-38px,26px,0) scale(.976)}
-html.js-reveal :is(.ph,.frame,.ecard).reveal-right{transform:translate3d(38px,26px,0) scale(.976)}
+html.js-reveal :is(.ph,.frame,.ecard).reveal-left{transform:translate3d(-24px,16px,0) scale(.988)}
+html.js-reveal :is(.ph,.frame,.ecard).reveal-right{transform:translate3d(24px,16px,0) scale(.988)}
 
 html.js-reveal .reveal.is-in,
 html.js-reveal .reveal-left.is-in,
 html.js-reveal .reveal-right.is-in{
   opacity:1;transform:none;
-  transition:opacity .72s var(--ease-in),transform .72s var(--ease-in);
+  /* .58s on the same curve iOS uses for its own settle - long enough to
+     be a movement, short enough that it is over before you look for it */
+  transition:opacity .58s var(--ease-in),transform .58s var(--ease-in);
   transition-delay:var(--d,0ms);
 }
 /* once it has arrived, stop reserving a compositor layer for it */
@@ -1010,7 +1035,7 @@ html.js-reveal .is-in{will-change:auto}
     padding-bottom:calc(var(--sa-b) + 5rem);
   }
   .hero__mark{width:42px}
-  .hero__names{font-size:clamp(1.25rem,5.4vh,1.85rem)}
+  .hero__names{font-size:clamp(1.6rem,6.6vh,2.4rem)}
   .hero__eyebrow{font-size:.55rem;letter-spacing:.28em;margin-bottom:.3rem}
   .hero__meta{margin-top:.55rem}
   .hero__meta b{font-size:.72rem;letter-spacing:.24em}
@@ -1033,7 +1058,7 @@ html.js-reveal .is-in{will-change:auto}
 }
 /* the narrowest phones still in use are 320px wide */
 @media (max-width:360px){
-  .hero__names{font-size:1.62rem}
+  .hero__names{font-size:2.15rem}
 }
 @media (max-width:640px){
   /* the arrows float over the picture instead of stealing width */

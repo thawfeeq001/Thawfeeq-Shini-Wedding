@@ -4,7 +4,7 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.6 - lighter reveals, hysteresis on the observer.
+   VERSION 2.7 - split show/hide observers, blended reveals.
    ========================================================== */
 
 /* ==========================================================
@@ -257,7 +257,7 @@
      composite on the GPU, which is what keeps this at 60fps on iOS
      Safari as well as on Android Chrome. */
 
-  let revealObserver = null;
+  let showObserver = null, hideObserver = null;
   let observerReported = false;   /* proof the browser actually delivers callbacks */
 
   function observeReveals(root) {
@@ -266,40 +266,51 @@
       showEverything();
       return;
     }
-    if (!revealObserver) {
-      revealObserver = new IntersectionObserver(entries => {
+    /* TWO OBSERVERS, NOT ONE.
+
+       One observer has to use one rootMargin, which forces the moment a
+       thing appears and the moment it resets to be the same line - and a
+       single line is what makes an element parked on it flicker, and what
+       makes a chapter look like it starts when you arrive at it.
+
+       Split in two, each edge can sit where it belongs. Showing runs a
+       fifth of a screen EARLY, so a section has already settled by the
+       time it is under your eye and the page reads as one continuous
+       thing rather than a stack of slides that each announce themselves.
+       Hiding runs a screen and a half LATE, so nothing resets anywhere
+       near the fold and scrolling back up finds the page already there.
+       The gap between the two is enormous, which is exactly the point:
+       nothing can cross both edges in one flick of a thumb. */
+    if (!showObserver) {
+      showObserver = new IntersectionObserver(entries => {
         observerReported = true;
         window.__revealReady = true;
         entries.forEach(entry => {
-          const el = entry.target;
-          const seen = entry.intersectionRatio;
-          /* HYSTERESIS. A single threshold makes an element sitting on
-             the fold flip in and out on the smallest scroll, and each
-             flip restarts the whole animation - which is what made
-             scrolling back up look stuck. So the two edges are set apart:
-             it appears once an eighth of it is showing, and hides again
-             only once it has left the viewport completely. In the band
-             between, it keeps whatever state it already had. */
-          if (seen >= 0.12) el.classList.add('is-in');
-          else if (seen === 0) el.classList.remove('is-in');
+          if (entry.isIntersecting) entry.target.classList.add('is-in');
         });
-      }, { threshold: [0, 0.12, 0.6] });
+      }, { rootMargin: '0px 0px 20% 0px', threshold: 0.01 });
+
+      hideObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) entry.target.classList.remove('is-in');
+        });
+      }, { rootMargin: '150% 0px 150% 0px', threshold: 0 });
     }
     items.forEach(el => {
       /* the stagger is measured once, not on every crossing */
       if (el.dataset.step === undefined) {
         const peers = el.parentElement
           ? $$('.reveal, .reveal-left, .reveal-right, .tl__i', el.parentElement) : [];
-        /* 55ms apart, four deep at most: enough that a row arrives as a
-           sweep rather than all at once, short enough that the whole
-           group is done inside a second. V2.5 used 120ms across six,
-           which spread one row over three quarters of a second and read
-           as a queue. */
-        const step = Math.min(Math.max(0, peers.indexOf(el)), 4);
+        /* 35ms apart, three deep at most. Any more and the eye reads
+           the members of a group arriving one after another instead of
+           together, which is the 'separate pages' complaint. This is
+           just enough offset to stop them looking mechanically identical. */
+        const step = Math.min(Math.max(0, peers.indexOf(el)), 3);
         el.dataset.step = step;
-        if (step) el.style.setProperty('--d', step * 55 + 'ms');
+        if (step) el.style.setProperty('--d', step * 35 + 'ms');
       }
-      revealObserver.observe(el);
+      showObserver.observe(el);
+      hideObserver.observe(el);
     });
   }
 
