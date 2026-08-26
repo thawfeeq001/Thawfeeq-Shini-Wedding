@@ -4,7 +4,8 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.8 - dark by design; split show/hide observers.
+   VERSION 2.9 - polish pass; split show/hide observers, modular
+   photo viewer and timeline behind single switches below.
    ========================================================== */
 
 /* ==========================================================
@@ -15,6 +16,7 @@
      04  Navigation Module    sidebar, scrim, progress, active link
      05  Parallax Module
      07  Countdown Module
+     07b Timeline Module      renders TIMELINE, two layouts
      08  Maps Module
      09  Gallery Module       family grid + the one shared photo viewer
      10  RSVP Module          name, guests, note + Sheet + local copy
@@ -29,6 +31,36 @@
   // ==================================
   // 01 · Configuration
   // ==================================
+
+  /* ==================================================================
+     MODULE SWITCHES
+     Two features are built to be turned off without unpicking anything
+     else. Both default to on.
+
+       ENABLE_PHOTO_VIEWER   false leaves every gallery tile as a plain
+                             button that does nothing, and the viewer is
+                             never wired up. The gallery markup and both
+                             photo lists are untouched either way, so the
+                             grids still render exactly as they do now.
+
+       TIMELINE_STYLE        'rail'  the gold rail with circular markers
+                             'plain' the older flat date-and-title list
+                             Both render from the same TIMELINE data.
+     ================================================================== */
+  const ENABLE_PHOTO_VIEWER = true;
+  const TIMELINE_STYLE      = 'rail';
+
+  /* ---- TIMELINE DATA ------------------------------------------------
+     The single source for the timeline. Edit, reorder or add an entry
+     here and the list follows; nothing about it is written into the
+     HTML.                                                              */
+  const TIMELINE = [
+    { date: '23 Oct', title: 'Mehendi',        venue: 'Thanjavur' },
+    { date: '24 Oct', title: 'Guests Arrival', venue: 'Courtallam \u00b7 4:00 PM' },
+    { date: '24 Oct', title: 'Engagement',     venue: 'Drizzle Elite Mahal, Courtallam \u00b7 7:00 PM' },
+    { date: '25 Oct', title: 'Wedding',        venue: 'Drizzle Elite Mahal, Courtallam \u00b7 11:00 AM' },
+    { date: '1 Nov',  title: 'Reception',      venue: 'Arulanandham Mahal, Thanjavur \u00b7 12:00 PM' }
+  ];
 
   /* Exact venue pins, decoded from the QR codes printed on the
      invitation. The three images under images/qr/ encode these same two
@@ -383,7 +415,15 @@
     /* Let the browser handle the hash jump (smooth scrolling is CSS),
        then close the panel. */
     links.forEach(a => on(a, 'click', () => setMenu(false)));
-    on(window, 'resize', () => { if (window.innerWidth > 1100) setMenu(false); }, { passive: true });
+    /* Only a change of width matters here. On iOS the address bar
+       collapsing fires resize continuously during a scroll, and reacting
+       to it is a repaint for nothing. */
+    let lastWidth = window.innerWidth;
+    on(window, 'resize', () => {
+      if (window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
+      if (window.innerWidth > 1100) setMenu(false);
+    }, { passive: true });
 
     onScrollFrame(() => {
       const y = window.scrollY || window.pageYOffset;
@@ -495,6 +535,39 @@
   }
 
   // ==================================
+  // 07b · Timeline Module
+  // ==================================
+  /* Renders TIMELINE into #timelineList. See TIMELINE_STYLE above for
+     the two layouts; the data is identical for both. */
+
+  function initTimeline() {
+    const list = $('#timelineList');
+    if (!list || !TIMELINE.length) return;
+    list.classList.toggle('tl--rail', TIMELINE_STYLE === 'rail');
+    const frag = document.createDocumentFragment();
+    TIMELINE.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'tl__i reveal';
+      const d = document.createElement('span');
+      d.className = 'tl__d';
+      d.textContent = item.date;
+      const t = document.createElement('span');
+      t.className = 'tl__t';
+      t.appendChild(document.createTextNode(item.title));
+      if (item.venue) {
+        const v = document.createElement('i');
+        v.textContent = item.venue;
+        t.appendChild(v);
+      }
+      li.appendChild(d);
+      li.appendChild(t);
+      frag.appendChild(li);
+    });
+    list.appendChild(frag);
+    observeReveals(list);
+  }
+
+  // ==================================
   // 08 · Maps Module
   // ==================================
 
@@ -529,7 +602,13 @@
     function build() {
       if (built || !grid) return;
       built = true;
-      items.forEach(item => grid.appendChild(buildTile(item, group, dir, alt)));
+      /* One insertion, not fourteen. Appending each tile straight to the
+         grid makes the browser re-lay the masonry out on every one; a
+         fragment is assembled off-document and costs a single reflow,
+         which is where the long frame on entering a gallery came from. */
+      const frag = document.createDocumentFragment();
+      items.forEach(item => frag.appendChild(buildTile(item, group, dir, alt)));
+      grid.appendChild(frag);
       observeReveals(grid);
       if (!document.documentElement.classList.contains('js-reveal')) {
         $$('.ph', grid).forEach(t => t.classList.add('is-in'));
@@ -783,9 +862,11 @@
       on(img, 'pointercancel', endDrag);
       img.style.cursor = 'zoom-in';
 
-      /* the picture is never left zoomed behind a closed viewer, and a
-         rotation invalidates the pan bounds, so both reset it */
-      on(window, 'orientationchange', () => resetZoom(false));
+      /* A rotation invalidates the pan bounds, so the zoom resets - but
+         only if there is a zoom to reset. Firing on every resize would
+         also fire on the address bar collapsing during a scroll, which
+         is a repaint nobody asked for. */
+      on(window, 'orientationchange', () => { if (scale > 1) resetZoom(false); });
       on(window, 'resize', () => { if (scale > 1) resetZoom(false); }, { passive: true });
     }
 
@@ -793,7 +874,7 @@
   })();
 
   function initGallery() {
-    Viewer.init();
+    if (ENABLE_PHOTO_VIEWER) Viewer.init();
     /* Two grids, two viewer groups: paging inside one part never wanders
        into the other. */
     buildGridWhenNear($('#fixingGrid'), FIXING_PHOTOS, 'fixing', FIXING_DIR,
@@ -1106,6 +1187,7 @@
     initNav();
     initParallax();
     initCountdown();
+    initTimeline();
     initMaps();
     initRsvp();
     initMusic();

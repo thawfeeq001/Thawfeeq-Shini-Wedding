@@ -4,7 +4,8 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.8 - dark by design: ink ground, gold accents, Cinzel names.
+   VERSION 2.9 - polish pass: equal-height cards, rail timeline,
+   premium footer, and layout reserved everywhere so nothing shifts.
    Portrait phones keep the stacked layout untouched; every landscape
    viewport switches to the split screens instead.
    ========================================================== */
@@ -36,7 +37,7 @@
             Inter (body) · Great Vibes (the ampersand only)
             Great Vibes drew the names until V2.6, but its swash capitals
             - A and Y above all - read as lowercase. Cinzel replaced the
-            stand-in in V2.8: Roman inscriptional capitals, which is the
+            stand-in from V2.8 onward: Roman inscriptional capitals, which is the
             one style where a capital cannot be mistaken for anything
             else, and which carries weight on ink without going heavy.
    DARK BY DESIGN, NOT BY INVERSION. The two full-screen photographs are
@@ -136,7 +137,16 @@
    container, which breaks position:fixed and stops IntersectionObserver
    from reporting - and every reveal would stay invisible. The sideways
    reveal offsets are contained per-section instead (see .quote/.duo…). */
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:76px}
+html{
+  -webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:76px;
+  /* The white strip under the page on iOS is the overscroll area, which
+     is painted from <html>, not <body>. Colouring the root is the fix -
+     and it is the root that has to carry it, because a background set
+     only on the body is what leaves that gap in the first place. */
+  background:var(--bg);
+  /* rubber-banding the whole document drags fixed elements with it */
+  overscroll-behavior-y:none;
+}
 body{
   margin:0;font-family:var(--sans);font-weight:300;
   font-size:clamp(15px,.5vw + 13.8px,16.5px);line-height:1.75;
@@ -151,6 +161,7 @@ body{
   overflow-x:hidden;-webkit-font-smoothing:antialiased;
   -webkit-overflow-scrolling:touch;   /* momentum scrolling on iOS */
   padding-left:var(--sa-l);padding-right:var(--sa-r);
+  overscroll-behavior-y:none;
 }
 /* iOS Safari ignores overflow:hidden on <body>, so the lock is a fixed
    body with the scroll offset held in --lock-y; the Overlay helper puts
@@ -222,6 +233,10 @@ section{position:relative;z-index:1}
    rectangle across the page. The chapters blend through their spacing
    and their overlap instead, which needs no extra paint. */
 .frame{position:relative;overflow:hidden;background:var(--paper);box-shadow:var(--shadow)}
+/* the intrinsic ratio comes from the width/height attributes on every
+   img, which is what holds cumulative layout shift at zero while two
+   dozen lazy photographs stream in */
+.ph img,.frame img,.ecard__art img{background-color:var(--paper)}
 .frame img{width:100%;height:100%;object-fit:cover;transition:transform 1.4s var(--ease)}
 .frame:hover img{transform:scale(1.04)}
 .frame--arch{border-radius:50% 50% 18px 18px / 32% 32% 18px 18px;aspect-ratio:4/5}
@@ -250,7 +265,10 @@ section{position:relative;z-index:1}
   padding:calc(var(--sa-t) + 4.3rem) 1.2rem calc(var(--sa-b) + 4.4rem);
 }
 .hero__img{
+  /* absolutely placed and told its size up front, so it reserves nothing
+     in flow and cannot shift the page while it decodes */
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  background-color:var(--bg);
   /* nudged left of centre: the frame is wider than a phone screen, so
      showing a little more of the right edge puts the two faces the same
      distance from the two sides. Tune with the two variables. */
@@ -265,7 +283,7 @@ section{position:relative;z-index:1}
     radial-gradient(120% 84% at 50% 50%, rgba(0,0,0,0) 26%, rgba(30,20,18,.50) 100%),
     linear-gradient(180deg, rgba(30,20,18,.34) 0%, rgba(30,20,18,.12) 38%, rgba(30,20,18,.56) 100%);
 }
-/* logo, top centre, with the groom's name directly beneath it */
+/* logo, alone, top centre */
 .hero__head{
   grid-row:1;position:relative;z-index:2;
   display:flex;flex-direction:column;align-items:center;gap:clamp(.5rem,1.4vh,.9rem);
@@ -275,16 +293,12 @@ section{position:relative;z-index:1}
   width:clamp(68px,8.5vw,112px);height:auto;
   opacity:.95;filter:drop-shadow(0 2px 18px rgba(0,0,0,.5));
 }
-.hero__house{
-  font-family:var(--serif);font-weight:400;
-  font-size:clamp(.98rem,2.5vw,1.42rem);line-height:1.3;
-  letter-spacing:.2em;text-transform:uppercase;color:#F2E3CC;
-  text-shadow:0 2px 24px rgba(0,0,0,.55);
-}
 .hero__inner{grid-row:2;align-self:center;position:relative;z-index:2;text-align:center;color:#fff}
 .hero__eyebrow{
   font-size:.74rem;letter-spacing:.36em;text-transform:uppercase;
-  color:rgba(255,255,255,.86);margin-bottom:.9rem;
+  /* 8px tighter to the names than it was: the eyebrow introduces them,
+     it is not a line of its own */
+  color:rgba(255,255,255,.86);margin-bottom:.4rem;
 }
 .hero__names{
   font-family:var(--display);font-weight:600;
@@ -319,7 +333,7 @@ section{position:relative;z-index:1}
      The bottom margin gives back exactly what the extra lift took, so
      the quote below lands where it always did instead of being dragged
      up under the card. */
-  margin:-128px auto 64px;
+  margin:-128px auto 96px;
 }
 .cd{
   position:relative;display:grid;grid-template-columns:repeat(4,1fr);
@@ -336,12 +350,23 @@ section{position:relative;z-index:1}
   width:min(760px,120%);aspect-ratio:1600/420;opacity:.07;pointer-events:none;
   background:url("assets/mosque-silhouette.png") center bottom/contain no-repeat;
 }
-.cd__u{position:relative;display:flex;flex-direction:column;align-items:center;gap:.35rem}
+/* Every unit is the same box: the grid gives equal width, stretch gives
+   equal height, and the column centres both lines inside it. */
+.cd{align-items:stretch}
+.cd__u{
+  position:relative;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:.35rem;
+  min-width:0;text-align:center;
+}
 .cd__u + .cd__u::before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:1px;background:var(--line)}
 .cd__n{
   font-family:var(--serif);font-weight:400;
   font-size:clamp(2rem,6vw,3.4rem);line-height:1;color:var(--text);
-  font-variant-numeric:tabular-nums;letter-spacing:.01em;
+  /* tabular figures: every digit takes the same advance width, so a
+     ticking second never nudges the number sideways */
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;
+  letter-spacing:.01em;
 }
 .cd__l{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-deep)}
 .cd__done{
@@ -458,7 +483,10 @@ section{position:relative;z-index:1}
 .duo__stage{position:relative;width:100%;display:flex;justify-content:center}
 .duo__photo{position:relative;width:min(100%,430px);margin:clamp(1.8rem,4vw,2.8rem) auto 0}
 .duo__line{
-  max-width:34ch;margin:clamp(1.3rem,3vw,1.9rem) auto 0;text-align:center;
+  /* an explicit width, not a max: the two sentences are different
+     lengths, and a max-width would let the shorter one sit in a narrower
+     box so the columns would rag differently */
+  width:min(100%,34ch);margin:clamp(1.3rem,3vw,1.9rem) auto 0;text-align:center;
   color:var(--ink-70);font-size:1.02rem;
 }
 .duo--fam .duo__side{grid-template-rows:auto 1fr}
@@ -633,6 +661,11 @@ section{position:relative;z-index:1}
 .ev__grid{
   margin-top:clamp(2rem,4.6vw,3.2rem);
   display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(1.4rem,2.6vw,2rem);
+  /* Every row the height of the tallest. Three across, a grid row already
+     stretched; stacked on a phone each card was its own row, so the
+     wedding card - which carries an extra line about sharing the
+     engagement venue - stood 31px taller and its QR sat 31px lower. */
+  grid-auto-rows:1fr;
 }
 .ecard{
   position:relative;display:flex;flex-direction:column;height:auto;
@@ -724,32 +757,47 @@ section{position:relative;z-index:1}
 
 /* =========================================================
    13 TIMELINE
+   MODULAR. Rendered from TIMELINE in script.js. The .tl--rail class is
+   added when TIMELINE_STYLE is 'rail'; drop it (set 'plain') and the
+   list falls back to the flat rules below, which is the older layout.
    ========================================================= */
-.tl{position:relative;max-width:520px;margin:clamp(2.2rem,5vw,3.2rem) auto 0;padding-left:34px}
-.tl::before{
-  content:"";position:absolute;left:6px;top:10px;bottom:10px;width:2px;
-  background:linear-gradient(var(--line),var(--gold),var(--line));border-radius:2px;
-}
+.tl{position:relative;max-width:540px;margin:clamp(2.2rem,5vw,3.2rem) auto 0;padding-left:34px}
 .tl__i{position:relative;padding:1rem 0 1rem .4rem;display:flex;align-items:baseline;gap:1.1rem}
-.tl__i::before{
-  content:"";position:absolute;left:-34px;top:1.45rem;width:14px;height:14px;
-  border-radius:50%;background:var(--bg);border:1.6px solid var(--gold);
-  transition:background-color .5s var(--ease),transform .5s var(--ease);
+.tl__d{
+  flex:none;min-width:74px;font-size:.66rem;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--gold-deep);
 }
-.tl__i.is-in::before{background:var(--gold);transform:scale(1.12)}
-.tl__i::after{
-  content:"";position:absolute;left:-27px;top:2.9rem;width:22px;height:34px;
-  border-left:1.4px solid var(--line);border-bottom-left-radius:22px;
-  transform:rotate(-8deg);opacity:.85;
+.tl__t{
+  font-family:var(--serif);font-size:clamp(1.15rem,2.8vw,1.45rem);line-height:1.3;
+  display:flex;flex-direction:column;gap:.2rem;
 }
-.tl__i:last-child::after{display:none}
-.tl__d{flex:none;min-width:74px;font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-deep)}
-.tl__t{font-family:var(--serif);font-size:clamp(1.2rem,3vw,1.55rem);line-height:1.3;
-  display:flex;flex-direction:column;gap:.15rem}
 .tl__t i{
   font-style:normal;font-family:var(--sans);font-size:.6rem;
-  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-50);
+  letter-spacing:.2em;text-transform:uppercase;color:var(--ink-50);line-height:1.5;
 }
+
+/* ---- the rail ---- */
+.tl--rail{padding-left:46px}
+.tl--rail::before{
+  content:"";position:absolute;left:9px;top:14px;bottom:14px;width:1px;
+  background:linear-gradient(180deg,
+    rgba(200,164,106,0) 0%, var(--gold) 14%, var(--gold) 86%, rgba(200,164,106,0) 100%);
+}
+.tl--rail .tl__i{padding:1.05rem 0;align-items:flex-start}
+/* the marker: a ring on the rail that fills as its row arrives */
+.tl--rail .tl__i::before{
+  content:"";position:absolute;left:-46px;top:1.35rem;
+  width:19px;height:19px;margin-left:0;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--gold);
+  box-shadow:0 0 0 4px var(--bg);
+  transition:background-color .5s var(--ease-in),transform .5s var(--ease-in),box-shadow .5s var(--ease-in);
+}
+.tl--rail .tl__i.is-in::before{
+  background:var(--gold);transform:scale(1.06);
+  box-shadow:0 0 0 4px var(--bg),0 0 14px 1px rgba(200,164,106,.45);
+}
+.tl--rail .tl__i::after{content:none}
+.tl--rail .tl__d{padding-top:.28rem}
 
 
 /* =========================================================
@@ -821,7 +869,6 @@ section{position:relative;z-index:1}
    15 CLOSING & CHROME
    ========================================================= */
 .closing{position:relative;height:var(--screen);min-height:520px;overflow:hidden;display:grid;place-items:center}
-.closing__inner{padding-bottom:calc(var(--sa-b) + .5rem)}
 .closing__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .closing__veil{
   position:absolute;inset:0;
@@ -829,27 +876,14 @@ section{position:relative;z-index:1}
     radial-gradient(72% 48% at 50% 50%, rgba(34,24,22,.52) 0%, rgba(34,24,22,.18) 62%, rgba(34,24,22,0) 100%),
     linear-gradient(180deg, rgba(34,24,22,.24) 0%, rgba(34,24,22,.12) 42%, rgba(34,24,22,.46) 100%);
 }
-.closing__inner{position:relative;text-align:center;padding:0 1.4rem;color:#fff}
-.closing__line{
-  font-family:var(--serif);font-weight:400;font-style:italic;
-  font-size:clamp(1.5rem,4.2vw,2.6rem);line-height:1.35;text-shadow:0 2px 28px rgba(0,0,0,.45);
-  max-width:18ch;margin-inline:auto;
-}
-.closing__names{
-  margin-top:1.1rem;font-family:var(--display);font-weight:600;letter-spacing:.08em;
-  font-size:clamp(1.05rem,2.6vw,1.7rem);
-  line-height:1.2;text-shadow:0 2px 26px rgba(0,0,0,.45);
-}
-.closing__names span{color:var(--blush);font-size:.62em;padding:0 .18em;vertical-align:middle}
-.closing__acts{margin-top:1.8rem;display:flex;justify-content:center;gap:.8rem}
 .icon-btn{
   width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
-  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.44);
+  background:rgba(255,255,255,.07);border:1px solid var(--line);
   -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   transition:background-color .35s var(--ease),transform .35s var(--ease);
 }
-.icon-btn:hover{background:rgba(255,255,255,.34);transform:translateY(-2px)}
-.icon-btn svg{width:19px;height:19px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn:hover{background:rgba(255,255,255,.16);border-color:var(--gold);transform:translateY(-2px)}
+.icon-btn svg{width:19px;height:19px;fill:none;stroke:var(--gold-deep);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
 .modal{
   position:fixed;inset:0;z-index:360;display:grid;place-items:center;padding:1.4rem;
@@ -923,6 +957,35 @@ section{position:relative;z-index:1}
 .blob--b{
   width:min(42vw,480px);aspect-ratio:1;bottom:4vh;right:-12vw;
   background:radial-gradient(circle at 55% 45%, rgba(168,180,154,.20), rgba(168,180,154,0) 68%);
+}
+
+
+/* =========================================================
+   15b FOOTER
+   ========================================================= */
+.foot{
+  position:relative;z-index:1;
+  width:min(100% - 2.6rem,var(--wrap));margin-inline:auto;
+  padding:clamp(4rem,9vw,6.5rem) 0 calc(clamp(3rem,7vw,5rem) + var(--sa-b));
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;overflow-x:hidden;
+}
+.foot__mark{width:clamp(46px,6vw,64px);height:auto;opacity:.75;margin-bottom:clamp(1.4rem,3vw,2.1rem)}
+.foot__line{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:clamp(1.15rem,2.8vw,1.6rem);line-height:1.5;color:var(--ink-70);
+  max-width:24ch;
+}
+.foot__names{
+  margin-top:clamp(.9rem,2.2vw,1.4rem);
+  font-family:var(--display);font-weight:600;letter-spacing:.09em;
+  font-size:clamp(.92rem,2.1vw,1.35rem);line-height:1.45;color:var(--text);
+}
+.foot__acts{margin-top:clamp(1.6rem,3.6vw,2.4rem);display:flex;justify-content:center;gap:.8rem}
+.foot .rule{margin-top:clamp(1.5rem,3.4vw,2.2rem);width:min(240px,52%)}
+.foot__credit{
+  margin-top:clamp(1.5rem,3.4vw,2.2rem);
+  font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-50);
 }
 
 
@@ -1021,7 +1084,7 @@ html.js-reveal .is-in{will-change:auto}
   .fam__inset{width:clamp(104px,26vw,150px);bottom:-6%}
   /* far enough up that the whole card, seconds included, sits inside the
      first screen on a 667px phone as well as an 844px one */
-  .cd-wrap{margin-top:-150px;margin-bottom:98px}
+  .cd-wrap{margin-top:-150px;margin-bottom:130px}
   .hero{padding-bottom:calc(var(--sa-b) + 10.5rem)}
 }
 
@@ -1033,7 +1096,7 @@ html.js-reveal .is-in{will-change:auto}
 @media (min-width:720px), (orientation:landscape) and (min-width:700px){
   .cd-wrap{
     margin-top:calc(-1 * clamp(140px,20vh,205px));
-    margin-bottom:clamp(76px,10vh,140px);
+    margin-bottom:clamp(104px,13vh,180px);
     width:min(100% - 2.6rem,760px);
   }
   .hero{padding-bottom:calc(var(--sa-b) + clamp(9rem,21vh,13rem))}
@@ -1069,9 +1132,7 @@ html.js-reveal .is-in{will-change:auto}
   .lb__cap{padding-top:.5rem}
 }
 @media (max-width:720px){
-  .rsvp__row{flex-wrap:wrap}
   .rsvp__field{flex:1 1 100%}
-  .rsvp__field--count{flex:0 0 auto}
   .rsvp__send{flex:1 1 auto;justify-content:center}
 }
 /* the narrowest phones still in use are 320px wide */

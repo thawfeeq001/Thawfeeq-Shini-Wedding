@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <!-- ==========================================================
 LANDMARK VERSION 1.0 - stable editable baseline. Do not delete.
-VERSION 2.8 - dark by design. Ink ground, gold accents, Cinzel names.
+VERSION 2.9 - polish and performance. Dark by design, zero layout
+shift, modular photo viewer and timeline (both switchable in script.js).
 The hero is a dark studio portrait, so the page now runs straight
 through it with no edge where the photograph stops.
 Order: Home, Groom, Groom Family, Bride, Bride Family,
@@ -42,7 +43,7 @@ IMAGE LIBRARY  (developer only)
 <meta name="theme-color" content="#141010">
 <!-- Which build is on screen. Open the page source and read this line to
      tell a stale cache from a real deploy without guessing. -->
-<meta name="version" content="2.8">
+<meta name="version" content="2.9">
 <meta name="color-scheme" content="only dark">
 <meta name="format-detection" content="telephone=no">
 
@@ -160,7 +161,7 @@ IMAGE LIBRARY  (developer only)
     <li><a href="#groom">Groom &amp; Bride</a></li>
     <li><a href="#groom-family">Families</a></li>
     <li><a href="#fixing">Fixing Ceremony</a></li>
-    <li><a href="#couple">Couple</a></li>
+    <li><a href="#couple">Our Story</a></li>
     <li><a href="#events">Events</a></li>
     <li><a href="#rsvp">Wishes</a></li>
   </ul>
@@ -315,7 +316,7 @@ IMAGE LIBRARY  (developer only)
   </div>
 
   <div class="gal__part" id="couple">
-    <h3 class="gal__head reveal">Couple</h3>
+    <h3 class="gal__head reveal">Our Story</h3>
     <p class="gal__lead reveal">The two of us, in the order it happened.</p>
     <div class="masonry" id="coupleGrid"></div>
   </div>
@@ -404,22 +405,16 @@ IMAGE LIBRARY  (developer only)
 </section>
 
 <!-- ===== 08b. CELEBRATION TIMELINE =====
-     The smaller gatherings live here rather than as cards of their own. -->
+     MODULAR. The list is built from TIMELINE at the top of script.js, so
+     the content lives in one place and this element stays empty in the
+     markup. Set TIMELINE_STYLE to 'rail' for the gold rail with circular
+     markers, or 'plain' to fall back to the older flat list - both read
+     the same data, so switching is one word. -->
 <section class="tl-sec" id="timeline">
   <h2 class="title reveal">Timeline</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <ol class="tl">
-    <li class="tl__i reveal"><span class="tl__d">23 Oct</span><span class="tl__t">Mehendi<i>Thanjavur</i></span></li>
-    <li class="tl__i reveal"><span class="tl__d">24 Oct</span><span class="tl__t">Guests Arrival<i>Courtallam · 4:00 PM</i></span></li>
-    <li class="tl__i reveal"><span class="tl__d">24 Oct</span><span class="tl__t">Engagement<i>Courtallam · 7:00 PM</i></span></li>
-    <li class="tl__i reveal"><span class="tl__d">25 Oct</span><span class="tl__t">Wedding<i>Courtallam · 11:00 AM</i></span></li>
-    <li class="tl__i reveal"><span class="tl__d">1 Nov</span><span class="tl__t">Reception<i>Thanjavur · 12:00 PM</i></span></li>
-  </ol>
+  <ol class="tl" id="timelineList"></ol>
 </section>
-
-<!-- V2.4 removed the Wedding Memories section outright: the live-video
-     card, its poster and the message QR that never resolved to a link.
-     Nothing takes its place, and no empty container is left behind. -->
 
 <!-- ===== TRANSITION ===== -->
 <section class="quote">
@@ -473,26 +468,38 @@ IMAGE LIBRARY  (developer only)
   <p class="rsvp__note" id="rsvpMsg" role="status" aria-live="polite"></p>
 </section>
 
-<!-- ===== 10. FAREWELL / FOOTER =====
-     Black & white portrait, full screen, overlay text only. -->
+<!-- ===== 10. FAREWELL =====
+     Black & white portrait, full screen, and nothing written across it.
+     The closing words used to sit here as an overlay; they now live in
+     the footer directly below, where they have room to breathe - and
+     saying them twice, once over the photograph and once under it, read
+     as a mistake. The photograph is stronger without type on it. -->
 <section class="closing" id="closing">
   <img class="closing__img" src="images/hero/farewell-couple-bw.webp" alt="Thawfeeq Ahamed and Shini Yassmin" width="1150" height="1450" loading="lazy" decoding="async">
   <div class="closing__veil" aria-hidden="true"></div>
-  <div class="closing__inner">
-    <p class="closing__line">And so our forever begins.</p>
-    <p class="closing__names">Thawfeeq Ahamed <span aria-hidden="true">&#9829;</span><span class="sr-only">and</span> Shini Yassmin</p>
-    <div class="closing__acts">
-      <button class="icon-btn" type="button" id="shareWhatsApp" aria-label="Share on WhatsApp">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 01-11.9 6.9L4 20l1.2-3.9A8 8 0 1120 12z"/><path d="M9.2 9.4c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .6.5l.6 1.4c.1.2 0 .4-.1.5l-.4.5c-.1.2-.2.3 0 .6a6 6 0 002.6 2.2c.3.1.4 0 .6-.1l.5-.5c.2-.2.3-.2.5-.1l1.4.7c.2.1.3.2.3.4s-.1.9-.4 1.2c-.3.3-1 .6-1.6.5-1.5-.2-3.2-1.1-4.4-2.3a8 8 0 01-1.8-3c-.2-.7 0-1.4.5-1.9z"/></svg>
-      </button>
-      <button class="icon-btn" type="button" id="copyLink" aria-label="Copy link">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M6.5 15H5.5A2.5 2.5 0 013 12.5v-7A2.5 2.5 0 015.5 3h7A2.5 2.5 0 0115 5.5v1"/></svg>
-      </button>
-    </div>
-  </div>
 </section>
 
 </main>
+
+<!-- ===== FOOTER =====
+     The farewell photograph above already carries the closing line and
+     the names over it; the footer closes the page underneath with the
+     mark and the credit, on generous space so it does not crowd them. -->
+<footer class="foot">
+  <img class="foot__mark" src="assets/logo-gold.png" alt="" width="260" height="260" loading="lazy" decoding="async">
+  <p class="foot__line reveal">And so our forever begins.</p>
+  <p class="foot__names reveal">Thawfeeq Ahamed &amp; Shini Yassmin</p>
+  <div class="foot__acts reveal">
+    <button class="icon-btn" type="button" id="shareWhatsApp" aria-label="Share on WhatsApp">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 01-11.9 6.9L4 20l1.2-3.9A8 8 0 1120 12z"/><path d="M9.2 9.4c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .6.5l.6 1.4c.1.2 0 .4-.1.5l-.4.5c-.1.2-.2.3 0 .6a6 6 0 002.6 2.2c.3.1.4 0 .6-.1l.5-.5c.2-.2.3-.2.5-.1l1.4.7c.2.1.3.2.3.4s-.1.9-.4 1.2c-.3.3-1 .6-1.6.5-1.5-.2-3.2-1.1-4.4-2.3a8 8 0 01-1.8-3c-.2-.7 0-1.4.5-1.9z"/></svg>
+    </button>
+    <button class="icon-btn" type="button" id="copyLink" aria-label="Copy link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M6.5 15H5.5A2.5 2.5 0 013 12.5v-7A2.5 2.5 0 015.5 3h7A2.5 2.5 0 0115 5.5v1"/></svg>
+    </button>
+  </div>
+  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
+  <p class="foot__credit reveal">&copy; 2026 &nbsp;&bull;&nbsp; With love, Thawfeeq &amp; Shini</p>
+</footer>
 
 <!-- ===== OVERLAY. LIGHTBOX =====
      One viewer for every photograph on the page. Dark, blurred backdrop,
