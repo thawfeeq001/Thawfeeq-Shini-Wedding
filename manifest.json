@@ -6,25 +6,70 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "orientation": "any",
-  "background_color": "#F7F3EC",
-  "theme_color": "#F7F3EC",
+  "background_color": "#141010",
+  "theme_color": "#141010",
   "lang": "en",
   "dir": "ltr",
-  "categories": ["lifestyle", "events", "social"],
+  "categories": [
+    "lifestyle",
+    "events",
+    "social"
+  ],
   "prefer_related_applications": false,
   "icons": [
-    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
-    { "src": "favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ],
   "shortcuts": [
-    { "name": "Event details", "short_name": "Events", "url": "./#events" },
-    { "name": "RSVP", "short_name": "RSVP", "url": "./#rsvp" },
-    { "name": "Gallery", "short_name": "Gallery", "url": "./#gallery" }
+    {
+      "name": "Event details",
+      "short_name": "Events",
+      "url": "./#events"
+    },
+    {
+      "name": "RSVP",
+      "short_name": "RSVP",
+      "url": "./#rsvp"
+    },
+    {
+      "name": "Gallery",
+      "short_name": "Gallery",
+      "url": "./#gallery"
+    }
   ],
   "screenshots": [
     {

@@ -4,7 +4,7 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.7 - only-light colour scheme, blended reveals, bigger names.
+   VERSION 2.8 - dark by design: ink ground, gold accents, Cinzel names.
    Portrait phones keep the stacked layout untouched; every landscape
    viewport switches to the split screens instead.
    ========================================================== */
@@ -29,16 +29,20 @@
    17 RESPONSIVE
    ===================================
 
-   Palette  Background #FDF9F5 · Paper #F8F2EC · Blush #EFD8D8
-            Rose #B76E79 · Sage #A8B49A · Gold #C8A46A · Text #463636
-   Type     Cormorant Garamond 600 (names) · Playfair Display (headings)
+   Palette  Ink #141010 · Surface #1F1917 · Raised #2A2320
+            Gold #C8A46A · Warm gold #DDBB80 · Blush #EFD8D8
+            Rose #B76E79 · Sage #A8B49A · Text #F3EAE0
+   Type     Cinzel 600 (names) · Playfair Display (headings)
             Inter (body) · Great Vibes (the ampersand only)
             Great Vibes drew the names until V2.6, but its swash capitals
-            - A and Y above all - read as lowercase, so 'Ahamed' and
-            'Yassmin' looked uncapitalised. It now draws the ampersand
-            only, which has no capital to misread.
-   No dark theme anywhere; the only dark pixels are the scrims that keep
-   white type legible over the two full-screen photographs.
+            - A and Y above all - read as lowercase. Cinzel replaced the
+            stand-in in V2.8: Roman inscriptional capitals, which is the
+            one style where a capital cannot be mistaken for anything
+            else, and which carries weight on ink without going heavy.
+   DARK BY DESIGN, NOT BY INVERSION. The two full-screen photographs are
+   dark studio portraits, so a dark page runs straight through them -
+   the hero has no edge where it stops and the page begins. Gold is the
+   accent that holds on both.
    =================================== */
 
 
@@ -46,40 +50,44 @@
    01 ROOT VARIABLES
    ========================================================= */
 :root{
-  /* THE PAGE IS LIGHT, AND ONLY LIGHT.
-     Chrome on Android will auto-darken a page it thinks is light-only
-     unless it is told otherwise, and its inversion is partial: the
-     photographs stay as they are, the type flips to pale grey, and every
-     faint decorative tint turns into a visible grey rectangle. That is
-     what the reported 'translucent boxes making the text disappear'
-     actually were - not boxes in the design, but the browser repainting
-     it. 'only light' is the strong form of this declaration and is what
-     switches that behaviour off; the meta tag alone does not. */
-  color-scheme:only light;
+  /* THE PAGE IS DARK, AND ONLY DARK.
+     Declaring it stops the browser trying to help - no auto-darken pass
+     on Android, and native form controls and scrollbars come up dark to
+     match. A browser's inversion of a light page is not a dark theme: it
+     flattens type to grey and turns every faint tint into a slab, which
+     is exactly what was reported. This is built instead. */
+  color-scheme:only dark;
 
-  --bg:#FDF9F5;
-  --paper:#F8F2EC;
+  --bg:#141010;          /* the ink the whole page sits on */
+  --surface:#1F1917;     /* a card lifted off it */
+  --raised:#2A2320;      /* a control lifted off the card */
+  --paper:#241D1A;       /* what shows behind a photograph while it loads */
   --blush:#EFD8D8;
   --rose:#B76E79;
   --sage:#A8B49A;
   --gold:#C8A46A;
-  --text:#463636;
+  --text:#F3EAE0;
 
-  --gold-deep:#A8834A;
-  --ink-70:rgba(70,54,54,.76);
-  --ink-50:rgba(70,54,54,.58);
-  --line:rgba(200,164,106,.32);
+  /* On ink the deep gold of the light build went muddy. Same hue, opened
+     up until it reads as gold again rather than as brown. */
+  --gold-deep:#DDBB80;
+  --ink-70:rgba(243,234,224,.74);
+  --ink-50:rgba(243,234,224,.52);
+  --line:rgba(200,164,106,.26);
 
-  --glass-bg:rgba(255,255,255,.62);
-  --glass-brd:rgba(255,255,255,.76);
-  --shadow:0 30px 70px -40px rgba(70,54,54,.42);
+  /* Glass on ink is a lift, not a veil: a little white at low alpha over
+     a blur, with a brighter hairline to catch the edge. */
+  --glass-bg:rgba(255,255,255,.055);
+  --glass-brd:rgba(255,255,255,.13);
+  --shadow:0 30px 70px -40px rgba(0,0,0,.85);
 
   --serif:'Playfair Display','Iowan Old Style',Georgia,serif;
-  /* The names get their own face. Cormorant Garamond is cut for display
-     sizes - high contrast, long elegant serifs, and capitals that are
-     unmistakably capitals, which is what Great Vibes could not give.
-     At 600 it carries real weight without turning heavy. */
-  --display:'Cormorant Garamond','Playfair Display',Georgia,serif;
+  /* The names get their own face. Cinzel is drawn from Roman
+     inscriptional capitals - the one style where a capital cannot be
+     read as anything but a capital, which is the whole reason for
+     leaving the script behind. It is also unmistakably not Playfair, and
+     cut gold on ink it is exactly the register a wedding wants. */
+  --display:'Cinzel','Trajan Pro','Playfair Display',Georgia,serif;
   --script:'Great Vibes','Snell Roundhand',cursive;
   --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
 
@@ -133,10 +141,12 @@ body{
   margin:0;font-family:var(--sans);font-weight:300;
   font-size:clamp(15px,.5vw + 13.8px,16.5px);line-height:1.75;
   color:var(--text);background:var(--bg);
+  /* the same three washes as before, at the strength ink can take -
+     enough that the page never reads as flat black */
   background-image:
-    radial-gradient(110% 60% at 8% 0%, rgba(239,216,216,.34) 0%, rgba(239,216,216,0) 58%),
-    radial-gradient(90% 55% at 96% 18%, rgba(200,164,106,.16) 0%, rgba(200,164,106,0) 55%),
-    radial-gradient(120% 70% at 50% 104%, rgba(168,180,154,.20) 0%, rgba(168,180,154,0) 60%);
+    radial-gradient(110% 60% at 8% 0%, rgba(183,110,121,.14) 0%, rgba(183,110,121,0) 58%),
+    radial-gradient(90% 55% at 96% 18%, rgba(200,164,106,.12) 0%, rgba(200,164,106,0) 55%),
+    radial-gradient(120% 70% at 50% 104%, rgba(168,180,154,.09) 0%, rgba(168,180,154,0) 60%);
   background-color:var(--bg);          /* stated outright, never inferred */
   overflow-x:hidden;-webkit-font-smoothing:antialiased;
   -webkit-overflow-scrolling:touch;   /* momentum scrolling on iOS */
@@ -177,9 +187,12 @@ ol,ul{list-style:none;padding:0}
   text-align:center;
 }
 .name{
+  /* Cinzel is all capitals by construction and needs air between them;
+     it is also wider than a text serif, so it is set a shade smaller
+     than the face it replaced and still reads larger. */
   font-family:var(--display);font-weight:600;
-  font-size:clamp(2.6rem,6.6vw,4.4rem);line-height:1.1;letter-spacing:.008em;
-  text-align:center;margin-top:.45rem;color:var(--text);
+  font-size:clamp(1.05rem,2.7vw,1.75rem);line-height:1.3;letter-spacing:.06em;
+  text-align:center;margin-top:.6rem;color:var(--text);
 }
 .rule{display:block;width:min(300px,58%);margin:1.3rem auto 0;opacity:.9}
 
@@ -276,16 +289,17 @@ section{position:relative;z-index:1}
 .hero__names{
   font-family:var(--display);font-weight:600;
   display:flex;flex-direction:column;align-items:center;gap:.02em;
-  /* Cormorant is narrower than Playfair at the same size, so the names
-     can be set considerably larger and still hold one line on a 320px
-     phone - which is the whole reason for the change of face. */
-  font-size:clamp(2.5rem,9.4vw,6.4rem);line-height:1.08;letter-spacing:.012em;
+  /* Roman capitals with generous tracking. Wider per character than a
+     lowercase setting, so the size is chosen to hold 'THAWFEEQ AHAMED'
+     on one line down to a 320px screen - and it still reads far larger
+     than the script it replaced, because capitals fill their line. */
+  font-size:clamp(1.35rem,4.6vw,3.1rem);line-height:1.34;letter-spacing:.10em;
   text-shadow:0 2px 30px rgba(0,0,0,.45);
 }
 .hero__names span{white-space:nowrap}
 .hero__names em{
-  font-family:var(--script);font-style:normal;font-size:.62em;
-  color:#F0DCB8;margin:-.06em 0;line-height:1;
+  font-family:var(--script);font-style:normal;font-size:1.15em;
+  color:var(--gold-deep);margin:-.1em 0;line-height:1;letter-spacing:0;
 }
 .hero__meta{
   margin-top:clamp(1.4rem,3.4vw,2.2rem);display:flex;flex-direction:column;gap:.45rem;align-items:center;
@@ -356,7 +370,7 @@ section{position:relative;z-index:1}
   transition:background-color .5s var(--ease),box-shadow .5s var(--ease);
 }
 .topbar.is-on{
-  background:rgba(253,249,245,.86);
+  background:rgba(20,16,16,.80);
   -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
   box-shadow:0 10px 30px -28px rgba(70,54,54,.8);
 }
@@ -390,7 +404,7 @@ section{position:relative;z-index:1}
   position:fixed;top:0;left:0;bottom:0;z-index:300;
   width:min(84vw,330px);
   padding:calc(var(--sa-t) + 3.6rem) 2rem calc(var(--sa-b) + 2rem);
-  background:rgba(253,249,245,.82);
+  background:rgba(20,16,16,.92);
   border-right:1px solid var(--glass-brd);
   -webkit-backdrop-filter:blur(26px) saturate(1.4);backdrop-filter:blur(26px) saturate(1.4);
   box-shadow:24px 0 70px -50px rgba(70,54,54,.9);
@@ -404,7 +418,7 @@ section{position:relative;z-index:1}
   width:42px;height:42px;border-radius:50%;font-size:1.7rem;line-height:1;color:var(--text);
   transition:background-color .35s var(--ease);
 }
-.sidenav__close:hover{background:rgba(255,255,255,.7)}
+.sidenav__close:hover{background:rgba(255,255,255,.10)}
 .sidenav__mark{width:56px;height:56px;opacity:.9}
 .sidenav__list{display:flex;flex-direction:column;gap:.15rem}
 .sidenav__list a{
@@ -474,7 +488,10 @@ section{position:relative;z-index:1}
      still correct, just not pixel-matched - and the smaller heading below
      keeps both names on one line, which makes them match anyway. */
   .duo__side{grid-row:1 / -1;grid-template-rows:subgrid}
-  .duo .name{font-size:clamp(2.3rem,4.2vw,3.4rem)}
+  /* Cinzel sets capitals, which are far wider than the lowercase face
+     this override was written for - at the old size 'THAWFEEQ AHAMED'
+     ran to two lines in a half-width panel. */
+  .duo .name{font-size:clamp(1.05rem,2.3vw,1.85rem)}
   .duo__grid::before{
     content:"";position:absolute;left:50%;top:clamp(2rem,6vw,4rem);bottom:clamp(2rem,6vw,4rem);
     width:1px;transform:translateX(-50%);pointer-events:none;
@@ -634,7 +651,7 @@ section{position:relative;z-index:1}
 .ecard:hover .ecard__art img{transform:scale(1.04)}
 .ecard__art::after{
   content:"";position:absolute;inset:auto 0 0 0;height:38%;pointer-events:none;
-  background:linear-gradient(180deg,rgba(248,242,236,0),rgba(248,242,236,.9));
+  background:linear-gradient(180deg,rgba(31,25,23,0),rgba(31,25,23,.96));
 }
 /* auto height, one padding value, nothing fixed - text cannot clip */
 .ecard__body{
@@ -819,7 +836,8 @@ section{position:relative;z-index:1}
   max-width:18ch;margin-inline:auto;
 }
 .closing__names{
-  margin-top:1.1rem;font-family:var(--display);font-weight:600;font-size:clamp(1.8rem,4.4vw,2.9rem);
+  margin-top:1.1rem;font-family:var(--display);font-weight:600;letter-spacing:.08em;
+  font-size:clamp(1.05rem,2.6vw,1.7rem);
   line-height:1.2;text-shadow:0 2px 26px rgba(0,0,0,.45);
 }
 .closing__names span{color:var(--blush);font-size:.62em;padding:0 .18em;vertical-align:middle}
@@ -835,7 +853,7 @@ section{position:relative;z-index:1}
 
 .modal{
   position:fixed;inset:0;z-index:360;display:grid;place-items:center;padding:1.4rem;
-  background:rgba(253,249,245,.74);
+  background:rgba(12,9,9,.80);
   -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   opacity:0;transition:opacity .4s var(--ease);
 }
@@ -880,12 +898,12 @@ section{position:relative;z-index:1}
 .toast.is-on{transform:translate(-50%,0);opacity:1}
 
 /* Where backdrop-filter is missing the glass would read as flat white
-   over a photograph, so the panels fall back to an opaque paper tint. */
+   over a photograph, so the panels fall back to an opaque surface. */
 @supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
-  .cd,.cd__done,.rsvp__row,.modal__card{background:rgba(250,245,240,.97)}
-  .sidenav{background:rgba(253,249,245,.985)}
-  .topbar.is-on{background:rgba(253,249,245,.98)}
-  .modal{background:rgba(253,249,245,.95)}
+  .cd,.cd__done,.rsvp__card,.modal__card{background:#241D1A}
+  .sidenav{background:#191413}
+  .topbar.is-on{background:#191413}
+  .modal{background:rgba(12,9,9,.96)}
 }
 
 /* decoration
@@ -900,11 +918,11 @@ section{position:relative;z-index:1}
 }
 .blob--a{
   width:min(46vw,520px);aspect-ratio:1;top:6vh;left:-14vw;
-  background:radial-gradient(circle at 42% 42%, rgba(239,216,216,.62), rgba(239,216,216,0) 68%);
+  background:radial-gradient(circle at 42% 42%, rgba(183,110,121,.30), rgba(183,110,121,0) 68%);
 }
 .blob--b{
   width:min(42vw,480px);aspect-ratio:1;bottom:4vh;right:-12vw;
-  background:radial-gradient(circle at 55% 45%, rgba(168,180,154,.42), rgba(168,180,154,0) 68%);
+  background:radial-gradient(circle at 55% 45%, rgba(168,180,154,.20), rgba(168,180,154,0) 68%);
 }
 
 
@@ -1035,7 +1053,7 @@ html.js-reveal .is-in{will-change:auto}
     padding-bottom:calc(var(--sa-b) + 5rem);
   }
   .hero__mark{width:42px}
-  .hero__names{font-size:clamp(1.6rem,6.6vh,2.4rem)}
+  .hero__names{font-size:clamp(.95rem,3.4vh,1.3rem);letter-spacing:.08em}
   .hero__eyebrow{font-size:.55rem;letter-spacing:.28em;margin-bottom:.3rem}
   .hero__meta{margin-top:.55rem}
   .hero__meta b{font-size:.72rem;letter-spacing:.24em}
@@ -1058,7 +1076,7 @@ html.js-reveal .is-in{will-change:auto}
 }
 /* the narrowest phones still in use are 320px wide */
 @media (max-width:360px){
-  .hero__names{font-size:2.15rem}
+  .hero__names{font-size:1.2rem;letter-spacing:.07em}
 }
 @media (max-width:640px){
   /* the arrows float over the picture instead of stealing width */

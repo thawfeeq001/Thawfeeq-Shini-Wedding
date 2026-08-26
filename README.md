@@ -10,7 +10,7 @@ Do not delete this marker.
 A luxury editorial wedding website. Photographs carry the story; the type stays
 out of their way.
 
-**Version 2.4.** Portrait phones keep the stacked reading experience; every
+**Version 2.8 — dark by design.** Portrait phones keep the stacked reading experience; every
 landscape viewport — a phone turned sideways, an iPad, a desktop — switches to
 a split screen, automatically, on rotation. Every photograph is WebP under
 `images/`, named for what it is. One viewer serves the whole page, with pinch

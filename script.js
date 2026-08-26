@@ -4,7 +4,7 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.7 - split show/hide observers, blended reveals.
+   VERSION 2.8 - dark by design; split show/hide observers.
    ========================================================== */
 
 /* ==========================================================
