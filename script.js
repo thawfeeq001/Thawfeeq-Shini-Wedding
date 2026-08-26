@@ -1062,10 +1062,32 @@
   // 13 · PWA Module
   // ==================================
 
+  /* Registering alone is not enough. A worker that is already installed
+     keeps serving the previous shell until the page is next opened, so a
+     guest who visited before sees yesterday's site once more and assumes
+     nothing changed. update() asks for a fresh sw.js on every load, and
+     when a new one takes control the page reloads itself exactly once -
+     so an edit lands on this visit rather than the next one.
+
+     The guard matters: without it, controllerchange during the reload
+     would trigger another reload, and so on. */
   function initPwa() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
+    /* Only a page that already had a worker can be showing a stale shell.
+       On a first-ever visit the new worker claims the page too, and
+       reloading then would be a pointless flash for someone who is
+       already looking at the current site. */
+    const hadWorker = !!navigator.serviceWorker.controller;
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadWorker || reloading) return;
+      reloading = true;
+      location.reload();
+    });
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => { /* offline support unavailable */ });
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => { if (reg && reg.update) reg.update(); })
+        .catch(() => { /* offline support unavailable */ });
     });
   }
 

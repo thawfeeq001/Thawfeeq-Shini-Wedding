@@ -7,10 +7,20 @@
 
 /* =============================================================
    Service worker — offline support for the wedding invitation.
+
+   THE SHELL IS ONE UNIT. index.html, style.css and script.js are
+   written against each other: the HTML names the grids, the script
+   fills them, the stylesheet lays them out. Serve a fresh page beside
+   a stale script and the result is a page that looks broken but
+   reports no error - empty galleries, missing sections, dead controls.
+   So all three are network-first, and only photographs and fonts are
+   served from cache first. That is worth the few kilobytes: those
+   three files together are smaller than one photograph.
+
    Bump CACHE_VERSION whenever you change site files so returning
    guests receive the update on their next visit.
    ============================================================= */
-const CACHE_VERSION = 'v8';
+const CACHE_VERSION = 'v9';
 const SHELL_CACHE = 'wedding-shell-' + CACHE_VERSION;
 const ASSET_CACHE = 'wedding-assets-' + CACHE_VERSION;
 const FONT_CACHE  = 'wedding-fonts-' + CACHE_VERSION;
@@ -106,6 +116,27 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* Everything else — serve from cache, refresh in the background */
+  /* The stylesheet and the script travel with the page, so they get the
+     same treatment: network first, cache only as the offline fallback.
+     See the note at the top for why a stale one of these is worse than
+     a slow one. */
+  if (/\.(?:css|js)$/.test(url.pathname)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(SHELL_CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  /* Photographs and everything else — cache first, refresh in the
+     background. These are safe to serve stale: a photograph is never
+     replaced in place, it is added under a new name. */
   event.respondWith(staleWhileRevalidate(request, ASSET_CACHE));
 });
