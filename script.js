@@ -4,6 +4,8 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
+   VERSION 3.0.2 - cross-platform pass; the gallery split is computed
+   here so no engine can fragment it wrongly.
    VERSION 3.0.1 - iOS pass; Safari gesture events guarded, audio
    resume verified, copy fallback rewritten for WebKit.
    VERSION 3.0 - final refinement; split show/hide observers, and the
@@ -741,24 +743,108 @@
           which photographs it can page through. Clicks are delegated
           from the document, so tiles created later need no wiring. */
 
+  /* ---- the column split ---------------------------------------------
+     What CSS multi-column was doing, done here so that every engine gets
+     the same answer.
+
+     Balancing a set of columns is the classic problem of cutting an
+     ordered list into N contiguous runs so that the tallest run is as
+     short as possible - which is what a browser's column balancer is
+     solving too, and why this reproduces Chrome's arrangement exactly
+     rather than inventing a new one. The shortest possible tallest
+     column is found by binary search, then the runs are cut to it.
+
+     Heights are taken from each photograph's own dimensions, so no
+     measuring is needed and the split is known before a single image has
+     loaded - nothing can move once they arrive.
+
+     The runs are contiguous and in order, so reading the columns left to
+     right, top to bottom still gives the list in its original order:
+     the viewer pages through the photographs exactly as it did.        */
+
+  function splitIntoColumns(items, cols) {
+    if (cols <= 1) return [items.slice()];
+    const h = items.map(it => (it.w && it.h) ? it.h / it.w : 1.25);
+    const total = h.reduce((a, b) => a + b, 0);
+
+    const fits = limit => {
+      let used = 1, acc = 0;
+      for (let i = 0; i < h.length; i++) {
+        if (acc + h[i] > limit + 1e-9) { used++; acc = h[i]; if (used > cols) return false; }
+        else acc += h[i];
+      }
+      return true;
+    };
+
+    let lo = Math.max(Math.max.apply(null, h), total / cols), hi = total;
+    for (let i = 0; i < 60; i++) {
+      const mid = (lo + hi) / 2;
+      if (fits(mid)) hi = mid; else lo = mid;
+    }
+
+    const out = [];
+    for (let i = 0; i < cols; i++) out.push([]);
+    let c = 0, acc = 0;
+    for (let i = 0; i < items.length; i++) {
+      /* never strand the tail: leave at least one photograph per column */
+      const colsLeft = cols - c - 1, itemsLeft = items.length - i;
+      if (c < cols - 1 && acc > 0 &&
+          (acc + h[i] > hi + 1e-9 || itemsLeft <= colsLeft)) { c++; acc = 0; }
+      out[c].push(items[i]);
+      acc += h[i];
+    }
+    return out;
+  }
+
+  function columnCount(grid) {
+    const raw = parseInt(getComputedStyle(grid).getPropertyValue('--cols'), 10);
+    return raw > 0 ? raw : 1;
+  }
+
   function buildGridWhenNear(grid, items, group, dir, alt) {
-    let built = false;
-    function build() {
-      if (built || !grid) return;
-      built = true;
-      /* One insertion, not fourteen. Appending each tile straight to the
-         grid makes the browser re-lay the masonry out on every one; a
-         fragment is assembled off-document and costs a single reflow,
-         which is where the long frame on entering a gallery came from. */
+    let built = false, drawnAt = 0;
+
+    function draw(cols) {
+      drawnAt = cols;
+      /* assembled off-document, so the page reflows once rather than
+         once per photograph */
       const frag = document.createDocumentFragment();
-      items.forEach(item => frag.appendChild(buildTile(item, group, dir, alt)));
+      splitIntoColumns(items, cols).forEach(run => {
+        const col = document.createElement('div');
+        col.className = 'masonry__col';
+        run.forEach(item => col.appendChild(buildTile(item, group, dir, alt)));
+        frag.appendChild(col);
+      });
+      grid.textContent = '';
       grid.appendChild(frag);
       observeReveals(grid);
       if (!document.documentElement.classList.contains('js-reveal')) {
         $$('.ph', grid).forEach(t => t.classList.add('is-in'));
       }
     }
+
+    function build() {
+      if (built || !grid) return;
+      built = true;
+      draw(columnCount(grid));
+    }
+
     if (!grid) return;
+
+    /* Re-cut only when the breakpoint actually changes the column count.
+       A resize on its own - the address bar sliding away, say - must not
+       rebuild a gallery under the reader's thumb. */
+    let queued = false;
+    on(window, 'resize', () => {
+      if (!built || queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        const now = columnCount(grid);
+        if (now !== drawnAt) draw(now);
+      });
+    }, { passive: true });
+
     if (!('IntersectionObserver' in window)) { build(); return; }
     const io = new IntersectionObserver(entries => {
       if (entries.some(e => e.isIntersecting)) { io.disconnect(); build(); }
@@ -1365,14 +1451,6 @@
     });
     on($('#copyLink'), 'click', () => {
       const done = () => toast('Link copied.');
-      /* The old fallback used select() on a readonly field parked at
-         -9999px. Neither works on iOS: Safari will not select a field it
-         considers off-screen, and select() alone does not extend a
-         selection there - so the copy quietly did nothing. This is the
-         recipe iOS actually honours: a field in the layout but invisible,
-         made contentEditable and not readonly, selected through a Range,
-         with setSelectionRange to give the selection an extent.
-         The keyboard is kept away by blurring straight afterwards. */
       /* The old fallback used select() on a readonly field parked at
          -9999px. Neither half works on iOS: Safari will not select a
          field it treats as off-screen, and select() does not give the

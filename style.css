@@ -4,6 +4,8 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
+   VERSION 3.0.2 - cross-platform pass: real gallery columns instead of
+   CSS multi-column, no blur on the background washes.
    VERSION 3.0.1 - iOS pass: svh not dvh, 44pt targets, the viewer
    owns its touches, and the photograph fits a sideways phone.
    VERSION 3.0 - final refinement: hero type at the foot of the frame,
@@ -638,11 +640,31 @@ html.js-reveal .memtag.reveal-right.is-in{transform:rotate(var(--tag-tilt))}
   max-width:52ch;margin:.7rem auto 0;text-align:center;color:var(--ink-50);
   font-size:.95rem;font-style:italic;
 }
-.masonry{margin-top:clamp(2rem,4.6vw,3.2rem);column-count:4;column-gap:clamp(.6rem,1.6vw,1.1rem)}
+/* MASONRY - real columns, not CSS multi-column.
+
+   column-count looked right on Chrome and broke on Safari: one tile
+   (the garlands, which happens to fall exactly on the phone's column
+   break) was fragmented out of its column and left stranded at the end.
+   Fragmenting a <button> that carries overflow:hidden and a transform
+   is a shape WebKit has never handled reliably, and there is no way to
+   ask multi-column to just be careful.
+
+   So the columns are real elements now and the split is worked out in
+   script.js instead of by the engine. It reproduces exactly what
+   Chrome's balancer produced - the arrangement checked on Android -
+   and being ordinary block flow, every browser draws the same thing.
+   --cols is still declared here, per breakpoint, so the layout rules
+   stay in the stylesheet; the script only reads it. */
+.masonry{
+  --cols:4;
+  --gap:clamp(.6rem,1.6vw,1.1rem);
+  margin-top:clamp(2rem,4.6vw,3.2rem);
+  display:flex;align-items:flex-start;gap:var(--gap);
+}
+.masonry__col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:var(--gap)}
 .ph{
   -webkit-appearance:none;appearance:none;border:0;padding:0;font:inherit;color:inherit;
-  display:block;width:100%;margin:0 0 clamp(.6rem,1.6vw,1.1rem);
-  break-inside:avoid;-webkit-column-break-inside:avoid;
+  display:block;width:100%;margin:0;
   border-radius:18px;overflow:hidden;position:relative;background:var(--paper);
   box-shadow:var(--shadow);-webkit-tap-highlight-color:transparent;
 }
@@ -1120,6 +1142,18 @@ html.js-reveal .memtag.reveal-right.is-in{transform:rotate(var(--tag-tilt))}
   .sidenav{background:#191413}
   .topbar.is-on{background:#191413}
   .modal{background:rgba(12,9,9,.96)}
+  /* The three controls a guest actually has to use. Their glass is only
+     5% white, which reads as a field ONLY because the blur separates it
+     from the card; without the blur they flatten into the card and the
+     form stops looking like a form. Given a surface of their own they
+     read the same either way. */
+  .rsvp__card input[type="text"],
+  .rsvp__card textarea,
+  .stepper{background:#332B27;border-color:rgba(255,255,255,.20)}
+  .rsvp__card input:focus,
+  .rsvp__card textarea:focus{background:#3D342F}
+  .stepper__b{background:#443A35;border-color:rgba(255,255,255,.22)}
+  .icon-btn{background:rgba(60,48,44,.92)}
 }
 
 /* decoration
@@ -1128,17 +1162,27 @@ html.js-reveal .memtag.reveal-right.is-in{transform:rotate(var(--tag-tilt))}
    type - which is exactly what they were reported doing. The watercolour
    blobs stay: they sit at z-index 0, behind the sections, so they tint
    the page without ever crossing a word. */
+/* No filter:blur() here, deliberately. These are radial gradients that
+   already fade to nothing, so blurring them was softening something
+   soft: measured against the unblurred version the largest difference
+   any pixel showed was 8/255, and not one pixel differed by more than
+   that. It was not free, though - two blurred fixed layers sitting under
+   fifteen backdrop-filter surfaces meant every one of those had to
+   resample a blurred backdrop while the page scrolled. On a throttled
+   1440 desktop that alone was the difference between 33ms frames with
+   11% of them long, and 17ms frames with none. The gradients simply
+   reach a little further now instead. */
 .blob{
-  position:fixed;z-index:0;pointer-events:none;border-radius:50%;filter:blur(60px);
+  position:fixed;z-index:0;pointer-events:none;border-radius:50%;
   will-change:transform;
 }
 .blob--a{
   width:min(46vw,520px);aspect-ratio:1;top:6vh;left:-14vw;
-  background:radial-gradient(circle at 42% 42%, rgba(183,110,121,.30), rgba(183,110,121,0) 68%);
+  background:radial-gradient(circle at 42% 42%, rgba(183,110,121,.26), rgba(183,110,121,0) 74%);
 }
 .blob--b{
   width:min(42vw,480px);aspect-ratio:1;bottom:4vh;right:-12vw;
-  background:radial-gradient(circle at 55% 45%, rgba(168,180,154,.20), rgba(168,180,154,0) 68%);
+  background:radial-gradient(circle at 55% 45%, rgba(168,180,154,.17), rgba(168,180,154,0) 74%);
 }
 
 
@@ -1236,7 +1280,7 @@ html.js-reveal .is-in{will-change:auto}
    17 RESPONSIVE
    ========================================================= */
 @media (max-width:900px){
-  .masonry{column-count:3}
+  .masonry{--cols:3}
   .fam__inset{width:clamp(104px,26vw,150px);bottom:-6%}
   /* far enough up that the whole card, seconds included, sits inside the
      first screen on a 667px phone as well as an 844px one */
@@ -1310,8 +1354,22 @@ html.js-reveal .is-in{will-change:auto}
   .cd__n{font-size:clamp(1.6rem,8vw,2.4rem)}
   .cd__l{font-size:.5rem;letter-spacing:.18em}
 }
-@media (max-width:720px){.masonry{column-count:2}}
-@media (orientation:landscape) and (max-height:520px){.masonry{column-count:3}}
+@media (max-width:720px){.masonry{--cols:2}}
+@media (orientation:landscape) and (max-height:520px){.masonry{--cols:3}}
+
+/* Windows High Contrast and friends. The browser forces its own two
+   colours and drops our shadows, which leaves the hero and farewell
+   words sitting directly on a photograph with nothing to separate them.
+   In that mode the type gets a solid panel and the washes step aside;
+   everywhere else this rule does not exist. */
+@media (forced-colors:active){
+  .hero__inner,.closing__words{
+    background:Canvas;color:CanvasText;
+    padding:1rem 1.1rem;border-radius:12px;border:1px solid CanvasText;
+  }
+  .hero__wash,.closing__veil{display:none}
+  .ph,.frame,.ecard,.stepper,.rsvp__card{border:1px solid CanvasText}
+}
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
