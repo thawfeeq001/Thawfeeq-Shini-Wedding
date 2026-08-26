@@ -4,6 +4,8 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
+   VERSION 3.0.1 - iOS pass: svh not dvh, 44pt targets, the viewer
+   owns its touches, and the photograph fits a sideways phone.
    VERSION 3.0 - final refinement: hero type at the foot of the frame,
    glass RSVP fields with a guest stepper, a memory tag on the bride
    family portrait, and the farewell photograph as the last screen.
@@ -126,8 +128,14 @@
    more, so the layout changes on rotation with no reload.
    The three event cards need more room than two panels do and stay on
    their own 860px breakpoint. */
+/* svh, deliberately, not dvh. dvh tracks Safari's address bar, so a
+   full-screen section grows by 60-75px as the bar retracts mid-scroll -
+   and everything below it is pushed down while the reader is scrolling,
+   which is exactly the stutter this release is meant to remove. svh is
+   the height with the bar SHOWN and never changes, so nothing reflows.
+   When the bar retracts a little more of the next section shows, which
+   is what every well-behaved iOS page does. */
 @supports (height:100svh){ :root{ --screen:100svh } }
-@supports (height:100dvh){ :root{ --screen:100dvh } }
 
 
 /* =========================================================
@@ -139,7 +147,11 @@
    from reporting - and every reveal would stay invisible. The sideways
    reveal offsets are contained per-section instead (see .quote/.duo…). */
 html{
-  -webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:76px;
+  -webkit-text-size-adjust:100%;scroll-behavior:smooth;
+  /* the bar is 76px, plus whatever the notch adds - without the inset
+     a jump from the menu lands the heading underneath it on an
+     iPhone with a notch or a Dynamic Island */
+  scroll-padding-top:calc(var(--sa-t) + 76px);
   /* The white strip under the page on iOS is the overscroll area, which
      is painted from <html>, not <body>. Colouring the root is the fix -
      and it is the root that has to carry it, because a background set
@@ -173,6 +185,13 @@ img{max-width:100%;height:auto;display:block}
    transformed ancestor. Painting it on its own layer fixes it and costs
    nothing, because the frames are already composited. */
 .frame img,.ph img{-webkit-transform:translateZ(0);transform:translateZ(0)}
+/* iOS pops "Save Image / Copy" on a long press, which fires on a slow
+   drag inside the viewer and interrupts it. Photographs are not links
+   here, so the callout has nothing to offer. */
+.hero__img,.closing__img,.frame img,.ph img,.lb__fig img,.memtag img{
+  -webkit-touch-callout:none;
+}
+.lb__fig img{-webkit-user-select:none;user-select:none}
 button,input{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 a{color:inherit;text-decoration:none}
@@ -408,7 +427,12 @@ section{position:relative;z-index:1}
 .topbar__mark img{width:38px;height:38px;transition:transform .5s var(--ease)}
 .topbar__mark:hover img{transform:rotate(-6deg) scale(1.06)}
 /* the gold mark would be lost on the photograph, so it fades in with the bar */
-.topbar__mark{opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+/* the mark is a link back to the top, so it carries a 44pt target
+   even though the artwork inside it is smaller */
+.topbar__mark{
+  opacity:0;pointer-events:none;transition:opacity .5s var(--ease);
+  width:44px;height:44px;display:grid;place-items:center;flex:none;
+}
 .topbar.is-on .topbar__mark{opacity:1;pointer-events:auto}
 
 .burger{width:44px;height:44px;position:relative;border-radius:50%;flex:none}
@@ -446,7 +470,7 @@ section{position:relative;z-index:1}
 .sidenav.is-open{transform:none}
 .sidenav__close{
   position:absolute;top:calc(var(--sa-t) + .9rem);right:1rem;
-  width:42px;height:42px;border-radius:50%;font-size:1.7rem;line-height:1;color:var(--text);
+  width:44px;height:44px;border-radius:50%;font-size:1.7rem;line-height:1;color:var(--text);
   transition:background-color .35s var(--ease);
 }
 .sidenav__close:hover{background:rgba(255,255,255,.10)}
@@ -631,6 +655,13 @@ html.js-reveal .memtag.reveal-right.is-in{transform:rotate(var(--tag-tilt))}
 
 /* Dark, blurred viewer. Four rows: bar, stage, caption, thumbnails.
    Everything is auto-height except the stage, so nothing can clip. */
+/* iOS: the pinch, drag and swipe handlers live on the whole overlay, so
+   the whole overlay has to opt out of Safari's own panning and zooming -
+   touch-action on the photograph alone left the backdrop live, and a
+   gesture that began just outside the picture scrolled the page behind
+   it. The thumbnail strip is given its one axis back. */
+.lb,.lb__stage,.lb__fig,.lb__fig img{touch-action:none}
+.lb__thumbs{touch-action:pan-x}
 .lb{
   position:fixed;inset:0;z-index:340;
   display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;
@@ -666,12 +697,29 @@ html.js-reveal .memtag.reveal-right.is-in{transform:rotate(var(--tag-tilt))}
 
 .lb__stage{
   position:relative;min-height:0;
-  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;
+  /* stretch, NOT center. Centring the row leaves the figure sized by its
+     own content, so its height:100% has nothing definite to resolve
+     against - and with no definite height, max-height:100% on the
+     photograph is inert. It then took whatever height its width implied,
+     which on a phone held sideways was 903px inside a 232px stage: the
+     picture ran 573px off the bottom of the screen. Stretched, the
+     figure fills the row, the percentage resolves, and the photograph is
+     bounded on both axes. The arrows keep their own centring. */
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:stretch;
   gap:.4rem;padding-inline:.4rem;
 }
+.lb__stage > .lb__nav{align-self:center}
 .lb__fig{margin:0;width:100%;min-width:0;min-height:0;height:100%;display:grid;place-items:center}
 .lb__fig img{
-  transform-origin:center center;touch-action:none;
+  transform-origin:center center;
+  /* min-width/min-height:0 is the whole fix. The photograph is a grid
+     item, and a grid item's default min-height:auto is its automatic
+     minimum size - for a replaced element, its own content height. A
+     minimum always beats a maximum, so max-height:100% below was simply
+     ignored and the picture stood at whatever its width implied. That
+     never showed in portrait, where the width is the binding constraint
+     anyway, and ran 573px off the bottom of a phone held sideways. */
+  min-width:0;min-height:0;
   max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;
   border-radius:14px;box-shadow:0 40px 90px -46px rgba(0,0,0,.9);
   animation:lbIn .42s var(--ease);
@@ -923,7 +971,8 @@ html.js-reveal .memtag.reveal-right.is-in{transform:rotate(var(--tag-tilt))}
 }
 .stepper:focus-within{border-color:var(--gold);box-shadow:0 0 0 4px rgba(200,164,106,.14)}
 .stepper__b{
-  flex:0 0 auto;width:40px;height:40px;border-radius:11px;
+  /* 44pt, the smallest target Apple considers reliable */
+  flex:0 0 auto;width:44px;height:44px;border-radius:12px;
   display:grid;place-items:center;
   border:1px solid var(--glass-brd);background:rgba(255,255,255,.06);
   color:var(--gold-deep);font-family:var(--sans);font-size:1.28rem;line-height:1;

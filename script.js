@@ -4,6 +4,8 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
+   VERSION 3.0.1 - iOS pass; Safari gesture events guarded, audio
+   resume verified, copy fallback rewritten for WebKit.
    VERSION 3.0 - final refinement; split show/hide observers, and the
    photo viewer, timeline and focal-point crop each behind one switch.
    ========================================================== */
@@ -498,9 +500,15 @@
       { el: $('.hero__img'), speed: 0.14, base: 'scale(1.05)' },
       { el: $('.closing__img'), speed: 0.09, base: '' }
     ].filter(l => l.el);
+    /* max: the drift is bounded. Unbounded, a 0.05 speed carries a blob a
+       thousand pixels down a page this long, so for most of the scroll
+       they sit far off-screen while still being re-composited every
+       frame - a blurred fixed layer is among the most expensive things
+       to move on iOS. Clamped, the wash stays where it can be seen and
+       the writes stop at the ends. */
     const blobs = [
-      { el: $('.blob--a'), speed: 0.05 },
-      { el: $('.blob--b'), speed: -0.04 }
+      { el: $('.blob--a'), speed: 0.05, max: 260, last: '' },
+      { el: $('.blob--b'), speed: -0.04, max: 260, last: '' }
     ].filter(b => b.el);
     if (!layers.length && !blobs.length) return;
 
@@ -513,7 +521,10 @@
         l.el.style.transform = l.base + ' translate3d(0,' + shift.toFixed(1) + 'px,0)';
       });
       blobs.forEach(b => {
-        b.el.style.transform = 'translate3d(0,' + (y * b.speed).toFixed(1) + 'px,0)';
+        const v = Math.max(-b.max, Math.min(b.max, y * b.speed)).toFixed(1);
+        if (v === b.last) return;            /* clamped, or simply unmoved */
+        b.last = v;
+        b.el.style.transform = 'translate3d(0,' + v + 'px,0)';
       });
     });
   }
@@ -966,6 +977,17 @@
 
       on(lb, 'dblclick', e => { e.preventDefault(); setScale(scale > 1 ? 1 : 2.4); });
 
+      /* Safari raises its own gesturestart/change/end for a two-finger
+         pinch, on top of the touch events, and acts on them by zooming
+         the whole page - user-scalable=no has been ignored since iOS 10.
+         Left alone, a pinch inside the viewer zooms the photograph and
+         the page at the same time and the reader is left at 2x with no
+         way back. These events do not exist off WebKit, where the
+         listeners simply never fire. */
+      ['gesturestart', 'gesturechange', 'gestureend'].forEach(type => {
+        on(lb, type, e => { if (overlay.isOpen()) e.preventDefault(); }, { passive: false });
+      });
+
       /* ---- pointer: wheel zoom, and drag to pan once zoomed ---- */
       on(lb, 'wheel', e => {
         if (!overlay.isOpen()) return;
@@ -1076,12 +1098,20 @@
 
     /* hold to repeat: a slow first repeat, then quicker */
     function holdable(button, by) {
-      let first = 0, repeat = 0;
+      let first = 0, repeat = 0, repeated = false;
       const stop = () => { clearTimeout(first); clearInterval(repeat); };
-      on(button, 'click', () => step(by));
+      /* A hold ends with a click as well as the repeats, which counted one
+         guest too many every time. The click after a hold is swallowed. */
+      on(button, 'click', () => {
+        if (repeated) { repeated = false; return; }
+        step(by);
+      });
       on(button, 'pointerdown', () => {
         stop();
-        first = setTimeout(() => { repeat = setInterval(() => step(by), 110); }, 420);
+        repeated = false;
+        first = setTimeout(() => {
+          repeat = setInterval(() => { repeated = true; step(by); }, 110);
+        }, 420);
       });
       ['pointerup', 'pointerleave', 'pointercancel'].forEach(e => on(button, e, stop));
       on(window, 'blur', stop);
@@ -1230,6 +1260,14 @@
     }
     return {
       isPlaying: () => playing,
+      /* Intent is not sound. iOS suspends the audio session whenever the
+         page goes to the background, and will not lift that outside a
+         gesture - so the context can sit suspended while `playing` is
+         still true. This reports what is actually audible. */
+      isLive: function () {
+        if (MUSIC_URL) return !!(el && !el.paused);
+        return !!(ctx && ctx.state === 'running');
+      },
       start: function () {
         if (MUSIC_URL) {
           const a = audio(), p = a.play();
@@ -1302,6 +1340,15 @@
       } else if (wasPlaying) {
         setOn(true, false);
         wasPlaying = false;
+        /* Coming back from the background is not a gesture, so on iOS the
+           resume above can be refused and the ambience stays silent with
+           the button still lit. Check, and if it did not take, put the
+           button back and wait for the reader's next touch. */
+        setTimeout(() => {
+          if (!Music.isPlaying() || Music.isLive()) return;
+          setOn(false, false);
+          on(document, 'pointerdown', () => setOn(true, false), { once: true });
+        }, 400);
       }
     });
   }
@@ -1318,16 +1365,51 @@
     });
     on($('#copyLink'), 'click', () => {
       const done = () => toast('Link copied.');
+      /* The old fallback used select() on a readonly field parked at
+         -9999px. Neither works on iOS: Safari will not select a field it
+         considers off-screen, and select() alone does not extend a
+         selection there - so the copy quietly did nothing. This is the
+         recipe iOS actually honours: a field in the layout but invisible,
+         made contentEditable and not readonly, selected through a Range,
+         with setSelectionRange to give the selection an extent.
+         The keyboard is kept away by blurring straight afterwards. */
+      /* The old fallback used select() on a readonly field parked at
+         -9999px. Neither half works on iOS: Safari will not select a
+         field it treats as off-screen, and select() does not give the
+         selection an extent there - so the copy quietly did nothing.
+
+         What iOS does honour is this combination, and it needs all of
+         it: the field inside the layout but invisible, contentEditable
+         so it can be selected, readOnly so no keyboard appears, focused,
+         a Range over its contents, and setSelectionRange to give that
+         selection a length. 16px because anything smaller makes iOS
+         zoom the page the moment the field takes focus. */
       function fallback() {
         const temp = document.createElement('textarea');
         temp.value = url;
-        temp.setAttribute('readonly', '');
-        temp.style.cssText = 'position:absolute;left:-9999px';
+        temp.contentEditable = 'true';
+        temp.readOnly = true;
+        temp.setAttribute('aria-hidden', 'true');
+        temp.style.cssText =
+          'position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:0;' +
+          'opacity:0;font-size:16px;';
         document.body.appendChild(temp);
-        temp.select();
-        try { document.execCommand('copy'); done(); }
-        catch (e) { toast('Copy failed — please copy the address bar link.'); }
+        let ok = false;
+        try {
+          temp.focus({ preventScroll: true });
+          const range = document.createRange();
+          range.selectNodeContents(temp);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          temp.setSelectionRange(0, url.length);
+          ok = document.execCommand('copy');
+          sel.removeAllRanges();
+        } catch (e) { ok = false; }
+        temp.blur();
         document.body.removeChild(temp);
+        if (ok) done();
+        else toast('Copy failed — please copy the address bar link.');
       }
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(done).catch(fallback);
