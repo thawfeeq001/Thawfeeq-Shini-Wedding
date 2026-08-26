@@ -468,10 +468,21 @@ IMAGE LIBRARY  (developer only)
 
 <!-- ===== 08. EVENTS =====
      Three cards: Engagement, Wedding, Reception. Each carries its own
-     photograph, the date and time, the venue and a scannable Google Maps
+     artwork, the date and time, the venue and a scannable Google Maps
      QR code. The QR codes are the ones printed on the invitation - the
      Maps button opens the same pin for anybody reading on the phone that
-     is showing the code. -->
+     is showing the code.
+
+     The engagement and the wedding are at the same hall, so those two
+     cards carry the same address and the same pin, and the wedding card
+     says so out loud rather than leaving a guest to compare addresses.
+
+     The three illustrations are drawn for this site rather than taken
+     from a stock library, so the set matches the palette and there is no
+     photograph of another couple's wedding on the page. They are
+     decorative and add nothing the heading does not already say, so the
+     alt text is deliberately empty - a screen reader should read the
+     title, not a description of a drawing. -->
 <section class="ev" id="events">
   <h2 class="title reveal">Events</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
@@ -479,7 +490,7 @@ IMAGE LIBRARY  (developer only)
 
     <article class="ecard reveal-right">
       <div class="ecard__art">
-        <img src="images/events/event-engagement.webp" alt="Engagement" width="1200" height="750" loading="lazy" decoding="async">
+        <img src="images/events/event-engagement.webp" alt="" width="1200" height="750" loading="lazy" decoding="async">
       </div>
       <div class="ecard__body">
         <h3 class="ecard__title">Engagement</h3>
@@ -496,12 +507,13 @@ IMAGE LIBRARY  (developer only)
 
     <article class="ecard reveal">
       <div class="ecard__art">
-        <img src="images/events/event-wedding.webp" alt="Wedding" width="1080" height="675" loading="lazy" decoding="async">
+        <img src="images/events/event-wedding.webp" alt="" width="1200" height="750" loading="lazy" decoding="async">
       </div>
       <div class="ecard__body">
         <h3 class="ecard__title">Wedding</h3>
         <p class="ecard__when">25 October 2026 <span>11:00 AM</span></p>
         <p class="ecard__place">Drizzle Elite Mahal<i>Ilanji, Courtallam</i></p>
+        <p class="ecard__same">Same venue as the engagement</p>
         <figure class="ecard__qr">
           <button class="qr-btn" type="button" data-maps="nikkah" aria-label="Open the wedding venue in Google Maps">
             <img src="images/qr/wedding-location.png" alt="QR code for the wedding venue" width="630" height="630" loading="lazy" decoding="async">
@@ -513,7 +525,7 @@ IMAGE LIBRARY  (developer only)
 
     <article class="ecard reveal-left">
       <div class="ecard__art">
-        <img src="images/events/event-reception.webp" alt="Reception" width="1150" height="719" loading="lazy" decoding="async">
+        <img src="images/events/event-reception.webp" alt="" width="1200" height="750" loading="lazy" decoding="async">
       </div>
       <div class="ecard__body">
         <h3 class="ecard__title">Reception</h3>

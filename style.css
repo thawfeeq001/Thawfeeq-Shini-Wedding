@@ -639,6 +639,14 @@ section{position:relative;z-index:1}
   font-style:normal;font-family:var(--sans);font-size:.62rem;
   letter-spacing:.22em;text-transform:uppercase;color:var(--ink-50);
 }
+/* only on the wedding card: the hall is the same one as the engagement */
+.ecard__same{
+  margin-top:.45rem;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold-deep);display:inline-flex;align-items:center;gap:.4rem;
+}
+.ecard__same::before,.ecard__same::after{
+  content:"";width:14px;height:1px;background:var(--line);
+}
 .ecard__qr{margin:auto auto 0;padding-top:1.1rem;display:flex;flex-direction:column;align-items:center;gap:.5rem}
 .qr-btn{
   width:clamp(104px,13vw,124px);aspect-ratio:1;padding:8px;border-radius:14px;
