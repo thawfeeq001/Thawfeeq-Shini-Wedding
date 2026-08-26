@@ -4,9 +4,9 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.4 - split-screen landscape, gallery 2.0, three-field RSVP.
-   Portrait phones keep the V2.3 stacked layout untouched; every
-   landscape viewport switches to the split screens instead.
+   VERSION 2.6 - lighter reveals, names in Playfair, gallery reordered.
+   Portrait phones keep the stacked layout untouched; every landscape
+   viewport switches to the split screens instead.
    ========================================================== */
 
 /* ===================================
@@ -31,7 +31,14 @@
 
    Palette  Background #FDF9F5 · Paper #F8F2EC · Blush #EFD8D8
             Rose #B76E79 · Sage #A8B49A · Gold #C8A46A · Text #463636
-   Type     Playfair Display (headings) · Great Vibes (names) · Inter (body)
+   Type     Playfair Display (headings and names) · Inter (body)
+            Great Vibes is still defined as --script and is used for the
+            ampersand only. The names were set in it until V2.6, but its
+            swash capitals - A and Y above all - read as lowercase, so
+            'Ahamed' and 'Yassmin' looked uncapitalised. Names are set in
+            Playfair italic now, where a capital is unmistakably a
+            capital. To go back, set .name and .hero__names to
+            var(--script).
    No dark theme anywhere; the only dark pixels are the scrims that keep
    white type legible over the two full-screen photographs.
    =================================== */
@@ -155,9 +162,9 @@ ol,ul{list-style:none;padding:0}
   text-align:center;
 }
 .name{
-  font-family:var(--script);font-weight:400;
-  font-size:clamp(3rem,7.4vw,5.2rem);line-height:1.06;
-  text-align:center;margin-top:.4rem;color:var(--text);
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:clamp(2.1rem,5.2vw,3.4rem);line-height:1.18;letter-spacing:.005em;
+  text-align:center;margin-top:.5rem;color:var(--text);
 }
 .rule{display:block;width:min(300px,58%);margin:1.3rem auto 0;opacity:.9}
 
@@ -249,18 +256,17 @@ section{position:relative;z-index:1}
   color:rgba(255,255,255,.86);margin-bottom:.9rem;
 }
 .hero__names{
-  font-family:var(--script);font-weight:400;
+  font-family:var(--serif);font-style:italic;font-weight:400;
   display:flex;flex-direction:column;align-items:center;gap:.02em;
-  /* sized so 'Thawfeeq Ahamed' holds one line even in the fallback
-     serif, which is wider than Great Vibes - the script face is what
-     loads in production, so this leaves room rather than using it */
-  font-size:clamp(2.5rem,8.2vw,6rem);line-height:1.05;
+  /* Playfair is wider than the script face it replaced, so this is
+     sized to hold 'Thawfeeq Ahamed' on one line down to a 320px phone. */
+  font-size:clamp(1.85rem,6.4vw,4.2rem);line-height:1.16;letter-spacing:.01em;
   text-shadow:0 2px 30px rgba(0,0,0,.45);
 }
 .hero__names span{white-space:nowrap}
 .hero__names em{
-  font-family:var(--serif);font-style:italic;font-size:.34em;
-  color:#F0DCB8;margin:.08em 0;
+  font-family:var(--script);font-style:normal;font-size:.62em;
+  color:#F0DCB8;margin:-.06em 0;line-height:1;
 }
 .hero__meta{
   margin-top:clamp(1.4rem,3.4vw,2.2rem);display:flex;flex-direction:column;gap:.45rem;align-items:center;
@@ -272,7 +278,16 @@ section{position:relative;z-index:1}
 /* =========================================================
    06 COUNTDOWN
    ========================================================= */
-.cd-wrap{width:min(100% - 2.6rem,880px);margin:-64px auto 0;position:relative;z-index:5}
+.cd-wrap{
+  width:min(100% - 2.6rem,880px);position:relative;z-index:5;
+  /* Pulled up into the photograph rather than sitting under it - at the
+     old -64px the card's lower half fell past the bottom of a phone
+     screen, so the seconds were cut in half on the opening view.
+     The bottom margin gives back exactly what the extra lift took, so
+     the quote below lands where it always did instead of being dragged
+     up under the card. */
+  margin:-128px auto 64px;
+}
 .cd{
   position:relative;display:grid;grid-template-columns:repeat(4,1fr);
   height:auto;min-height:0;
@@ -785,7 +800,7 @@ section{position:relative;z-index:1}
   max-width:18ch;margin-inline:auto;
 }
 .closing__names{
-  margin-top:1.1rem;font-family:var(--script);font-size:clamp(1.9rem,5vw,3rem);
+  margin-top:1.1rem;font-family:var(--serif);font-style:italic;font-size:clamp(1.5rem,3.8vw,2.3rem);
   line-height:1.2;text-shadow:0 2px 26px rgba(0,0,0,.45);
 }
 .closing__names span{color:var(--blush);font-size:.62em;padding:0 .18em;vertical-align:middle}
@@ -854,12 +869,12 @@ section{position:relative;z-index:1}
   .modal{background:rgba(253,249,245,.95)}
 }
 
-/* decoration */
-.petals{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
-.petal{
-  position:absolute;top:-6vh;border-radius:60% 40% 55% 45% / 55% 55% 45% 45%;
-  opacity:0;animation:drift linear infinite;will-change:transform,opacity;
-}
+/* decoration
+   The drifting petals are gone. They were fixed at z-index 2, which put
+   them above every section, so a pale shape could pass across a line of
+   type - which is exactly what they were reported doing. The watercolour
+   blobs stay: they sit at z-index 0, behind the sections, so they tint
+   the page without ever crossing a word. */
 .blob{
   position:fixed;z-index:0;pointer-events:none;border-radius:50%;filter:blur(60px);
   will-change:transform;
@@ -876,36 +891,31 @@ section{position:relative;z-index:1}
 
 /* =========================================================
    16 ANIMATIONS
-   Fade up, fade left, fade right, petals, spinners. No bounce.
+   Fade up, fade left, fade right, spinners. No bounce.
    ========================================================= */
 @keyframes heroIn{from{opacity:0}to{opacity:1}}
 @keyframes lbIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes draw{to{stroke-dashoffset:0}}
-@keyframes drift{
-  0%{opacity:0;transform:translate3d(0,-10vh,0) rotate(0deg)}
-  10%{opacity:.5}
-  90%{opacity:.32}
-  100%{opacity:0;transform:translate3d(var(--dx,6vw),112vh,0) rotate(320deg)}
-}
 
 /* Reversible reveals.
 
-   The observer adds .is-in on entry and removes it on exit, and never
-   unobserves, so every element replays each time it comes back into view
-   in either direction.
+   V2.5 overdid this. 84px of travel, a 12px blur and a 1.35s arrival on
+   a 120ms stagger meant the last item in a row started nearly three
+   quarters of a second after the first, so a group arrived as a queue
+   rather than together - and the blur made each one look like it was
+   dragging. Scrolling back looked worse still, because an element
+   sitting on the fold could cross the threshold twice in a flick and
+   re-run the whole thing.
 
-   The motion is deliberately large: 84px of travel and a 6% scale for
-   ordinary content, 110px and 12% for a photograph, over 1.35s on the
-   arrival curve. The exit is far quicker - .5s - so scrolling back up
-   never feels like wading.
+   This is the same idea at a quarter of the amplitude: a short lift, a
+   scale so slight you read it as depth rather than as movement, and a
+   stagger tight enough that a row reads as one gesture. Nothing blurs.
+   Where the flicker came from is fixed in the observer, not here - see
+   the Scroll Animation Module for the hysteresis.
 
-   Everything animated here is opacity, transform or filter. The first
-   two never touch layout and composite on the GPU. filter does too, but
-   an animated blur on a large photograph forces iOS Safari to
-   re-rasterize that layer every frame, so the focus pull is limited to
-   type and small ornament and photographs get the bigger travel instead.
-   That split is what keeps this at 60fps on a phone.
+   Everything animated is opacity and transform. Neither touches layout
+   and both composite on the GPU, which is what keeps this at 60fps.
 
    Nothing is hidden by the stylesheet alone: every rule below is behind
    html.js-reveal, which the inline snippet in <head> adds and the
@@ -915,53 +925,49 @@ html.js-reveal .reveal,
 html.js-reveal .reveal-left,
 html.js-reveal .reveal-right{
   opacity:0;
-  transition:opacity .5s var(--ease),transform .5s var(--ease),filter .5s var(--ease);
+  transition:opacity .45s var(--ease),transform .45s var(--ease);
   will-change:opacity,transform;
 }
-html.js-reveal .reveal{transform:translate3d(0,84px,0) scale(.94)}
-html.js-reveal .reveal-left{transform:translate3d(-112px,0,0) scale(.95)}
-html.js-reveal .reveal-right{transform:translate3d(112px,0,0) scale(.95)}
+html.js-reveal .reveal{transform:translate3d(0,34px,0) scale(.988)}
+html.js-reveal .reveal-left{transform:translate3d(-44px,0,0)}
+html.js-reveal .reveal-right{transform:translate3d(44px,0,0)}
 
-/* photographs travel further and start smaller, and are the one thing
-   that also drifts sideways as it rises */
+/* a photograph lifts a little further and starts a little smaller - just
+   enough to feel like it settles into the page */
 html.js-reveal :is(.ph,.frame,.ecard):is(.reveal,.reveal-left,.reveal-right){
-  transform:translate3d(0,110px,0) scale(.88);
+  transform:translate3d(0,44px,0) scale(.972);
 }
-html.js-reveal :is(.ph,.frame,.ecard).reveal-left{transform:translate3d(-70px,84px,0) scale(.9) rotate(-1.4deg)}
-html.js-reveal :is(.ph,.frame,.ecard).reveal-right{transform:translate3d(70px,84px,0) scale(.9) rotate(1.4deg)}
-
-/* type and ornament pull into focus; see the note above on why photographs do not */
-html.js-reveal :is(.title,.name,.kicker,.rule,.quote__line,.duo__line,.gal__lead,.hero__names,.closing__line):is(.reveal,.reveal-left,.reveal-right){
-  filter:blur(12px);
-}
+html.js-reveal :is(.ph,.frame,.ecard).reveal-left{transform:translate3d(-38px,26px,0) scale(.976)}
+html.js-reveal :is(.ph,.frame,.ecard).reveal-right{transform:translate3d(38px,26px,0) scale(.976)}
 
 html.js-reveal .reveal.is-in,
 html.js-reveal .reveal-left.is-in,
 html.js-reveal .reveal-right.is-in{
-  opacity:1;transform:none;filter:blur(0);
-  transition:opacity 1.35s var(--ease-in),transform 1.35s var(--ease-in),filter 1.1s var(--ease-in);
+  opacity:1;transform:none;
+  transition:opacity .72s var(--ease-in),transform .72s var(--ease-in);
   transition-delay:var(--d,0ms);
 }
 /* once it has arrived, stop reserving a compositor layer for it */
 html.js-reveal .is-in{will-change:auto}
 
 /* The opening screen is not observed - it is already on screen - so it
-   gets its own entrance, staggered down the block. */
+   gets its own entrance, close behind one another so the block arrives
+   as a whole rather than as five separate events. */
 @keyframes riseIn{
-  from{opacity:0;transform:translate3d(0,54px,0) scale(.96);filter:blur(10px)}
-  to{opacity:1;transform:none;filter:blur(0)}
+  from{opacity:0;transform:translate3d(0,26px,0)}
+  to{opacity:1;transform:none}
 }
 .hero__head,.hero__eyebrow,.hero__names,.hero__meta,.cd{
-  animation:riseIn 1.4s var(--ease-in) both;
+  animation:riseIn .8s var(--ease-in) both;
 }
-.hero__head{animation-delay:.15s}
-.hero__eyebrow{animation-delay:.42s}
-.hero__names{animation-delay:.56s}
-.hero__meta{animation-delay:.78s}
-.cd{animation-delay:.94s}
+.hero__head{animation-delay:.08s}
+.hero__eyebrow{animation-delay:.20s}
+.hero__names{animation-delay:.28s}
+.hero__meta{animation-delay:.38s}
+.cd{animation-delay:.46s}
 
 /* the timeline dot fills as its row arrives */
-.tl__i::before{transition:background-color .7s var(--ease-in),transform .7s var(--ease-in)}
+.tl__i::before{transition:background-color .5s var(--ease-in),transform .5s var(--ease-in)}
 
 
 /* =========================================================
@@ -970,7 +976,10 @@ html.js-reveal .is-in{will-change:auto}
 @media (max-width:900px){
   .masonry{column-count:3}
   .fam__inset{width:clamp(104px,26vw,150px);bottom:-6%}
-  .cd-wrap{margin-top:-52px}
+  /* far enough up that the whole card, seconds included, sits inside the
+     first screen on a 667px phone as well as an 844px one */
+  .cd-wrap{margin-top:-150px;margin-bottom:98px}
+  .hero{padding-bottom:calc(var(--sa-b) + 10.5rem)}
 }
 
 /* SCREEN 1 on a landscape or desktop viewport: the countdown is pulled up
@@ -979,23 +988,39 @@ html.js-reveal .is-in{will-change:auto}
    The hero gains the same amount of bottom padding, which keeps the names
    optically centred instead of shunting them upwards. */
 @media (min-width:720px), (orientation:landscape) and (min-width:700px){
-  .cd-wrap{margin-top:calc(-1 * clamp(112px,15vh,168px));width:min(100% - 2.6rem,760px)}
-  .hero{padding-bottom:calc(var(--sa-b) + clamp(7rem,17vh,10.5rem))}
+  .cd-wrap{
+    margin-top:calc(-1 * clamp(140px,20vh,205px));
+    margin-bottom:clamp(76px,10vh,140px);
+    width:min(100% - 2.6rem,760px);
+  }
+  .hero{padding-bottom:calc(var(--sa-b) + clamp(9rem,21vh,13rem))}
   .cd{background:rgba(255,255,255,.52);border-color:rgba(255,255,255,.62)}
 }
 /* A phone held sideways is barely 380px tall. Shrink the hero furniture
    rather than let the logo block and the names fight for the same space. */
 @media (orientation:landscape) and (max-height:520px){
-  .cd-wrap{margin-top:calc(-1 * clamp(56px,11vh,90px))}
-  .cd__n{font-size:clamp(1.5rem,5.4vh,2.2rem)}
+  /* A phone held sideways is about 390px tall, and min-height:560px was
+     beating the dynamic height - so the opening screen was taller than
+     the screen and the countdown started below the fold no matter how
+     far it was pulled up. Dropping the floor lets the hero be exactly
+     one screen again, and everything in it shrinks to match. */
+  .hero{
+    min-height:0;
+    padding-top:calc(var(--sa-t) + 2.5rem);
+    padding-bottom:calc(var(--sa-b) + 5rem);
+  }
+  .hero__mark{width:42px}
+  .hero__names{font-size:clamp(1.25rem,5.4vh,1.85rem)}
+  .hero__eyebrow{font-size:.55rem;letter-spacing:.28em;margin-bottom:.3rem}
+  .hero__meta{margin-top:.55rem}
+  .hero__meta b{font-size:.72rem;letter-spacing:.24em}
+  .hero__meta i{font-size:.6rem;letter-spacing:.24em}
+  .cd-wrap{margin-top:-72px;margin-bottom:34px}
+  .cd{padding-block:.55rem}
+  .cd__n{font-size:clamp(1.15rem,4.4vh,1.6rem)}
+  .cd__l{font-size:.44rem;letter-spacing:.14em}
   .duo__photo{width:min(100%,270px)}
   .ecard__art{aspect-ratio:16/9}
-  .hero{padding-top:calc(var(--sa-t) + 3.4rem);padding-bottom:calc(var(--sa-b) + 2.6rem)}
-  .hero__mark{width:52px}
-  .hero__house{font-size:.86rem;letter-spacing:.16em}
-  .hero__names{font-size:clamp(2.2rem,7vh,3.4rem)}
-  .hero__eyebrow{font-size:.62rem;margin-bottom:.5rem}
-  .hero__meta{margin-top:.9rem}
   .lb__thumbs{padding-top:.4rem}
   .lb__t{width:38px;height:48px}
   .lb__cap{padding-top:.5rem}
@@ -1008,7 +1033,7 @@ html.js-reveal .is-in{will-change:auto}
 }
 /* the narrowest phones still in use are 320px wide */
 @media (max-width:360px){
-  .hero__names{font-size:2.15rem}
+  .hero__names{font-size:1.62rem}
 }
 @media (max-width:640px){
   /* the arrows float over the picture instead of stealing width */
@@ -1029,14 +1054,14 @@ html.js-reveal .is-in{will-change:auto}
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
   html.js-reveal .reveal,
   html.js-reveal .reveal-left,
-  html.js-reveal .reveal-right{opacity:1!important;transform:none!important;filter:none!important}
+  html.js-reveal .reveal-right{opacity:1!important;transform:none!important}
   .hero__head,.hero__eyebrow,.hero__names,.hero__meta,.cd{animation:none!important}
-  .petals,.blob{display:none}
+  .blob{display:none}
 }
 @media print{
-  .topbar,.sidenav,.scrim,.music,.lb,.toast,.modal,.petals,.blob,.progress{display:none!important}
+  .topbar,.sidenav,.scrim,.music,.lb,.toast,.modal,.blob,.progress{display:none!important}
   body{background:#fff}
   html.js-reveal .reveal,
   html.js-reveal .reveal-left,
-  html.js-reveal .reveal-right{opacity:1!important;transform:none!important;filter:none!important}
+  html.js-reveal .reveal-right{opacity:1!important;transform:none!important}
 }

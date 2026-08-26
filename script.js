@@ -4,7 +4,7 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.4 - renamed image library, gallery 2.0, three-field RSVP.
+   VERSION 2.6 - lighter reveals, hysteresis on the observer.
    ========================================================== */
 
 /* ==========================================================
@@ -14,7 +14,6 @@
      03  Scroll Animation Module
      04  Navigation Module    sidebar, scrim, progress, active link
      05  Parallax Module
-     06  Decoration Module    petals and drifting blobs
      07  Countdown Module
      08  Maps Module
      09  Gallery Module       family grid + the one shared photo viewer
@@ -85,25 +84,36 @@
     { file: 'gallery-family-both-families-2.webp', cap: 'Both families together',     w: 900, h: 720 }
   ];
 
-  /* Part two: the couple, roughly in the order it happened. The last two
-     have company in the frame - they are still photographs of the two of
-     them, so this is where they belong. */
+  /* Part two: the couple.
+
+     Deliberately NOT chronological. Eight of these fourteen are the same
+     shot - the two of them, close, facing the camera - and in date order
+     they clumped, so four or five near-identical frames ran together and
+     the grid read as one photograph repeated. They are interleaved with
+     the six that are not: the mirror, the parrot, the two on the water,
+     and the two with company. No two neighbours share a setting, and only
+     one pair of close selfies is adjacent anywhere in the list.
+
+     The masonry fills column by column, so neighbours here end up stacked
+     vertically - which is the direction a reader actually compares them
+     in. Reordering this list is the whole edit; nothing else needs to
+     change.                                                            */
   const COUPLE_DIR = 'images/story/';
   const COUPLE_PHOTOS = [
     { file: 'story-couple-first-selfie.webp', cap: 'The first photograph of us', w: 900, h: 1125 },
-    { file: 'story-couple-road-trip.webp',    cap: 'Somewhere on the road',      w: 900, h: 1125 },
-    { file: 'story-couple-night-drive.webp',  cap: 'The long way home',          w: 1200, h: 900 },
-    { file: 'story-couple-cafe-table.webp',   cap: 'Our corner table',           w: 900, h: 1125 },
     { file: 'story-couple-mirror.webp',       cap: 'Caught in a mirror',         w: 900, h: 1125 },
+    { file: 'story-couple-road-trip.webp',    cap: 'Somewhere on the road',      w: 900, h: 1125 },
     { file: 'story-couple-day-out.webp',      cap: 'A day out together',         w: 900, h: 1125 },
-    { file: 'story-couple-hills-sunset.webp', cap: 'Evening at the hills',       w: 1100, h: 1467 },
-    { file: 'story-couple-afternoon.webp',    cap: 'An ordinary afternoon',      w: 900, h: 1125 },
+    { file: 'story-couple-night-drive.webp',  cap: 'The long way home',          w: 1200, h: 900 },
     { file: 'story-couple-close.webp',        cap: 'Just the two of us',         w: 900, h: 1200 },
-    { file: 'story-couple-in-red.webp',       cap: 'Dressed for the occasion',   w: 900, h: 1125 },
     { file: 'story-couple-on-the-water.webp', cap: 'On the water',               w: 900, h: 1125 },
-    { file: 'story-couple-golden-hour.webp',  cap: 'Golden hour',                w: 900, h: 1125 },
+    { file: 'story-couple-hills-sunset.webp', cap: 'Evening at the hills',       w: 1100, h: 1467 },
     { file: 'story-couple-dinner-out.webp',   cap: 'Dinner out',                 w: 900, h: 720 },
-    { file: 'story-couple-with-friends.webp', cap: 'With the people we love',    w: 900, h: 1125 }
+    { file: 'story-couple-in-red.webp',       cap: 'Dressed for the occasion',   w: 900, h: 1125 },
+    { file: 'story-couple-golden-hour.webp',  cap: 'Golden hour',                w: 900, h: 1125 },
+    { file: 'story-couple-afternoon.webp',    cap: 'An ordinary afternoon',      w: 900, h: 1125 },
+    { file: 'story-couple-with-friends.webp', cap: 'With the people we love',    w: 900, h: 1125 },
+    { file: 'story-couple-cafe-table.webp',   cap: 'Our corner table',           w: 900, h: 1125 }
   ];
 
   const VENUES = {
@@ -243,10 +253,9 @@
      unobserved after it appears, so .is-in is added on entry and removed
      on exit: the animation replays every single time that element comes
      back into view, in either direction.
-     Only opacity, transform and filter change - none of them touch
-     layout, and all three composite on the GPU, which is what keeps this
-     at 60fps on iOS Safari as well as on Android Chrome. The stylesheet
-     has the detail on why the focus pull is kept off photographs. */
+     Only opacity and transform change - neither touches layout, and both
+     composite on the GPU, which is what keeps this at 60fps on iOS
+     Safari as well as on Android Chrome. */
 
   let revealObserver = null;
   let observerReported = false;   /* proof the browser actually delivers callbacks */
@@ -262,24 +271,33 @@
         observerReported = true;
         window.__revealReady = true;
         entries.forEach(entry => {
-          entry.target.classList.toggle('is-in', entry.isIntersecting);
+          const el = entry.target;
+          const seen = entry.intersectionRatio;
+          /* HYSTERESIS. A single threshold makes an element sitting on
+             the fold flip in and out on the smallest scroll, and each
+             flip restarts the whole animation - which is what made
+             scrolling back up look stuck. So the two edges are set apart:
+             it appears once an eighth of it is showing, and hides again
+             only once it has left the viewport completely. In the band
+             between, it keeps whatever state it already had. */
+          if (seen >= 0.12) el.classList.add('is-in');
+          else if (seen === 0) el.classList.remove('is-in');
         });
-        /* -12% at the foot: the element is well inside the viewport
-           before it starts, so the whole 1.35s arrival is visible rather
-           than half-finished by the time it clears the fold. */
-      }, { rootMargin: '0px 0px -12% 0px', threshold: 0.05 });
+      }, { threshold: [0, 0.12, 0.6] });
     }
     items.forEach(el => {
       /* the stagger is measured once, not on every crossing */
       if (el.dataset.step === undefined) {
         const peers = el.parentElement
           ? $$('.reveal, .reveal-left, .reveal-right, .tl__i', el.parentElement) : [];
-        const step = Math.min(Math.max(0, peers.indexOf(el)), 6);
+        /* 55ms apart, four deep at most: enough that a row arrives as a
+           sweep rather than all at once, short enough that the whole
+           group is done inside a second. V2.5 used 120ms across six,
+           which spread one row over three quarters of a second and read
+           as a queue. */
+        const step = Math.min(Math.max(0, peers.indexOf(el)), 4);
         el.dataset.step = step;
-        /* 120ms apart rather than 80: with the longer travel the rows
-           need more separation before the stagger reads as a cascade
-           rather than as one block arriving slightly unevenly. */
-        if (step) el.style.setProperty('--d', step * 120 + 'ms');
+        if (step) el.style.setProperty('--d', step * 55 + 'ms');
       }
       revealObserver.observe(el);
     });
@@ -413,30 +431,6 @@
         b.el.style.transform = 'translate3d(0,' + (y * b.speed).toFixed(1) + 'px,0)';
       });
     });
-  }
-
-  // ==================================
-  // 06 · Decoration Module
-  // ==================================
-
-  function initPetals() {
-    const host = $('#petals');
-    if (!host || REDUCED) return;
-    const tints = ['rgba(239,216,216,.85)', 'rgba(183,110,121,.42)', 'rgba(200,164,106,.45)', 'rgba(168,180,154,.5)'];
-    const count = window.innerWidth < 700 ? 7 : 12;
-    for (let i = 0; i < count; i++) {
-      const p = document.createElement('span');
-      const size = 7 + Math.random() * 11;
-      p.className = 'petal';
-      p.style.left = (Math.random() * 100) + 'vw';
-      p.style.width = size + 'px';
-      p.style.height = (size * 0.72) + 'px';
-      p.style.background = tints[i % tints.length];
-      p.style.setProperty('--dx', (Math.random() * 16 - 8) + 'vw');
-      p.style.animationDuration = (17 + Math.random() * 16) + 's';
-      p.style.animationDelay = (-Math.random() * 24) + 's';
-      host.appendChild(p);
-    }
   }
 
   // ==================================
@@ -1100,7 +1094,6 @@
     initReveal();
     initNav();
     initParallax();
-    initPetals();
     initCountdown();
     initMaps();
     initRsvp();
