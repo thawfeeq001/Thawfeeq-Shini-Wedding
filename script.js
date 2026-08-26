@@ -4,8 +4,8 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.9 - polish pass; split show/hide observers, modular
-   photo viewer and timeline behind single switches below.
+   VERSION 3.0 - final refinement; split show/hide observers, and the
+   photo viewer, timeline and focal-point crop each behind one switch.
    ========================================================== */
 
 /* ==========================================================
@@ -46,9 +46,39 @@
        TIMELINE_STYLE        'rail'  the gold rail with circular markers
                              'plain' the older flat date-and-title list
                              Both render from the same TIMELINE data.
+
+       ENABLE_FOCAL_POINT    false leaves the two full-screen photographs
+                             on the plain object-position written in the
+                             stylesheet. True lets the module below work
+                             the crop out from where the faces actually
+                             are, for the viewport in front of it.
      ================================================================== */
   const ENABLE_PHOTO_VIEWER = true;
   const TIMELINE_STYLE      = 'rail';
+  const ENABLE_FOCAL_POINT  = true;
+
+  /* ---- FOCAL POINTS -------------------------------------------------
+     Where the faces are in each full-screen photograph, as a fraction of
+     the file's own width and height. Measured off the pictures, not
+     guessed: lx and rx are the centres of the two faces, top is the
+     highest feature that must stay in frame (the higher of the two
+     brows) and chin is the lowest (the lower of the two jaws).
+
+     From these four numbers the module works out an object-position for
+     whatever box the photograph is being poured into, so that
+
+       - the bride sits as far from the left edge as the groom does from
+         the right, at any width; and
+       - both faces finish above the block of text, at any height.
+
+     Re-measure a number here if a photograph is ever replaced; nothing
+     else needs to change.                                              */
+  const FOCAL = [
+    { sel: '.hero__img',    x: '--hero-x', y: '--hero-y', clear: '.hero__inner',
+      face: { lx: 0.32, rx: 0.71, top: 0.20, chin: 0.41 } },
+    { sel: '.closing__img', x: '--fw-x',   y: '--fw-y',   clear: '.closing__words',
+      face: { lx: 0.34, rx: 0.73, top: 0.20, chin: 0.41 } }
+  ];
 
   /* ---- TIMELINE DATA ------------------------------------------------
      The single source for the timeline. Edit, reorder or add an entry
@@ -129,7 +159,12 @@
      The masonry fills column by column, so neighbours here end up stacked
      vertically - which is the direction a reader actually compares them
      in. Reordering this list is the whole edit; nothing else needs to
-     change.                                                            */
+     change.
+
+     Thirteen, not fourteen: the one with their friends has moved out of
+     the gallery and on to the bride family portrait, where it is pinned
+     to the corner as a memory tag. It is referenced from the HTML there,
+     so it must not appear here as well.                                */
   const COUPLE_DIR = 'images/story/';
   const COUPLE_PHOTOS = [
     { file: 'story-couple-first-selfie.webp', cap: 'The first photograph of us', w: 900, h: 1125 },
@@ -144,7 +179,6 @@
     { file: 'story-couple-in-red.webp',       cap: 'Dressed for the occasion',   w: 900, h: 1125 },
     { file: 'story-couple-golden-hour.webp',  cap: 'Golden hour',                w: 900, h: 1125 },
     { file: 'story-couple-afternoon.webp',    cap: 'An ordinary afternoon',      w: 900, h: 1125 },
-    { file: 'story-couple-with-friends.webp', cap: 'With the people we love',    w: 900, h: 1125 },
     { file: 'story-couple-cafe-table.webp',   cap: 'Our corner table',           w: 900, h: 1125 }
   ];
 
@@ -540,6 +574,105 @@
   /* Renders TIMELINE into #timelineList. See TIMELINE_STYLE above for
      the two layouts; the data is identical for both. */
 
+  // ==================================
+  // 07c · Focal Point Module
+  // ==================================
+  /* MODULE: focal point. Switch with ENABLE_FOCAL_POINT above.
+
+     object-fit:cover has to throw away whichever axis does not fit, and
+     it decides that from a single percentage. A fixed percentage cannot
+     be right everywhere: the same 54% that balances two faces on a tall
+     phone pushes them off centre on a tablet, because the amount being
+     cropped is different. So the percentage is worked out here instead,
+     from the box the picture is actually in.
+
+     HORIZONTAL. With a crop of (I - W) pixels, the point at fraction f
+     of the image lands at (W - I) * X + f * I on screen. Setting the
+     bride's distance from the left equal to the groom's from the right
+     gives one equation with one unknown:
+
+         X = (W - (lx + rx) * I) / (2 * (W - I))
+
+     VERTICAL. Two things are wanted at once - the brows in frame, and
+     both jaws finishing above the words. Each is a bound on Y:
+
+         Y <= top  * I_h / (I_h - H)        brows stay visible
+         Y >= (chin * I_h - T) / (I_h - H)  jaws clear the text at T
+
+     Where both can be had, they are. Where the viewport is too short for
+     both - a phone held sideways - the first wins and the second is
+     satisfied as far as it can be, which is the smallest overlap the
+     screen allows rather than an arbitrary one.
+
+     Only object-position is written, which the browser resolves at paint
+     time. Nothing here can move a box, so none of it can shift layout. */
+
+  function initFocal() {
+    if (!ENABLE_FOCAL_POINT) return;
+
+    const items = FOCAL
+      .map(cfg => ({ cfg: cfg, img: $(cfg.sel), clear: $(cfg.clear) }))
+      .filter(it => it.img);
+    if (!items.length) return;
+
+    const GAP = 18;                    /* breathing room under the jaw */
+
+    function place(it) {
+      const img = it.img, f = it.cfg.face;
+      const W = img.clientWidth, H = img.clientHeight;
+      if (!W || !H) return;
+
+      /* the attributes carry the real pixel size before the file lands,
+         so the first paint is already right rather than corrected later */
+      const nw = img.naturalWidth  || +img.getAttribute('width')  || W;
+      const nh = img.naturalHeight || +img.getAttribute('height') || H;
+
+      const scale = Math.max(W / nw, H / nh);
+      const IW = nw * scale, IH = nh * scale;
+
+      /* ---- across ---- */
+      let X = 0.5;
+      if (IW - W > 1) X = (W - (f.lx + f.rx) * IW) / (2 * (W - IW));
+
+      /* ---- down ---- */
+      let Y = 0.5;
+      if (IH - H > 1) {
+        const over = IH - H;
+        const ceil = f.top * IH / over;                 /* brows in frame */
+        let T = H;                                      /* where the words start */
+        if (it.clear) {
+          const a = img.getBoundingClientRect(), b = it.clear.getBoundingClientRect();
+          if (b.height) T = b.top - a.top;
+        }
+        const floor = (f.chin * IH - (T - GAP)) / over;  /* jaws above them */
+        Y = Math.min(Math.max(floor, 0), ceil);
+      }
+
+      const root = document.documentElement.style;
+      root.setProperty(it.cfg.x, (clamp01(X) * 100).toFixed(2) + '%');
+      root.setProperty(it.cfg.y, (clamp01(Y) * 100).toFixed(2) + '%');
+    }
+
+    function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+    function placeAll() { items.forEach(place); }
+
+    placeAll();
+    items.forEach(it => {
+      if (!it.img.complete) on(it.img, 'load', () => place(it), { once: true });
+    });
+
+    /* one recompute per frame at most, so a drag-resize or a rotation
+       cannot queue up work behind itself */
+    let queued = false;
+    function schedule() {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; placeAll(); });
+    }
+    on(window, 'resize', schedule, { passive: true });
+    on(window, 'orientationchange', schedule);
+  }
+
   function initTimeline() {
     const list = $('#timelineList');
     if (!list || !TIMELINE.length) return;
@@ -904,12 +1037,71 @@
     }
   }
 
+  /* MODULE: guest stepper.
+
+     A count from one upwards, held in a hidden input so the form, the
+     stored copy and the Sheet all still read a field called "guests".
+     Press-and-hold repeats, because picking eight guests should not cost
+     eight taps. There is no maximum in the markup, only MAX here.       */
+
+  function initGuestStepper(field) {
+    const box = $('.stepper');
+    if (!box || !field) return null;
+
+    const out  = $('#guestsValue');
+    const down = $('#guestsDown');
+    const up   = $('#guestsUp');
+    if (!out || !down || !up) return null;
+
+    const MIN = 1, MAX = 30;
+    let value = MIN;
+
+    function render() {
+      out.textContent = String(value);
+      field.value = String(value);
+      down.disabled = value <= MIN;
+      up.disabled   = value >= MAX;
+      /* restart the lift: removing and re-adding in the same frame does
+         nothing, so the class is dropped and re-set on the next one */
+      out.classList.remove('is-bump');
+      requestAnimationFrame(() => out.classList.add('is-bump'));
+    }
+
+    function step(by) {
+      const next = Math.min(MAX, Math.max(MIN, value + by));
+      if (next === value) return;
+      value = next;
+      render();
+    }
+
+    /* hold to repeat: a slow first repeat, then quicker */
+    function holdable(button, by) {
+      let first = 0, repeat = 0;
+      const stop = () => { clearTimeout(first); clearInterval(repeat); };
+      on(button, 'click', () => step(by));
+      on(button, 'pointerdown', () => {
+        stop();
+        first = setTimeout(() => { repeat = setInterval(() => step(by), 110); }, 420);
+      });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach(e => on(button, e, stop));
+      on(window, 'blur', stop);
+    }
+
+    holdable(down, -1);
+    holdable(up,  +1);
+
+    field.value = String(value);
+    down.disabled = true;
+    return { reset: () => { value = MIN; render(); } };
+  }
+
   function initRsvp() {
     const form = $('#rsvpForm');
     if (!form) return;
     const name = $('#rsvpName');
     const guests = $('#rsvpGuests');
     const note = $('#rsvpNote');
+    const stepper = initGuestStepper(guests);
     const button = $('#rsvpSubmit');
     const msg = $('#rsvpMsg');
 
@@ -943,6 +1135,7 @@
       saveRsvp(entry);
       if (msg) msg.textContent = '';
       form.reset();
+      if (stepper) stepper.reset();   /* form.reset() cannot reach a rendered figure */
 
       thanks.open();
 
@@ -1182,6 +1375,7 @@
   // ==================================
 
   function boot() {
+    initFocal();       /* crop the two big photographs before anything paints */
     initGallery();     /* build the grids first so they can be observed */
     initReveal();
     initNav();

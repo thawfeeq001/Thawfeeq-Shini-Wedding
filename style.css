@@ -4,8 +4,9 @@
    Purpose : Stable editable baseline before redesign
    Do not delete this marker.
 
-   VERSION 2.9 - polish pass: equal-height cards, rail timeline,
-   premium footer, and layout reserved everywhere so nothing shifts.
+   VERSION 3.0 - final refinement: hero type at the foot of the frame,
+   glass RSVP fields with a guest stepper, a memory tag on the bride
+   family portrait, and the farewell photograph as the last screen.
    Portrait phones keep the stacked layout untouched; every landscape
    viewport switches to the split screens instead.
    ========================================================== */
@@ -182,7 +183,6 @@ ol,ul{list-style:none;padding:0}
 :where(a,button,input,[tabindex]):focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
 .skip-link{position:fixed;left:-9999px;top:0;z-index:400;background:var(--gold);color:#fff;padding:.7rem 1.1rem}
 .skip-link:focus{left:0}
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 
 /* =========================================================
@@ -293,7 +293,13 @@ section{position:relative;z-index:1}
   width:clamp(68px,8.5vw,112px);height:auto;
   opacity:.95;filter:drop-shadow(0 2px 18px rgba(0,0,0,.5));
 }
-.hero__inner{grid-row:2;align-self:center;position:relative;z-index:2;text-align:center;color:#fff}
+/* The names sit at the FOOT of the hero, not in its middle. Centred,
+   they landed across the two faces - on a wide screen straight over the
+   bride's. Parked at the bottom of the row they sit on the couple's
+   clothing instead, a comfortable distance under both chins and just
+   above the countdown card that overlaps the picture below them. The
+   type itself is untouched; only where the block sits has changed. */
+.hero__inner{grid-row:2;align-self:end;position:relative;z-index:2;text-align:center;color:#fff}
 .hero__eyebrow{
   font-size:.74rem;letter-spacing:.36em;text-transform:uppercase;
   /* 8px tighter to the names than it was: the eyebrow introduces them,
@@ -494,8 +500,58 @@ section{position:relative;z-index:1}
 
 .fam__stage{position:relative;margin-top:clamp(2rem,4.6vw,3.2rem)}
 .fam__stage .frame--wide{width:min(100%,900px);margin-inline:auto}
-.fam__stage--tall .frame--arch{width:min(100%,440px);margin-inline:auto}
+.fam__stage--tall .frame--arch{width:100%}
+/* the stage is the photograph, so a corner of one is a corner of the other */
+.duo--fam .fam__stage--tall{width:min(100%,440px);margin-inline:auto}
 .fam__inset{position:absolute;width:clamp(116px,15vw,186px);aspect-ratio:4/5;z-index:2;right:3%;bottom:-9%}
+
+/* ---------------------------------------------------------
+   MODULE: memory tag
+   A second, smaller photograph tucked into the bottom-right
+   corner of the family portrait, tilted a couple of degrees
+   the way a print sits when it is slipped under a corner
+   mount. Every value that shapes it is a variable, so the
+   size, angle and inset can be changed in one place - and
+   deleting this block returns the panel to a plain frame.
+
+   Its width is a share of the photograph it sits on rather
+   than of the viewport, so the proportion holds at every
+   screen size. The vertical offset keeps it clear of the
+   faces above, which sit in the top third of that picture.
+   --------------------------------------------------------- */
+.memtag{
+  --tag-w:31%;          /* share of the main photograph's width */
+  --tag-tilt:3deg;
+  position:absolute;right:2%;bottom:3%;z-index:3;
+  width:var(--tag-w);aspect-ratio:4/3;
+  margin:0;padding:5px 5px 5px;
+  border-radius:7px;
+  background:rgba(255,255,255,.90);
+  box-shadow:0 14px 30px -12px rgba(0,0,0,.72), 0 2px 6px rgba(0,0,0,.35);
+  transform:rotate(var(--tag-tilt));
+  transform-origin:100% 100%;
+  overflow:hidden;
+}
+.memtag img{
+  display:block;width:100%;height:100%;object-fit:cover;
+  /* framed on the three of them rather than on the sky above */
+  object-position:45% 88%;
+  border-radius:3px;
+}
+/* the frosted edge that makes it read as laid over the print */
+.memtag::after{
+  content:"";position:absolute;inset:0;border-radius:7px;pointer-events:none;
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:inset 0 0 0 5px rgba(255,255,255,.92);
+}
+/* it arrives with the panel, and tilts into place rather than
+   snapping - the reveal handles opacity, this handles the angle */
+/* The reveal rules are written as `html.js-reveal .reveal-right`, which
+   outweighs a plain `.memtag.reveal-right` - so these carry the same gate
+   in front of them, otherwise the tilt is flattened the moment the tag
+   arrives. */
+html.js-reveal .memtag.reveal-right{transform:rotate(0deg) translate3d(26px,0,0)}
+html.js-reveal .memtag.reveal-right.is-in{transform:rotate(var(--tag-tilt))}
 
 /* the divider only exists once there are two columns to divide */
 @media (min-width:720px), (orientation:landscape) and (min-width:700px){
@@ -531,7 +587,7 @@ section{position:relative;z-index:1}
   .duo__photo{width:min(100%,380px)}
   .duo--fam .fam__stage{margin-top:clamp(1.4rem,3vw,2.2rem);min-height:clamp(240px,32vw,420px)}
   .duo--fam .fam__stage .frame--wide{width:min(100%,520px)}
-  .duo--fam .fam__stage--tall .frame--arch{width:min(100%,330px)}
+  .duo--fam .fam__stage--tall{width:min(100%,330px)}
   .fam__inset{width:clamp(96px,10vw,140px);right:0;bottom:-12%}
 }
 
@@ -818,11 +874,17 @@ section{position:relative;z-index:1}
 .rsvp__field{display:flex;flex-direction:column;gap:.45rem;min-width:0}
 .rsvp__field label{font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-deep)}
 
+/* Glass, not filled. These carried a near-white fill from the light
+   theme, which read as two grey slabs dropped on the dark card. They are
+   now the same material as the card itself: transparent, blurred, with a
+   hairline border - only a shade lighter so the field still reads as a
+   place to type. */
 .rsvp__card input[type="text"],
-.rsvp__card textarea,
-.rsvp__card select{
+.rsvp__card textarea{
   width:100%;padding:.8rem 1rem;border-radius:14px;
-  border:1px solid var(--line);background:rgba(255,255,255,.62);
+  border:1px solid var(--glass-brd);
+  background:rgba(255,255,255,.05);
+  -webkit-backdrop-filter:blur(12px) saturate(1.15);backdrop-filter:blur(12px) saturate(1.15);
   font-family:var(--serif);font-size:1.06rem;color:var(--text);line-height:1.55;
   transition:border-color .35s var(--ease),background-color .35s var(--ease),box-shadow .35s var(--ease);
   -webkit-appearance:none;appearance:none;
@@ -834,24 +896,55 @@ section{position:relative;z-index:1}
 /* Glass placeholder: it is part of the panel rather than grey filler,
    and the browser clears it the moment a character is typed. */
 .rsvp__card ::placeholder{
-  color:rgba(70,54,54,.34);font-family:var(--sans);font-weight:300;
+  color:rgba(255,255,255,.42);font-family:var(--sans);font-weight:300;
   font-size:.95rem;font-style:italic;letter-spacing:.01em;opacity:1;
 }
 .rsvp__card input:focus,
-.rsvp__card textarea:focus,
-.rsvp__card select:focus{
-  outline:none;border-color:var(--gold);background:rgba(255,255,255,.92);
+.rsvp__card textarea:focus{
+  outline:none;border-color:var(--gold);background:rgba(255,255,255,.10);
   box-shadow:0 0 0 4px rgba(200,164,106,.14);
 }
 .rsvp__card [aria-invalid="true"]{border-color:var(--rose);box-shadow:0 0 0 4px rgba(183,110,121,.14)}
 
-/* the chevron is drawn here because appearance:none removes the native one */
-.select{position:relative;display:block}
-.select select{padding-right:2.6rem;cursor:pointer}
-.select__chev{
-  position:absolute;right:1.05rem;top:50%;width:9px;height:9px;pointer-events:none;
-  border-right:1.5px solid var(--gold-deep);border-bottom:1.5px solid var(--gold-deep);
-  transform:translateY(-70%) rotate(45deg);
+/* ---------------------------------------------------------
+   MODULE: guest stepper
+   Minus, figure, plus - the same glass as the fields beside
+   it, and the same height, so the row reads as one material.
+   The figure is centred in a fixed, tabular box so stepping
+   from 9 to 10 cannot nudge the buttons sideways.
+   --------------------------------------------------------- */
+.stepper{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:.5rem;padding:.34rem .4rem;border-radius:14px;
+  border:1px solid var(--glass-brd);
+  background:rgba(255,255,255,.05);
+  -webkit-backdrop-filter:blur(12px) saturate(1.15);backdrop-filter:blur(12px) saturate(1.15);
+  transition:border-color .35s var(--ease),box-shadow .35s var(--ease);
+}
+.stepper:focus-within{border-color:var(--gold);box-shadow:0 0 0 4px rgba(200,164,106,.14)}
+.stepper__b{
+  flex:0 0 auto;width:40px;height:40px;border-radius:11px;
+  display:grid;place-items:center;
+  border:1px solid var(--glass-brd);background:rgba(255,255,255,.06);
+  color:var(--gold-deep);font-family:var(--sans);font-size:1.28rem;line-height:1;
+  cursor:pointer;-webkit-user-select:none;user-select:none;
+  transition:background-color .3s var(--ease),border-color .3s var(--ease),transform .18s var(--ease),opacity .3s var(--ease);
+}
+.stepper__b:hover:not(:disabled){background:rgba(255,255,255,.13);border-color:var(--gold)}
+.stepper__b:active:not(:disabled){transform:scale(.92)}
+.stepper__b:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.stepper__b:disabled{opacity:.32;cursor:default}
+.stepper__v{
+  flex:1 1 auto;text-align:center;min-width:3ch;
+  font-family:var(--serif);font-size:1.28rem;color:var(--text);line-height:1;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"lnum" 1;
+}
+/* the figure lifts a little as it changes, so the step is felt */
+.stepper__v.is-bump{animation:bump .32s var(--ease)}
+@keyframes bump{
+  0%{transform:translate3d(0,0,0) scale(1)}
+  40%{transform:translate3d(0,-3px,0) scale(1.09)}
+  100%{transform:translate3d(0,0,0) scale(1)}
 }
 
 .rsvp__send{justify-self:center;height:52px;padding-inline:2.2rem;margin-top:.3rem}
@@ -868,14 +961,54 @@ section{position:relative;z-index:1}
 /* =========================================================
    15 CLOSING & CHROME
    ========================================================= */
-.closing{position:relative;height:var(--screen);min-height:520px;overflow:hidden;display:grid;place-items:center}
-.closing__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* The page ends on the photograph. The words sit on its lower third
+   over one soft gradient - no panel, no rule, nothing drawn around
+   them; the gradient exists only so the type stays readable over
+   whatever falls behind it. */
+.closing{
+  position:relative;height:var(--screen);min-height:520px;overflow:hidden;
+  display:grid;grid-template-rows:1fr auto;
+  padding:0 1.2rem calc(var(--sa-b) + clamp(2.4rem,7vh,4.4rem));
+}
+.closing__img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  background-color:var(--bg);
+  /* same focal logic as the hero: the two faces are set the same
+     distance from the two edges. The module in script.js writes these;
+     the values here are the fallback if it is switched off. */
+  object-position:var(--fw-x,55%) var(--fw-y,30%);
+}
 .closing__veil{
   position:absolute;inset:0;
-  background:
-    radial-gradient(72% 48% at 50% 50%, rgba(34,24,22,.52) 0%, rgba(34,24,22,.18) 62%, rgba(34,24,22,0) 100%),
-    linear-gradient(180deg, rgba(34,24,22,.24) 0%, rgba(34,24,22,.12) 42%, rgba(34,24,22,.46) 100%);
+  background:linear-gradient(180deg,
+    rgba(20,16,16,.30) 0%,
+    rgba(20,16,16,.10) 30%,
+    rgba(20,16,16,.42) 62%,
+    rgba(20,16,16,.86) 100%);
 }
+.closing__words{
+  grid-row:2;position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;color:#fff;
+}
+.closing__line{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:clamp(1.2rem,3vw,1.7rem);line-height:1.5;
+  color:rgba(255,255,255,.92);max-width:24ch;
+  text-shadow:0 2px 26px rgba(0,0,0,.6);
+}
+.closing__names{
+  margin-top:clamp(.85rem,2.2vw,1.35rem);
+  font-family:var(--display);font-weight:600;letter-spacing:.10em;
+  font-size:clamp(.92rem,2.1vw,1.35rem);line-height:1.45;color:#fff;
+  text-shadow:0 2px 26px rgba(0,0,0,.6);
+}
+.closing__acts{
+  margin-top:clamp(1.5rem,3.4vw,2.2rem);
+  display:flex;justify-content:center;gap:.8rem;
+}
+.closing__acts .icon-btn{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.30)}
+.closing__acts .icon-btn:hover{background:rgba(255,255,255,.20);border-color:var(--gold)}
 .icon-btn{
   width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
   background:rgba(255,255,255,.07);border:1px solid var(--line);
@@ -963,32 +1096,6 @@ section{position:relative;z-index:1}
 /* =========================================================
    15b FOOTER
    ========================================================= */
-.foot{
-  position:relative;z-index:1;
-  width:min(100% - 2.6rem,var(--wrap));margin-inline:auto;
-  padding:clamp(4rem,9vw,6.5rem) 0 calc(clamp(3rem,7vw,5rem) + var(--sa-b));
-  display:flex;flex-direction:column;align-items:center;
-  text-align:center;overflow-x:hidden;
-}
-.foot__mark{width:clamp(46px,6vw,64px);height:auto;opacity:.75;margin-bottom:clamp(1.4rem,3vw,2.1rem)}
-.foot__line{
-  font-family:var(--serif);font-style:italic;font-weight:400;
-  font-size:clamp(1.15rem,2.8vw,1.6rem);line-height:1.5;color:var(--ink-70);
-  max-width:24ch;
-}
-.foot__names{
-  margin-top:clamp(.9rem,2.2vw,1.4rem);
-  font-family:var(--display);font-weight:600;letter-spacing:.09em;
-  font-size:clamp(.92rem,2.1vw,1.35rem);line-height:1.45;color:var(--text);
-}
-.foot__acts{margin-top:clamp(1.6rem,3.6vw,2.4rem);display:flex;justify-content:center;gap:.8rem}
-.foot .rule{margin-top:clamp(1.5rem,3.4vw,2.2rem);width:min(240px,52%)}
-.foot__credit{
-  margin-top:clamp(1.5rem,3.4vw,2.2rem);
-  font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-50);
-}
-
-
 /* =========================================================
    16 ANIMATIONS
    Fade up, fade left, fade right, spinners. No bounce.
@@ -1085,7 +1192,7 @@ html.js-reveal .is-in{will-change:auto}
   /* far enough up that the whole card, seconds included, sits inside the
      first screen on a 667px phone as well as an 844px one */
   .cd-wrap{margin-top:-150px;margin-bottom:130px}
-  .hero{padding-bottom:calc(var(--sa-b) + 10.5rem)}
+  .hero{padding-bottom:calc(var(--sa-b) + 11.6rem)}
 }
 
 /* SCREEN 1 on a landscape or desktop viewport: the countdown is pulled up
@@ -1099,7 +1206,7 @@ html.js-reveal .is-in{will-change:auto}
     margin-bottom:clamp(104px,13vh,180px);
     width:min(100% - 2.6rem,760px);
   }
-  .hero{padding-bottom:calc(var(--sa-b) + clamp(9rem,21vh,13rem))}
+  .hero{padding-bottom:calc(var(--sa-b) + clamp(9.6rem,22.5vh,14rem))}
   .cd{background:rgba(255,255,255,.52);border-color:rgba(255,255,255,.62)}
 }
 /* A phone held sideways is barely 380px tall. Shrink the hero furniture
@@ -1113,7 +1220,7 @@ html.js-reveal .is-in{will-change:auto}
   .hero{
     min-height:0;
     padding-top:calc(var(--sa-t) + 2.5rem);
-    padding-bottom:calc(var(--sa-b) + 5rem);
+    padding-bottom:calc(var(--sa-b) + 4.2rem);
   }
   .hero__mark{width:42px}
   .hero__names{font-size:clamp(.95rem,3.4vh,1.3rem);letter-spacing:.08em}
@@ -1121,7 +1228,11 @@ html.js-reveal .is-in{will-change:auto}
   .hero__meta{margin-top:.55rem}
   .hero__meta b{font-size:.72rem;letter-spacing:.24em}
   .hero__meta i{font-size:.6rem;letter-spacing:.24em}
-  .cd-wrap{margin-top:-72px;margin-bottom:34px}
+  /* A phone on its side shows barely a third of the picture's height, so
+     the logo, both faces, the names and the clock are all competing for
+     390px. The card is pulled up only as far as the fold allows and the
+     names take the slack that frees, which is every pixel there is. */
+  .cd-wrap{margin-top:-56px;margin-bottom:34px}
   .cd{padding-block:.55rem}
   .cd__n{font-size:clamp(1.15rem,4.4vh,1.6rem)}
   .cd__l{font-size:.44rem;letter-spacing:.14em}
@@ -1159,6 +1270,7 @@ html.js-reveal .is-in{will-change:auto}
   html.js-reveal .reveal,
   html.js-reveal .reveal-left,
   html.js-reveal .reveal-right{opacity:1!important;transform:none!important}
+  html.js-reveal .memtag.reveal-right{opacity:1!important;transform:rotate(var(--tag-tilt))!important}
   .hero__head,.hero__eyebrow,.hero__names,.hero__meta,.cd{animation:none!important}
   .blob{display:none}
 }
@@ -1168,4 +1280,5 @@ html.js-reveal .is-in{will-change:auto}
   html.js-reveal .reveal,
   html.js-reveal .reveal-left,
   html.js-reveal .reveal-right{opacity:1!important;transform:none!important}
+  html.js-reveal .memtag.reveal-right{opacity:1!important;transform:rotate(var(--tag-tilt))!important}
 }
