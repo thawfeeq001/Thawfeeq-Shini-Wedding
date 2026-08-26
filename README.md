@@ -37,13 +37,14 @@ to 4×, drag, double-tap and swipe.
 
 ## Page order (version 2.4)
 
-Home (logo, groom's name, names, countdown) → **Groom &amp; Bride** on one split
-screen → **Groom Family &amp; Bride Family** on the next → **Our Story** →
-**Family Memories** → **Events** → Timeline → **Wishes &amp; RSVP** → Farewell.
+Home (logo, names, countdown) → **Groom &amp; Bride** on one split screen →
+**Groom Family &amp; Bride Family** on the next → **Gallery** → **Events** →
+Timeline → **Wishes &amp; RSVP** → Farewell.
 
-Our Story deliberately follows both family chapters, and holds only
-photographs of the two of them together. Anything with an extra person in the
-frame lives in Family Memories.
+The gallery is one section in two parts: **Fixing Ceremony** first, then
+**Couple**. The split is by subject — the fixing part is that day, the couple
+part is the two of them — and each part pages within itself in the viewer
+rather than wandering into the other.
 
 ---
 
@@ -103,11 +104,11 @@ part of the page it belongs to, under a filename that says what it is.
 | `images/hero/` | `hero-couple-main.webp` | Home — the coloured studio portrait |
 | | `farewell-couple-bw.webp` | Farewell — the black &amp; white portrait |
 | `images/groom/` | `groom-portrait-1.webp` | Groom, left half of the split screen |
-| `images/bride/` | `bride-portrait-1.webp`, `bride-at-dinner-1.webp` | Bride, right half |
+| `images/bride/` | `bride-portrait-1.webp` | Bride, right half |
 | `images/family/` | `groom-family-group-1.webp`, `groom-with-sister-1.webp` | Groom Family |
 | | `bride-family-group-1.webp` | Bride Family |
-| `images/story/` | `story-couple-*.webp` (12) | Our Story — **only** the two of them together |
-| `images/gallery/` | `gallery-family-*.webp` (11) | Family Memories — every frame with extra people |
+| `images/story/` | `story-couple-*.webp` (14) | Gallery, couple part |
+| `images/gallery/` | `gallery-family-*.webp` (9) | Gallery, fixing-ceremony part |
 | `images/events/` | `event-engagement/-wedding/-reception.webp` | the three event cards |
 | `images/qr/` | `engagement-/wedding-/reception-location.png` | the venue QR codes |
 
@@ -117,25 +118,33 @@ a third smaller than the JPEGs they replaced, at the same size on screen.
 
 ### Adding or removing photographs
 
-Our Story is written directly into `index.html`, because the prose has to sit
-between the pictures. Family Memories is built in JavaScript from one list at
-the top of `script.js`, so no count is written into the HTML — add a filename
-and the grid grows:
+Both galleries are built in JavaScript from one list each at the top of
+`script.js`, so no count is written into the HTML — add a filename and the
+grid grows:
 
 ```js
-const FAMILY_DIR = 'images/gallery/';
-const FAMILY_PHOTOS = [
-  { file: 'gallery-family-fixing-ceremony.webp', cap: 'The fixing ceremony' },
+const COUPLE_DIR = 'images/story/';
+const COUPLE_PHOTOS = [
+  { file: 'story-couple-first-selfie.webp', cap: 'The first photograph of us', w: 900, h: 1125 },
+  …
+];
+
+const FIXING_DIR = 'images/gallery/';
+const FIXING_PHOTOS = [
+  { file: 'gallery-family-fixing-ceremony.webp', cap: 'The fixing ceremony', w: 1360, h: 950 },
   …
 ];
 ```
 
-Keep the two groups apart: a photograph with anybody else in the frame belongs
-in Family Memories, never in Our Story.
+`w` and `h` are the file's own pixel dimensions. They are written onto every
+tile so the browser reserves the right box before the photograph arrives —
+that is what holds the layout shift at zero while the images stream in.
+
+Move a filename from one list to the other and the grids follow.
 
 > A page served from GitHub Pages cannot read its own folder — there is no
-> server to ask for a directory listing — so this list is the manifest. Drop
-> the file into `images/gallery/` and add its name here; that is the whole step.
+> server to ask for a directory listing — so these lists are the manifest. Drop
+> the file into the right folder and add its name here; that is the whole step.
 
 ### The one viewer
 

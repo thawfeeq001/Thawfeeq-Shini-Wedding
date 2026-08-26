@@ -19,8 +19,8 @@
    07 NAVIGATION
    08 SPLIT SCREENS (groom/bride, the two families)
    09 (folded into 08)
-   10 OUR STORY (storytelling chapter)
-   11 GALLERY & LIGHTBOX
+   10 (folded into 11)
+   11 GALLERIES & LIGHTBOX
    12 EVENTS
    13 TIMELINE
    14 RSVP
@@ -64,6 +64,10 @@
 
   --wrap:1240px;
   --ease:cubic-bezier(.22,.61,.36,1);
+  /* Arrival curve. Almost all of the distance is covered in the first
+     third, then it glides to a stop - which is what makes a long travel
+     read as cinematic instead of slow. */
+  --ease-in:cubic-bezier(.16,1,.3,1);
   --sa-t:env(safe-area-inset-top,0px);
   --sa-b:env(safe-area-inset-bottom,0px);
   --sa-l:env(safe-area-inset-left,0px);
@@ -164,17 +168,17 @@ ol,ul{list-style:none;padding:0}
 section{position:relative;z-index:1}
 /* Each chapter carries its own clip so the fade-left/right offsets can
    never widen the page - this replaces the old overflow on <html>. */
-.duo,.story,.gal,.ev,.tl-sec,.rsvp,.quote{
+.duo,.gal,.ev,.tl-sec,.rsvp,.quote{
   position:relative;overflow-x:hidden;
 }
-.duo,.story,.gal,.ev,.tl-sec,.rsvp{
+.duo,.gal,.ev,.tl-sec,.rsvp{
   width:min(100% - 2.6rem,var(--wrap));margin-inline:auto;
   padding:clamp(4.5rem,10vw,8rem) 0;
 }
 /* continuous canvas: chapters overlap and blend, no harsh edges */
-.duo,.story,.gal,.ev,.tl-sec{margin-top:-100px;padding-top:calc(clamp(4.5rem,10vw,8rem) + 100px)}
+.duo,.gal,.ev,.tl-sec{margin-top:-100px;padding-top:calc(clamp(4.5rem,10vw,8rem) + 100px)}
 .quote{margin-block:-60px;padding-block:calc(clamp(3rem,7vw,5.5rem) + 60px)}
-.duo::before,.story::before,.gal::before,.ev::before,.tl-sec::before{
+.duo::before,.gal::before,.ev::before,.tl-sec::before{
   content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);
   width:100vw;height:180px;pointer-events:none;z-index:-1;
   background:linear-gradient(180deg, rgba(248,242,236,.55) 0%, rgba(248,242,236,0) 100%);
@@ -247,9 +251,13 @@ section{position:relative;z-index:1}
 .hero__names{
   font-family:var(--script);font-weight:400;
   display:flex;flex-direction:column;align-items:center;gap:.02em;
-  font-size:clamp(3.2rem,8.6vw,6.2rem);line-height:1.05;
+  /* sized so 'Thawfeeq Ahamed' holds one line even in the fallback
+     serif, which is wider than Great Vibes - the script face is what
+     loads in production, so this leaves room rather than using it */
+  font-size:clamp(2.5rem,8.2vw,6rem);line-height:1.05;
   text-shadow:0 2px 30px rgba(0,0,0,.45);
 }
+.hero__names span{white-space:nowrap}
 .hero__names em{
   font-family:var(--serif);font-style:italic;font-size:.34em;
   color:#F0DCB8;margin:.08em 0;
@@ -401,11 +409,6 @@ section{position:relative;z-index:1}
    sits inside it, out of flow, costing the panel no height. */
 .duo__stage{position:relative;width:100%;display:flex;justify-content:center}
 .duo__photo{position:relative;width:min(100%,430px);margin:clamp(1.8rem,4vw,2.8rem) auto 0}
-/* small candid tucked against the portrait, mirroring the groom side */
-.duo__inset{
-  position:absolute;right:0;bottom:-7%;z-index:2;
-  width:clamp(96px,13vw,140px);aspect-ratio:5/4;
-}
 .duo__line{
   max-width:34ch;margin:clamp(1.3rem,3vw,1.9rem) auto 0;text-align:center;
   color:var(--ink-70);font-size:1.02rem;
@@ -446,7 +449,6 @@ section{position:relative;z-index:1}
   .duo__grid{position:relative}
   /* identical spacing on both sides, whatever the content */
   .duo__side{padding-inline:clamp(.6rem,2vw,1.6rem)}
-  .duo__inset{right:clamp(0px,4vw,3rem)}
   .duo__photo{width:min(100%,380px)}
   .duo--fam .fam__stage{margin-top:clamp(1.4rem,3vw,2.2rem);min-height:clamp(240px,32vw,420px)}
   .duo--fam .fam__stage .frame--wide{width:min(100%,520px)}
@@ -456,45 +458,26 @@ section{position:relative;z-index:1}
 
 
 /* =========================================================
-   10 OUR STORY
-   The storytelling chapter. Narrative, single frame, pair, full-width
-   frame - deliberately alternating so two picture blocks are never
-   neighbours. Only photographs of the two of them together live here.
+   11 GALLERIES & LIGHTBOX
+   Our Story and Family Memories are the same masonry with different
+   manifests, and both feed the one viewer.
    ========================================================= */
-.story__text{
-  max-width:62ch;margin:clamp(2.4rem,5vw,3.6rem) auto 0;
-  text-align:center;color:var(--ink-70);
-  font-size:clamp(1rem,.34vw + .96rem,1.12rem);line-height:1.95;
+/* The gallery is one section in two parts. Each part carries its own
+   heading and its own masonry; the rule between them is what tells a
+   reader the subject has changed without a second section break. */
+.gal__part{margin-top:clamp(3.2rem,7vw,5rem)}
+.gal__part + .gal__part{
+  margin-top:clamp(4rem,9vw,6.5rem);padding-top:clamp(3rem,6vw,4.5rem);
+  border-top:1px solid var(--line);
 }
-.story__text::first-letter{color:var(--gold-deep)}
-.story__text--end{
-  font-family:var(--serif);font-style:italic;color:var(--text);
-  font-size:clamp(1.14rem,2.6vw,1.5rem);line-height:1.62;max-width:44ch;
+.gal__head{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(1.5rem,3.4vw,2.1rem);line-height:1.2;letter-spacing:.02em;
+  text-align:center;
 }
-.story figure{margin:0}
-.story__solo{width:min(100%,420px);margin:clamp(2.2rem,4.6vw,3.2rem) auto 0}
-.story__wide{width:min(100%,860px);margin:clamp(2.2rem,4.6vw,3.2rem) auto 0}
-.story__pair{
-  margin:clamp(2.2rem,4.6vw,3.2rem) auto 0;width:min(100%,900px);
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:clamp(.8rem,2.2vw,1.4rem);align-items:start;
-}
-.story__cap{
-  margin-top:.85rem;text-align:center;
-  font-size:.63rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-50);
-}
-/* the whole photograph is the button, so the tap target is the picture */
-.ph--frame{border-radius:20px}
-.ph--frame::after{border-radius:20px}
-.story__wide .ph--frame img{aspect-ratio:16/11;object-fit:cover;height:auto}
-
-
-/* =========================================================
-   11 GALLERY & LIGHTBOX
-   The masonry feeds the same viewer the story frames use.
-   ========================================================= */
 .gal__lead{
-  max-width:52ch;margin:1.4rem auto 0;text-align:center;color:var(--ink-70);font-size:1rem;
+  max-width:52ch;margin:.7rem auto 0;text-align:center;color:var(--ink-50);
+  font-size:.95rem;font-style:italic;
 }
 .masonry{margin-top:clamp(2rem,4.6vw,3.2rem);column-count:4;column-gap:clamp(.6rem,1.6vw,1.1rem)}
 .ph{
@@ -907,32 +890,78 @@ section{position:relative;z-index:1}
 }
 
 /* Reversible reveals.
-   The observer adds .is-in on entry and removes it on exit, so the same
-   element animates every single time it comes back into view. Only
-   opacity and transform are touched - both composite on the GPU, which
-   is what keeps this at 60fps on an iPhone as well as on Chrome.
-   The out-transition is deliberately quicker than the in-transition so
-   scrolling back never feels sticky.
-   These elements are visible by default in the no-JS case: the observer
-   is what hides them (html.js-reveal), never the stylesheet alone. That
-   is the guarantee that nothing can disappear permanently. */
+
+   The observer adds .is-in on entry and removes it on exit, and never
+   unobserves, so every element replays each time it comes back into view
+   in either direction.
+
+   The motion is deliberately large: 84px of travel and a 6% scale for
+   ordinary content, 110px and 12% for a photograph, over 1.35s on the
+   arrival curve. The exit is far quicker - .5s - so scrolling back up
+   never feels like wading.
+
+   Everything animated here is opacity, transform or filter. The first
+   two never touch layout and composite on the GPU. filter does too, but
+   an animated blur on a large photograph forces iOS Safari to
+   re-rasterize that layer every frame, so the focus pull is limited to
+   type and small ornament and photographs get the bigger travel instead.
+   That split is what keeps this at 60fps on a phone.
+
+   Nothing is hidden by the stylesheet alone: every rule below is behind
+   html.js-reveal, which the inline snippet in <head> adds and the
+   watchdog removes again if the observer never reports. That is the
+   guarantee that content cannot end up permanently invisible. */
 html.js-reveal .reveal,
 html.js-reveal .reveal-left,
 html.js-reveal .reveal-right{
   opacity:0;
-  transition:opacity .55s var(--ease),transform .55s var(--ease);
+  transition:opacity .5s var(--ease),transform .5s var(--ease),filter .5s var(--ease);
   will-change:opacity,transform;
 }
-html.js-reveal .reveal{transform:translate3d(0,28px,0)}
-html.js-reveal .reveal-left{transform:translate3d(-34px,0,0)}
-html.js-reveal .reveal-right{transform:translate3d(34px,0,0)}
+html.js-reveal .reveal{transform:translate3d(0,84px,0) scale(.94)}
+html.js-reveal .reveal-left{transform:translate3d(-112px,0,0) scale(.95)}
+html.js-reveal .reveal-right{transform:translate3d(112px,0,0) scale(.95)}
+
+/* photographs travel further and start smaller, and are the one thing
+   that also drifts sideways as it rises */
+html.js-reveal :is(.ph,.frame,.ecard):is(.reveal,.reveal-left,.reveal-right){
+  transform:translate3d(0,110px,0) scale(.88);
+}
+html.js-reveal :is(.ph,.frame,.ecard).reveal-left{transform:translate3d(-70px,84px,0) scale(.9) rotate(-1.4deg)}
+html.js-reveal :is(.ph,.frame,.ecard).reveal-right{transform:translate3d(70px,84px,0) scale(.9) rotate(1.4deg)}
+
+/* type and ornament pull into focus; see the note above on why photographs do not */
+html.js-reveal :is(.title,.name,.kicker,.rule,.quote__line,.duo__line,.gal__lead,.hero__names,.closing__line):is(.reveal,.reveal-left,.reveal-right){
+  filter:blur(12px);
+}
+
 html.js-reveal .reveal.is-in,
 html.js-reveal .reveal-left.is-in,
 html.js-reveal .reveal-right.is-in{
-  opacity:1;transform:none;
-  transition:opacity 1s var(--ease),transform 1s var(--ease);
+  opacity:1;transform:none;filter:blur(0);
+  transition:opacity 1.35s var(--ease-in),transform 1.35s var(--ease-in),filter 1.1s var(--ease-in);
   transition-delay:var(--d,0ms);
 }
+/* once it has arrived, stop reserving a compositor layer for it */
+html.js-reveal .is-in{will-change:auto}
+
+/* The opening screen is not observed - it is already on screen - so it
+   gets its own entrance, staggered down the block. */
+@keyframes riseIn{
+  from{opacity:0;transform:translate3d(0,54px,0) scale(.96);filter:blur(10px)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+.hero__head,.hero__eyebrow,.hero__names,.hero__meta,.cd{
+  animation:riseIn 1.4s var(--ease-in) both;
+}
+.hero__head{animation-delay:.15s}
+.hero__eyebrow{animation-delay:.42s}
+.hero__names{animation-delay:.56s}
+.hero__meta{animation-delay:.78s}
+.cd{animation-delay:.94s}
+
+/* the timeline dot fills as its row arrives */
+.tl__i::before{transition:background-color .7s var(--ease-in),transform .7s var(--ease-in)}
 
 
 /* =========================================================
@@ -977,6 +1006,10 @@ html.js-reveal .reveal-right.is-in{
   .rsvp__field--count{flex:0 0 auto}
   .rsvp__send{flex:1 1 auto;justify-content:center}
 }
+/* the narrowest phones still in use are 320px wide */
+@media (max-width:360px){
+  .hero__names{font-size:2.15rem}
+}
 @media (max-width:640px){
   /* the arrows float over the picture instead of stealing width */
   .lb__stage{grid-template-columns:minmax(0,1fr);padding-inline:.5rem}
@@ -984,23 +1017,20 @@ html.js-reveal .reveal-right.is-in{
   .lb__nav--p{left:.3rem}
   .lb__nav--n{right:.3rem}
   .lb__nav:active{transform:translateY(-50%) scale(.94)}
-  .story__pair{gap:.6rem}
   .cd{padding-inline:.4rem}
   .cd__n{font-size:clamp(1.6rem,8vw,2.4rem)}
   .cd__l{font-size:.5rem;letter-spacing:.18em}
 }
 @media (max-width:720px){.masonry{column-count:2}}
 @media (orientation:landscape) and (max-height:520px){.masonry{column-count:3}}
-@media (max-width:460px){
-  .story__pair{grid-template-columns:minmax(0,1fr);width:min(100%,420px)}
-}
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
   html.js-reveal .reveal,
   html.js-reveal .reveal-left,
-  html.js-reveal .reveal-right{opacity:1!important;transform:none!important}
+  html.js-reveal .reveal-right{opacity:1!important;transform:none!important;filter:none!important}
+  .hero__head,.hero__eyebrow,.hero__names,.hero__meta,.cd{animation:none!important}
   .petals,.blob{display:none}
 }
 @media print{
@@ -1008,5 +1038,5 @@ html.js-reveal .reveal-right.is-in{
   body{background:#fff}
   html.js-reveal .reveal,
   html.js-reveal .reveal-left,
-  html.js-reveal .reveal-right{opacity:1!important;transform:none!important}
+  html.js-reveal .reveal-right{opacity:1!important;transform:none!important;filter:none!important}
 }

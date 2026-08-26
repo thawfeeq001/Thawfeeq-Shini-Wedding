@@ -61,17 +61,19 @@
      ask - so this list is the manifest. Add a filename here and the
      grid grows on its own.                                            */
 
-  /* FAMILY MEMORIES - every photograph with somebody else in the frame:
-     parents, siblings, relatives, the fixing ceremony, group shots.
-     The couple-only photographs are NOT here; they are written straight
-     into the Our Story chapter in index.html so the prose can sit
-     between them. Keeping the two sets apart is deliberate. */
-  /* w and h are the file's own pixel dimensions. They are written onto
-     every tile so the browser can reserve the right box before the
-     photograph arrives - that is what keeps the layout shift at zero
-     while eleven lazy images stream in. */
-  const FAMILY_DIR = 'images/gallery/';
-  const FAMILY_PHOTOS = [
+  /* ---- THE TWO GALLERY PARTS ---------------------------------------
+     The gallery is one section split in two, and these are its lists.
+     Move a filename from one to the other and the grids follow; nothing
+     about the counts is written into the HTML.
+
+     w and h are the file's own pixel dimensions. They are written onto
+     every tile so the browser reserves the right box before the
+     photograph arrives - that is what holds the layout shift at zero
+     while two dozen lazy images stream in.                            */
+
+  /* Part one: the fixing ceremony - that day, and only that day. */
+  const FIXING_DIR = 'images/gallery/';
+  const FIXING_PHOTOS = [
     { file: 'gallery-family-fixing-ceremony.webp', cap: 'The fixing ceremony',        w: 1360, h: 950 },
     { file: 'gallery-family-bride-seated.webp',    cap: 'The bride, waiting',         w: 900, h: 1125 },
     { file: 'gallery-family-gift-exchange.webp',   cap: 'Gifts exchanged',            w: 900, h: 1125 },
@@ -80,9 +82,28 @@
     { file: 'gallery-family-offering-trays.webp',  cap: 'The offering trays',         w: 900, h: 720 },
     { file: 'gallery-family-gathering.webp',       cap: 'The gathering',              w: 900, h: 720 },
     { file: 'gallery-family-both-families-1.webp', cap: 'Both families together',     w: 900, h: 720 },
-    { file: 'gallery-family-both-families-2.webp', cap: 'Both families together',     w: 900, h: 720 },
-    { file: 'gallery-family-dinner-together.webp', cap: 'Dinner with family',         w: 900, h: 720 },
-    { file: 'gallery-family-with-friends.webp',    cap: 'With the people we love',    w: 900, h: 1125 }
+    { file: 'gallery-family-both-families-2.webp', cap: 'Both families together',     w: 900, h: 720 }
+  ];
+
+  /* Part two: the couple, roughly in the order it happened. The last two
+     have company in the frame - they are still photographs of the two of
+     them, so this is where they belong. */
+  const COUPLE_DIR = 'images/story/';
+  const COUPLE_PHOTOS = [
+    { file: 'story-couple-first-selfie.webp', cap: 'The first photograph of us', w: 900, h: 1125 },
+    { file: 'story-couple-road-trip.webp',    cap: 'Somewhere on the road',      w: 900, h: 1125 },
+    { file: 'story-couple-night-drive.webp',  cap: 'The long way home',          w: 1200, h: 900 },
+    { file: 'story-couple-cafe-table.webp',   cap: 'Our corner table',           w: 900, h: 1125 },
+    { file: 'story-couple-mirror.webp',       cap: 'Caught in a mirror',         w: 900, h: 1125 },
+    { file: 'story-couple-day-out.webp',      cap: 'A day out together',         w: 900, h: 1125 },
+    { file: 'story-couple-hills-sunset.webp', cap: 'Evening at the hills',       w: 1100, h: 1467 },
+    { file: 'story-couple-afternoon.webp',    cap: 'An ordinary afternoon',      w: 900, h: 1125 },
+    { file: 'story-couple-close.webp',        cap: 'Just the two of us',         w: 900, h: 1200 },
+    { file: 'story-couple-in-red.webp',       cap: 'Dressed for the occasion',   w: 900, h: 1125 },
+    { file: 'story-couple-on-the-water.webp', cap: 'On the water',               w: 900, h: 1125 },
+    { file: 'story-couple-golden-hour.webp',  cap: 'Golden hour',                w: 900, h: 1125 },
+    { file: 'story-couple-dinner-out.webp',   cap: 'Dinner out',                 w: 900, h: 720 },
+    { file: 'story-couple-with-friends.webp', cap: 'With the people we love',    w: 900, h: 1125 }
   ];
 
   const VENUES = {
@@ -198,12 +219,12 @@
   /* Build one masonry tile. Every photograph below the fold is lazy,
      and every tile carries the data the viewer needs, so a tile built
      later is picked up by the delegated click handler with no rewiring. */
-  function buildTile(item, group, alt) {
+  function buildTile(item, group, dir, alt) {
     const el = document.createElement('button');
     el.className = 'ph reveal';
     el.type = 'button';
     el.dataset.lb = group;
-    el.dataset.src = FAMILY_DIR + item.file;
+    el.dataset.src = dir + item.file;
     if (item.cap) el.dataset.cap = item.cap;
     const img = document.createElement('img');
     img.src = el.dataset.src;
@@ -218,12 +239,14 @@
   // ==================================
   // 03 · Scroll Animation Module
   // ==================================
-  /* Fade up, fade left and fade right - one observer for the whole page.
-     The element is NOT unobserved after it appears, so .is-in is added
-     on entry and removed on exit: the animation plays again every single
-     time that element scrolls back into view, in both directions.
-     Only opacity and transform change, which keeps the work on the
-     compositor - the same 60fps on iOS Safari as on Android Chrome. */
+  /* One observer drives every reveal on the page. The element is NOT
+     unobserved after it appears, so .is-in is added on entry and removed
+     on exit: the animation replays every single time that element comes
+     back into view, in either direction.
+     Only opacity, transform and filter change - none of them touch
+     layout, and all three composite on the GPU, which is what keeps this
+     at 60fps on iOS Safari as well as on Android Chrome. The stylesheet
+     has the detail on why the focus pull is kept off photographs. */
 
   let revealObserver = null;
   let observerReported = false;   /* proof the browser actually delivers callbacks */
@@ -241,16 +264,22 @@
         entries.forEach(entry => {
           entry.target.classList.toggle('is-in', entry.isIntersecting);
         });
-      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
+        /* -12% at the foot: the element is well inside the viewport
+           before it starts, so the whole 1.35s arrival is visible rather
+           than half-finished by the time it clears the fold. */
+      }, { rootMargin: '0px 0px -12% 0px', threshold: 0.05 });
     }
     items.forEach(el => {
       /* the stagger is measured once, not on every crossing */
       if (el.dataset.step === undefined) {
         const peers = el.parentElement
           ? $$('.reveal, .reveal-left, .reveal-right, .tl__i', el.parentElement) : [];
-        const step = Math.min(Math.max(0, peers.indexOf(el)), 5);
+        const step = Math.min(Math.max(0, peers.indexOf(el)), 6);
         el.dataset.step = step;
-        if (step) el.style.setProperty('--d', step * 80 + 'ms');
+        /* 120ms apart rather than 80: with the longer travel the rows
+           need more separation before the stagger reads as a cascade
+           rather than as one block arriving slightly unevenly. */
+        if (step) el.style.setProperty('--d', step * 120 + 'ms');
       }
       revealObserver.observe(el);
     });
@@ -482,19 +511,20 @@
   // 09 · Gallery Module
   // ==================================
   /* Two jobs.
-       1. Build the Family Memories masonry, but only when the reader is
-          near it, so none of it competes with the hero for bandwidth.
+       1. Build the two gallery masonries, but only when the reader is
+          near them, so none of it competes with the hero for bandwidth
+          on first paint.
        2. Drive ONE viewer for every photograph on the page. Any element
           carrying data-lb="<group>" opens it; the group name decides
           which photographs it can page through. Clicks are delegated
           from the document, so tiles created later need no wiring. */
 
-  function buildGridWhenNear(grid, items, group, alt) {
+  function buildGridWhenNear(grid, items, group, dir, alt) {
     let built = false;
     function build() {
       if (built || !grid) return;
       built = true;
-      items.forEach(item => grid.appendChild(buildTile(item, group, alt)));
+      items.forEach(item => grid.appendChild(buildTile(item, group, dir, alt)));
       observeReveals(grid);
       if (!document.documentElement.classList.contains('js-reveal')) {
         $$('.ph', grid).forEach(t => t.classList.add('is-in'));
@@ -759,7 +789,12 @@
 
   function initGallery() {
     Viewer.init();
-    buildGridWhenNear($('#familyGrid'), FAMILY_PHOTOS, 'family', 'A family memory');
+    /* Two grids, two viewer groups: paging inside one part never wanders
+       into the other. */
+    buildGridWhenNear($('#fixingGrid'), FIXING_PHOTOS, 'fixing', FIXING_DIR,
+      'The fixing ceremony');
+    buildGridWhenNear($('#coupleGrid'), COUPLE_PHOTOS, 'couple', COUPLE_DIR,
+      'Thawfeeq Ahamed and Shini Yassmin');
   }
 
   // ==================================

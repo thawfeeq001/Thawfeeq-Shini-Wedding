@@ -19,17 +19,17 @@ IMAGE LIBRARY  (developer only)
 
     images/hero/      hero-couple-main, farewell-couple-bw
     images/groom/     groom-portrait-1
-    images/bride/     bride-portrait-1, bride-at-dinner-1
+    images/bride/     bride-portrait-1
     images/family/    groom-family-group-1, groom-with-sister-1,
                       bride-family-group-1
-    images/story/     story-couple-*      ONLY the two of them together
-    images/gallery/   gallery-family-*    every frame with extra people
+    images/story/     story-couple-*      the couple part of the gallery
+    images/gallery/   gallery-family-*    the fixing-ceremony part
     images/events/    event-engagement, event-wedding, event-reception
     images/qr/        engagement-location, wedding-location,
                       reception-location            (PNG, scannable)
 
-  Family photographs never appear inside Our Story. The Family Memories
-  grid is built from FAMILY_PHOTOS at the top of script.js.
+  Both grids are built from COUPLE_PHOTOS and FIXING_PHOTOS at the top of
+  script.js - add a filename to a list and that grid grows.
 -->
 
 
@@ -156,8 +156,8 @@ IMAGE LIBRARY  (developer only)
     <li><a href="#hero">Home</a></li>
     <li><a href="#groom">Groom &amp; Bride</a></li>
     <li><a href="#groom-family">Families</a></li>
-    <li><a href="#story">Our Story</a></li>
-    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#fixing">Fixing Ceremony</a></li>
+    <li><a href="#couple">Couple</a></li>
     <li><a href="#events">Events</a></li>
     <li><a href="#rsvp">Wishes</a></li>
   </ul>
@@ -166,27 +166,27 @@ IMAGE LIBRARY  (developer only)
 <!-- ===== PAGE SECTIONS =====
      ORDER IS FIXED (V2.3):
        01 Home  02 Groom  03 Groom Family  04 Bride  05 Bride Family
-       06 Our Story  07 Gallery  08 Events  09 Wishes  10 Farewell
-     Our Story deliberately sits after both family chapters. -->
+       06 Gallery (fixing ceremony, then couple)  07 Events
+       08 Wishes  09 Farewell
+     The gallery deliberately sits after both family chapters. -->
 <main id="main">
 
 <!-- ===== 01. HOME =====
-     Logo sits at the top centre with the groom's name directly beneath it
-     in Playfair Display. The photograph is nudged left with
-     object-position so both faces sit the same distance from the edges. -->
+     The logo sits alone at the top centre. The photograph is nudged left
+     with object-position so both faces sit the same distance from the
+     two edges. -->
 <section class="hero" id="hero">
   <img class="hero__img" src="images/hero/hero-couple-main.webp" alt="Thawfeeq Ahamed and Shini Yassmin" width="1080" height="1370" fetchpriority="high" decoding="async">
   <div class="hero__wash" aria-hidden="true"></div>
 
   <div class="hero__head">
     <img class="hero__mark" src="assets/logo-ivory.png" alt="" width="260" height="260" fetchpriority="high" decoding="async">
-    <p class="hero__house">Thawfeeq Ahamed</p>
   </div>
 
   <div class="hero__inner">
     <p class="hero__eyebrow">Together with our families</p>
     <h1 class="hero__names">
-      <span>Thawfeeq</span>
+      <span>Thawfeeq Ahamed</span>
       <em>&amp;</em>
       <span>Shini Yassmin</span>
     </h1>
@@ -239,11 +239,6 @@ IMAGE LIBRARY  (developer only)
         <figure class="frame frame--arch duo__photo reveal-left">
           <img src="images/bride/bride-portrait-1.webp" alt="Shini Yassmin" width="1000" height="1270" loading="lazy" decoding="async">
         </figure>
-        <!-- absolutely placed, so it costs the panel no height and the two
-             sides keep identical row heights -->
-        <figure class="frame frame--soft duo__inset reveal-right">
-          <img src="images/bride/bride-at-dinner-1.webp" alt="Shini Yassmin" width="900" height="720" loading="lazy" decoding="async">
-        </figure>
       </div>
       <!-- one short sentence - edit freely -->
       <p class="duo__line reveal">A physician with a quiet strength and an easy laugh.</p>
@@ -294,171 +289,33 @@ IMAGE LIBRARY  (developer only)
   <p class="quote__line reveal">Two hearts. One beautiful journey.</p>
 </section>
 
-<!-- ===== 06. OUR STORY =====
-     ONLY photographs of the two of them together. The chapter alternates
-     narrative, single frame, pair and full-width frame so two picture
-     blocks are never neighbours. Every frame opens the viewer.
-     Prose is placeholder copy - rewrite any paragraph freely. -->
-<section class="story" id="story">
-  <h2 class="title reveal">Our Story</h2>
-  <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
+<!-- ===== 06. GALLERY =====
+     One section, two parts, as asked: the fixing ceremony first, then
+     the couple. Each part is its own masonry built from its own list in
+     script.js - FIXING_PHOTOS and COUPLE_PHOTOS - and every tile in both
+     opens the same viewer, paging within its own part rather than
+     wandering into the other one.
 
-  <p class="story__text reveal">
-    Every love story begins somewhere ordinary. Ours began with a conversation
-    that was meant to be short and somehow never ended. There was no thunder and
-    no grand gesture, only the quiet realisation that the day felt lighter when
-    the other one was in it — and that neither of us wanted the conversation to stop.
-  </p>
-
-  <figure class="story__solo reveal">
-    <button class="ph ph--frame" type="button" data-lb="story" data-cap="The first photograph of us">
-      <img src="images/story/story-couple-first-selfie.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
-    </button>
-    <figcaption class="story__cap">The first photograph of us</figcaption>
-  </figure>
-
-  <p class="story__text reveal">
-    After that came the small things nobody photographs well — long drives with the
-    windows down, playlists argued over at every junction, tea that went cold because
-    we were still talking. Those unhurried hours taught us something simple. Home was
-    not a place we were travelling towards. It had quietly become a person.
-  </p>
-
-  <div class="story__pair">
-    <figure class="reveal-right">
-      <button class="ph ph--frame" type="button" data-lb="story" data-cap="Somewhere on the road">
-        <img src="images/story/story-couple-road-trip.webp" alt="Thawfeeq and Shini Yassmin on a drive" width="900" height="1125" loading="lazy" decoding="async">
-      </button>
-    </figure>
-    <figure class="reveal-left">
-      <button class="ph ph--frame" type="button" data-lb="story" data-cap="The long way home">
-        <img src="images/story/story-couple-night-drive.webp" alt="Thawfeeq and Shini Yassmin on an evening drive" width="1200" height="900" loading="lazy" decoding="async">
-      </button>
-    </figure>
-  </div>
-
-  <p class="story__text reveal">
-    We learned each other slowly, the way you learn a favourite song. Which corner
-    table she prefers. How he goes quiet before he laughs hardest. The particular
-    silence that means everything is fine, and the one that means it isn't. Love, it
-    turned out, is mostly attention — paid patiently, and returned.
-  </p>
-
-  <figure class="story__wide reveal">
-    <button class="ph ph--frame" type="button" data-lb="story" data-cap="Our corner table">
-      <img src="images/story/story-couple-cafe-table.webp" alt="Thawfeeq and Shini Yassmin at a cafe" width="900" height="1125" loading="lazy" decoding="async">
-    </button>
-    <figcaption class="story__cap">Our corner table</figcaption>
-  </figure>
-
-  <p class="story__text reveal">
-    Somewhere between the ordinary evenings and the ones we planned for weeks, the
-    question of forever stopped feeling like a question. It was simply the shape the
-    days were already taking. We told our families. They smiled as though they had
-    been waiting for us to catch up with what they had known all along.
-  </p>
-
-  <div class="story__pair">
-    <figure class="reveal-right">
-      <button class="ph ph--frame" type="button" data-lb="story" data-cap="Caught in a mirror">
-        <img src="images/story/story-couple-mirror.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
-      </button>
-    </figure>
-    <figure class="reveal-left">
-      <button class="ph ph--frame" type="button" data-lb="story" data-cap="A day out together">
-        <img src="images/story/story-couple-day-out.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
-      </button>
-    </figure>
-  </div>
-
-  <p class="story__text reveal">
-    There is a particular kind of happiness in being fully known and chosen anyway.
-    It is not loud. It arrives in the middle of a normal Tuesday and stays. We have
-    been carrying it quietly for a while now, and this year we decided it deserved
-    a celebration — with every person who helped it grow.
-  </p>
-
-  <figure class="story__wide reveal">
-    <button class="ph ph--frame" type="button" data-lb="story" data-cap="Evening at the hills">
-      <img src="images/story/story-couple-hills-sunset.webp" alt="Thawfeeq and Shini Yassmin in the hills at sunset" width="1100" height="1467" loading="lazy" decoding="async">
-    </button>
-    <figcaption class="story__cap">Evening at the hills</figcaption>
-  </figure>
-
-  <p class="story__text reveal">
-    We began collecting places. A stretch of water under a pink sky. A hill road
-    that took twice as long as the map promised. None of them were remarkable on
-    their own; they became ours because we were there together, and because we
-    kept coming back to talk about them long after the light had gone.
-  </p>
-
-  <div class="story__pair">
-    <figure class="reveal-right">
-      <button class="ph ph--frame" type="button" data-lb="story" data-cap="An ordinary, perfect afternoon">
-        <img src="images/story/story-couple-afternoon.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
-      </button>
-    </figure>
-    <figure class="reveal-left">
-      <button class="ph ph--frame" type="button" data-lb="story" data-cap="Just the two of us">
-        <img src="images/story/story-couple-close.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1200" loading="lazy" decoding="async">
-      </button>
-    </figure>
-  </div>
-
-  <p class="story__text reveal">
-    People ask how we knew. There was never a single moment to point to, only a
-    long accumulation of small ones — the message sent for no reason, the door
-    held open, the plan quietly rearranged. Certainty did not arrive. It was
-    built, patiently, by two people who kept showing up.
-  </p>
-
-  <figure class="story__wide reveal">
-    <button class="ph ph--frame" type="button" data-lb="story" data-cap="Dressed for the occasion">
-      <img src="images/story/story-couple-in-red.webp" alt="Thawfeeq and Shini Yassmin" width="900" height="1125" loading="lazy" decoding="async">
-    </button>
-    <figcaption class="story__cap">Dressed for the occasion</figcaption>
-  </figure>
-
-  <p class="story__text reveal">
-    So this is where the story pauses and the invitation begins. The water was calm
-    that evening, the light was gold, and neither of us said very much. We did not
-    need to. Some things you simply agree on without speaking, and then spend the
-    rest of your life keeping.
-  </p>
-
-  <div class="story__pair">
-    <figure class="reveal-right">
-      <button class="ph ph--frame" type="button" data-lb="story" data-cap="On the water">
-        <img src="images/story/story-couple-on-the-water.webp" alt="Thawfeeq and Shini Yassmin on the water" width="900" height="1125" loading="lazy" decoding="async">
-      </button>
-    </figure>
-    <figure class="reveal-left">
-      <button class="ph ph--frame" type="button" data-lb="story" data-cap="Golden hour">
-        <img src="images/story/story-couple-golden-hour.webp" alt="Thawfeeq and Shini Yassmin on the water" width="900" height="1125" loading="lazy" decoding="async">
-      </button>
-    </figure>
-  </div>
-
-  <p class="story__text story__text--end reveal">
-    And so, from one quiet conversation to a day surrounded by everyone we love —
-    thank you for being part of how we got here.
-  </p>
-</section>
-
-<!-- ===== TRANSITION ===== -->
-<section class="quote">
-  <p class="quote__line reveal">A day where two families became one.</p>
-</section>
-
-<!-- ===== 07. GALLERY — FAMILY MEMORIES =====
-     Every photograph that has somebody else in it: parents, siblings,
-     relatives and the fixing ceremony. Rendered from FAMILY_PHOTOS in
-     script.js; tiles open the same viewer as Our Story. -->
+     The split is by subject, not by folder: the fixing part is the day
+     itself, the couple part is the two of them. Two frames that show the
+     couple with company - a dinner out and an evening with a friend -
+     sit in the couple part, because that is who they are photographs of.
+     Move a filename between the two lists and the grids follow. -->
 <section class="gal" id="gallery">
-  <h2 class="title reveal">Family Memories</h2>
+  <h2 class="title reveal">Gallery</h2>
   <img class="rule reveal" src="assets/gold-divider.svg" alt="" width="420" height="40" loading="lazy">
-  <p class="gal__lead reveal">The blessings, the gatherings and the people who made this day possible.</p>
-  <div class="masonry" id="familyGrid"></div>
+
+  <div class="gal__part" id="fixing">
+    <h3 class="gal__head reveal">Fixing Ceremony</h3>
+    <p class="gal__lead reveal">The day both families said yes.</p>
+    <div class="masonry" id="fixingGrid"></div>
+  </div>
+
+  <div class="gal__part" id="couple">
+    <h3 class="gal__head reveal">Couple</h3>
+    <p class="gal__lead reveal">The two of us, in the order it happened.</p>
+    <div class="masonry" id="coupleGrid"></div>
+  </div>
 </section>
 
 <!-- ===== TRANSITION ===== -->
